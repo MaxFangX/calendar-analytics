@@ -17,7 +17,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("CALENDAR_JOURNAL_SECRET_KEY", "fake_key")
+SECRET_KEY = os.getenv("CJ_DJANGO_SECRET_KEY", "fake_key")
 
 ENVIRONMENT = os.getenv('APP_ENVIRONMENT', 'dev')
 
