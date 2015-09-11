@@ -6,5 +6,6 @@ urlpatterns = patterns(
     '',
     url(r'^$', 'cal.views.home', name='home'),
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^logout$', 'cal.views.logout', name='logout'),
 
 )
