@@ -16,18 +16,21 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
 
-# Variables
-GOOGLE_CALENDAR_API_CLIENT_ID = os.getenv('CJ_GOOGLE_CALENDAR_API_CLIENT_ID')
-GOOGLE_CALENDAR_API_CLIENT_SECRET = os.getenv('CJ_GOOGLE_CALENDAR_API_CLIENT_SECRET')
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("CJ_DJANGO_SECRET_KEY", None)
 
 ENVIRONMENT = os.getenv('APP_ENVIRONMENT', 'dev')
 
-if ENVIRONMENT != 'prod':
+if ENVIRONMENT == 'prod':
+    BASE_URL = 'https://calendarjournal.maxfa.ng'
+else:
     DEBUG = True
     TEMPLATE_DEBUG = True
+    BASE_URL = 'localhost:8000'
+
+# Variables
+GOOGLE_CALENDAR_API_CLIENT_ID = os.getenv('CJ_GOOGLE_CALENDAR_API_CLIENT_ID')
+GOOGLE_CALENDAR_API_CLIENT_SECRET = os.getenv('CJ_GOOGLE_CALENDAR_API_CLIENT_SECRET')
 
 ALLOWED_HOSTS = []
 
