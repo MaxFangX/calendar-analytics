@@ -17,9 +17,10 @@ class GCalendar(models.Model):
 
     def authenticate(self):
         OAuth2WebServerFlow(client_id=settings.GOOGLE_CALENDAR_API_CLIENT_ID,
-                                   client_secret=settings.GOOGLE_CALENDAR_API_CLIENT_SECRET,
-                                   scope='https://www.googleapis.com/auth/calendar',
-                                   redirect_uri=settings.BASE_URL + '/auth/google')
+                            client_secret=settings.GOOGLE_CALENDAR_API_CLIENT_SECRET,
+                            scope='https://www.googleapis.com/auth/calendar',
+                            redirect_uri=settings.BASE_URL + '/auth/google')
+
 
 class Event(models.Model):
 

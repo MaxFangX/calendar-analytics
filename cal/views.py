@@ -11,3 +11,7 @@ def home(request):
 def logout_view(request):
     logout(request)
     return render_to_response(template_name='home_logged_out.html')
+
+
+def google_auth(request):
+    pass
