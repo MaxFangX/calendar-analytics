@@ -1,5 +1,9 @@
+from django.conf import settings
 from django.contrib.auth import logout
+from django.http import HTTPResponseRedirect
 from django.shortcuts import render_to_response
+
+from oauth2client.client import OAuth2WebServerFlow
 
 
 def home(request):
@@ -14,4 +18,13 @@ def logout_view(request):
 
 
 def google_auth(request):
-    pass
+    if request.POST:
+        pass
+
+    flow = OAuth2WebServerFlow(client_id=settings.GOOGLE_CALENDAR_API_CLIENT_ID,
+                               client_secret=settings.GOOGLE_CALENDAR_API_CLIENT_SECRET,
+                               scope='https://www.googleapis.com/auth/calendar',
+                               redirect_uri=settings.BASE_URL + '/auth/google')
+
+    auth_uri = flow.step1_get_authorize_url()
+    return HTTPResponseRedirect(auth_uri)
