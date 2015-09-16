@@ -1,6 +1,6 @@
 from django.conf import settings
 from django.contrib.auth import logout
-from django.http import HTTPResponseRedirect
+from django.http import HttpResponseRedirect
 from django.shortcuts import render_to_response
 
 from oauth2client.client import OAuth2WebServerFlow
@@ -27,4 +27,4 @@ def google_auth(request):
                                redirect_uri=settings.BASE_URL + '/auth/google')
 
     auth_uri = flow.step1_get_authorize_url()
-    return HTTPResponseRedirect(auth_uri)
+    return HttpResponseRedirect(auth_uri)
