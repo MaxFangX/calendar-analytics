@@ -19,7 +19,7 @@ def logout_view(request):
 
 def google_auth(request):
     if request.POST:
-        pass
+        return google_callback(request)
 
     flow = OAuth2WebServerFlow(client_id=settings.GOOGLE_CALENDAR_API_CLIENT_ID,
                                client_secret=settings.GOOGLE_CALENDAR_API_CLIENT_SECRET,
@@ -28,3 +28,11 @@ def google_auth(request):
 
     auth_uri = flow.step1_get_authorize_url()
     return HttpResponseRedirect(auth_uri)
+
+
+def google_callback(request):
+    flow = OAuth2WebServerFlow(client_id=settings.GOOGLE_CALENDAR_API_CLIENT_ID,
+                               client_secret=settings.GOOGLE_CALENDAR_API_CLIENT_SECRET,
+                               scope='https://www.googleapis.com/auth/calendar',
+                               redirect_uri=settings.BASE_URL + '/auth/google')
+    flow.step2_exchange(request.data.get('code'))
