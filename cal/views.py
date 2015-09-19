@@ -35,4 +35,6 @@ def google_callback(request):
                                client_secret=settings.GOOGLE_CALENDAR_API_CLIENT_SECRET,
                                scope='https://www.googleapis.com/auth/calendar',
                                redirect_uri=settings.BASE_URL + '/auth/google')
-    flow.step2_exchange(request.data.get('code'))
+    credentials = flow.step2_exchange(request.data.get('code'))
+    credentials_json = credentials.to_json()
+    
