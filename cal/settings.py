@@ -22,7 +22,7 @@ SECRET_KEY = os.getenv("CJ_DJANGO_SECRET_KEY", None)
 ENVIRONMENT = os.getenv('APP_ENVIRONMENT', 'dev')
 
 if ENVIRONMENT == 'prod':
-    BASE_URL = 'https://calendarjournal.maxfa.ng'
+    BASE_URL = '104.131.153.171:8000'
 else:
     DEBUG = True
     TEMPLATE_DEBUG = True
