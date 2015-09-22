@@ -12,6 +12,12 @@ def home(request):
     return render_to_response(template_name='home_logged_out.html')
 
 
+def login_view(request):
+    if request.user.is_authenticated():
+        return render_to_response(template_name='home_logged_in.html')
+    return render_to_response(template_name='home_logged_out.html')
+
+
 def logout_view(request):
     logout(request)
     return render_to_response(template_name='home_logged_out.html')
@@ -35,6 +41,5 @@ def google_callback(request):
                                client_secret=settings.GOOGLE_CALENDAR_API_CLIENT_SECRET,
                                scope='https://www.googleapis.com/auth/calendar',
                                redirect_uri=settings.BASE_URL + '/auth/google')
-    credentials = flow.step2_exchange(request.data.get('code'))
-    credentials_json = credentials.to_json()
+    credentials = flow.step2_exchange(request.data.get('code')).to_json()
     
