@@ -4,5 +4,9 @@
   <body>
     <h1>Public homepage</h1>
     <a href="/login">Log in to Calendar Journal</a>
+    <form action="/login" method="POST">{% csrf_token %}
+      {{ login_form }}
+      <input type="submit" value="login">
+    </form>
   </body>
 </html>
