@@ -10,6 +10,7 @@ oauth2client==1.5.0
 path.py==8.1
 pexpect==3.3
 pickleshare==0.5
+psycopg2==2.6.1
 pyasn1==0.1.8
 pyasn1-modules==0.0.7
 rsa==3.2
