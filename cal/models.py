@@ -9,6 +9,13 @@ class Profile(models.Model):
     modified_at = models.DateTimeField(auto_now=True)
 
 
+class UserCategory(models.Model):
+
+    user = models.ForeignKey(User)
+    color = models.CharField(max_length=100)
+    label = models.CharField(max_length=100)
+
+
 class GCalendar(models.Model):
 
     user = models.ForeignKey(User)
