@@ -45,7 +45,11 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    # CalendarJournal App(s)
     'cal',
+
+    # Vendor App(s)
+    'rest_framework'
 )
 
 MIDDLEWARE_CLASSES = (

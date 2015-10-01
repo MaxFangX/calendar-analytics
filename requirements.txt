@@ -1,11 +1,14 @@
 appnope==0.1.0
 decorator==4.0.2
 Django==1.8.4
+django-filter==0.11.0
+djangorestframework==3.2.4
 gnureadline==6.3.3
 google-api-python-client==1.4.1
 httplib2==0.9.1
 ipython==4.0.0
 ipython-genutils==0.1.0
+markdown==2.6.2
 oauth2client==1.5.0
 path.py==8.1
 pexpect==3.3
