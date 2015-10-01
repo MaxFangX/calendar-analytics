@@ -8,6 +8,9 @@ urlpatterns = patterns(
     url(r'^admin/', include(admin.site.urls)),
     url(r'^login$', 'cal.views.login_view', name='login_view'),
     url(r'^logout$', 'cal.views.logout_view', name='logout_view'),
-    url(r'^auth/google', 'cal.views.google_auth', name='google_auth')
+    url(r'^auth/google', 'cal.views.google_auth', name='google_auth'),
+
+    # Django REST framework
+    url(r'^auth', include('rest_framework.urls', namespace='rest_framework')),
 
 )
