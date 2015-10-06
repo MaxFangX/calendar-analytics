@@ -1,6 +1,8 @@
 from django.conf.urls import patterns, include, url
 from django.contrib import admin
 
+import api.urls
+
 urlpatterns = patterns(
 
     '',
@@ -11,6 +13,7 @@ urlpatterns = patterns(
     url(r'^auth/google', 'cal.views.google_auth', name='google_auth'),
 
     # Django REST framework
+    url(r'', include(api.urls)),
     url(r'^auth', include('rest_framework.urls', namespace='rest_framework')),
 
 )
