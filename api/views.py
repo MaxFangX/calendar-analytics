@@ -3,7 +3,7 @@ from rest_framework import viewsets
 from api.serializers import UserSerializer
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserList(viewsets.ModelViewSet):
     """
     API endpoint that allows users to be viewed or edited.
     """
