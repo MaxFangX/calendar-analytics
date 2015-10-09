@@ -40,3 +40,11 @@ class GEvent(Event):
     # TODO: Add choices for color
     color = models.CharField(max_length=100)
     note = models.TextField(max_length=20000)
+
+
+class Statistic(models.Model):
+
+    user = models.ForeignKey(User)
+    name = models.CharField(max_length=500)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
