@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import viewsets
-from api.serializers import GEventSerializer, UserSerializer
-from cal.models import GEvent
+from api.serializers import GEventSerializer, StatisticSerializer, UserSerializer
+from cal.models import GEvent, Statistic
 
 
 class UserList(viewsets.ModelViewSet):
@@ -18,3 +18,11 @@ class GEventList(viewsets.ModelViewSet):
     """
     queryset = GEvent.objects.all().order_by('start_time')
     serializer_class = GEventSerializer
+
+
+class StatisticList(viewsets.ModelViewSet):
+    """
+    API endpoint to query for Statistics
+    """
+    queryset = Statistic.objects.all()
+    serializer_class = StatisticSerializer
