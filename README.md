@@ -1,2 +1,2 @@
-# calendar-journal
-You already have your life logged in a calendar - why not use it as a journal? Keep memories of what's memorable, and see how you've spent your time.
+# Calendar Analytics
+The stats app for life hackers and efficiency whores. Know exactly how you've spent your time, so you know exactly how you can improve.
