@@ -7,3 +7,6 @@ static/
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+
+# Hide environment variables 
+.ebextensions/02-cal.config
