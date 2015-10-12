@@ -66,6 +66,9 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    # Custom middleware
+    'cal.middleware.UserBasedExceptionMiddleware',
 )
 
 ROOT_URLCONF = 'cal.urls'
