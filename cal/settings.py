@@ -53,6 +53,7 @@ INSTALLED_APPS = (
 
     # CalendarJournal App(s)
     'cal',
+    'api',
 
     # Vendor App(s)
     'rest_framework'
