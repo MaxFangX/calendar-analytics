@@ -1,13 +1,9 @@
 from api import views
-from django.conf.urls import include, patterns, url
-from rest_framework import routers
-
-router = routers.DefaultRouter()
-router.register(r'users', views.UserList)
-router.register(r'gevents', views.UserList)
+from django.conf.urls import patterns, url
 
 urlpatterns = patterns(
 
-    url(r'^v1/', include(router.urls)),
+    url(r'^v1/gevents/', views.GEventList),
+    url(r'^v1/stats/', views.StatisticList),
 
 )
