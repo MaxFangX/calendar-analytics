@@ -1,5 +1,6 @@
 from api import views
-from django.conf.urls import patterns, url
+from django.conf.urls import include, patterns, url
+from rest_framework.urlpatterns import format_suffix_patterns
 
 urlpatterns = patterns(
 
@@ -7,3 +8,9 @@ urlpatterns = patterns(
     url(r'^v1/stats/$', views.StatisticList.as_view()),
 
 )
+
+urlpatterns = format_suffix_patterns(urlpatterns)
+
+urlpatterns += [
+    url(r'^api-auth/$', include('rest_framework.urls', namespace='rest_framework')),
+]

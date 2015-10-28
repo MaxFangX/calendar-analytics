@@ -12,6 +12,5 @@ urlpatterns = patterns(
 
     # Django REST framework
     url(r'^', include('api.urls')),
-    url(r'^auth', include('rest_framework.urls', namespace='rest_framework')),
 
 )
