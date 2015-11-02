@@ -107,8 +107,19 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static/")
 
-# Production settings
-if ENVIRONMENT == 'prod':
+# These environment variables are set in prod
+if 'RDS_DB_NAME' in os.environ:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': os.environ['RDS_DB_NAME'],
+            'USER': os.environ['RDS_USERNAME'],
+            'PASSWORD': os.environ['RDS_PASSWORD'],
+            'HOST': os.environ['RDS_HOSTNAME'],
+            'PORT': os.environ['RDS_PORT'],
+        }
+    }
+else:
     DATABASES['default'] = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': os.getenv('CJ_DB_NAME'),
@@ -117,3 +128,7 @@ if ENVIRONMENT == 'prod':
         'HOST': 'localhost',
         'PORT': '',
     }
+
+# Production settings
+if ENVIRONMENT == 'prod':
+    pass
