@@ -1,6 +1,8 @@
 from django.contrib.auth.models import User
 from django.db import models
+from cal.constants import GOOGLE_CALENDAR_COLORS
 
+EVENT_COLORS = GOOGLE_CALENDAR_COLORS['event'].keys()
 
 class Profile(models.Model):
 
@@ -38,7 +40,7 @@ class GEvent(Event):
 
     calendar = models.ForeignKey(GCalendar)
     # TODO: Add choices for color
-    color = models.CharField(max_length=100)
+    color = models.CharField(max_length=10, choices=EVENT_COLORS)
     note = models.TextField(max_length=20000)
 
 
