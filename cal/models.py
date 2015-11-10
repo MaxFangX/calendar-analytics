@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from django.db import models
 from cal.constants import GOOGLE_CALENDAR_COLORS
 
-EVENT_COLORS = GOOGLE_CALENDAR_COLORS['event'].keys()
+EVENT_COLORS = [(key, GOOGLE_CALENDAR_COLORS['event'][key]['background']) for key in GOOGLE_CALENDAR_COLORS['event']]
 
 class Profile(models.Model):
 
