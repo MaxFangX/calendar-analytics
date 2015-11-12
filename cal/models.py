@@ -47,6 +47,15 @@ class GEvent(Event):
 class Statistic(models.Model):
 
     user = models.ForeignKey(User)
-    name = models.CharField(max_length=500)
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
+    name = models.CharField(max_length=100)
+    display_name = models.CharField(max_length=100)
+    start_time = models.DateTimeField(null=True)
+    end_time = models.DateTimeField(null=True)
+
+    def query(self):
+        qs = GEvent.objects.filter(user=self.user, name=self.name)
+        if self.start_time:
+            qs.filter(start_time__gt=self.start_time)
+        if self.end_time:
+            qs.filter(end_time__gt=self.end_time)
+        return qs
