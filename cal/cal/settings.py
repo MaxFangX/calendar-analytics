@@ -38,7 +38,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
 }
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['panalytics.elasticbeanstalk.com', 'localhost', '127.0.0.1', 'ngrok.io']
 
 
 # Application definition
