@@ -38,7 +38,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
 }
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
