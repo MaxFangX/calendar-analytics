@@ -93,15 +93,6 @@ if 'RDS_DB_NAME' in os.environ:
         }
     }
 else:
-    # DATABASES['default'] = {
-    #     'ENGINE': 'django.db.backends.postgresql_psycopg2',
-    #     'NAME': os.getenv('CJ_DB_NAME'),
-    #     'USER': os.getenv('CJ_DB_USER'),
-    #     'PASSWORD': os.getenv('CJ_DB_PASSWORD'),
-    #     'HOST': 'localhost',
-    #     'PORT': '',
-    # }
-
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
