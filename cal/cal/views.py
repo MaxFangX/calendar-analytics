@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.views.decorators.http import require_POST
@@ -47,8 +47,17 @@ def google_auth(request):
                                scope='https://www.googleapis.com/auth/calendar',
                                redirect_uri=settings.BASE_URL + '/auth/google')
 
-    auth_uri = flow.step1_get_authorize_url()
-    return HttpResponseRedirect(auth_uri)
+    code = request.GET.get('code', None)
+    error = request.GET.get('error', None)
+    if error:
+        return HttpResponseBadRequest("Authentication failed. Reason: {}".format(error))
+    elif code:
+        credentials = flow.step2_exchange(code)
+        # TODO make this redirect to site or something
+        return HttpResponse("Success! You have authorized Panalytics (:")
+    else:
+        auth_uri = flow.step1_get_authorize_url()
+        return HttpResponseRedirect(auth_uri)
 
 
 def google_callback(request):
