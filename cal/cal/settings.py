@@ -13,24 +13,32 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('CJ_DJANGO_SECRET_KEY', "1hr3!jy2bb+rjy^u^2vq@fxkchs5n!hy@eqi-97bn_%afdok=s")
-
 ENVIRONMENT = os.getenv('APP_ENVIRONMENT', 'dev')
-
 if ENVIRONMENT == 'prod':
-    BASE_URL = '104.131.153.171:8000'
+    PRODUCTION= True  # Defined for convenience
 else:
+    PRODUCTION = False  # Defined for convenience
+
+# Configured prod/non-prod settings
+
+if PRODUCTION:
+    BASE_URL = 'panalytics.elasticbeanstalk.com'
+    DEBUG = False
+    TEMPLATE_DEBUG = False
+else:
+    BASE_URL = os.getenv('BASE_URL', 'localhost:8000')
     DEBUG = True
     TEMPLATE_DEBUG = True
-    BASE_URL = 'localhost:8000'
 
-# Variables
-GOOGLE_CALENDAR_API_CLIENT_ID = os.getenv('CJ_GOOGLE_CALENDAR_API_CLIENT_ID')
-GOOGLE_CALENDAR_API_CLIENT_SECRET = os.getenv('CJ_GOOGLE_CALENDAR_API_CLIENT_SECRET')
+# Environment variables
+SECRET_KEY = os.environ.get('CJ_DJANGO_SECRET_KEY', "fake_key")
+if ENVIRONMENT == 'prod':
+    assert SECRET_KEY != "fake_key", "SECRET_KEY environment variable must be set"
+
+GOOGLE_CALENDAR_API_CLIENT_ID = os.getenv('CJ_GOOGLE_CALENDAR_API_CLIENT_ID', None)
+GOOGLE_CALENDAR_API_CLIENT_SECRET = os.getenv('CJ_GOOGLE_CALENDAR_API_CLIENT_SECRET', None)
+assert GOOGLE_CALENDAR_API_CLIENT_ID, "GOOGLE_CALENDAR_API_CLIENT_ID environment variable must be set"
+assert GOOGLE_CALENDAR_API_CLIENT_SECRET, "GOOGLE_CALENDAR_API_CLIENT_SECRET environment variable must be set"
 
 # Django REST Framework
 REST_FRAMEWORK = {
@@ -76,12 +84,11 @@ ROOT_URLCONF = 'cal.urls'
 
 WSGI_APPLICATION = 'cal.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.7/ref/settings/#databases
 
 if 'RDS_DB_NAME' in os.environ:
-    # These environment variables are set in prod
+    # These environment variables are automagically set in prod
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -113,7 +120,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
@@ -123,7 +129,3 @@ if ENVIRONMENT == 'prod':
 else:
     STATIC_ROOT = os.path.join(BASE_DIR, "static/")
     STATIC_URL = '/static/'
-
-# Production settings
-if ENVIRONMENT == 'prod':
-    pass
