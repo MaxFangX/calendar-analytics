@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.db import models
 from cal.constants import GOOGLE_CALENDAR_COLORS
+from oauth2client.django_orm import CredentialsField, FlowField
 
 EVENT_COLORS = [(key, GOOGLE_CALENDAR_COLORS['event'][key]['background']) for key in GOOGLE_CALENDAR_COLORS['event']]
 
@@ -59,3 +60,23 @@ class Statistic(models.Model):
         if self.end_time:
             qs.filter(end_time__gt=self.end_time)
         return qs
+
+
+class GoogleFlow(models.Model):
+    """
+    Represents a Google oauth flow.
+    See: https://developers.google.com/api-client-library/python/guide/django
+    """
+
+    id = models.OneToOneField(User, primary_key=True)
+    flow = FlowField()
+
+
+class GoogleCredentials(models.Model):
+    """
+    Represents Google oauth credentials.
+    See: https://developers.google.com/api-client-library/python/guide/django
+    """
+
+    id = models.OneToOneField(User, primary_key=True)
+    credential = CredentialsField()
