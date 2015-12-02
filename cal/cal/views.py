@@ -55,7 +55,7 @@ def google_auth(request):
                                        redirect_uri=settings.BASE_URL + '/auth/google')
 
     # TODO perhaps create a new user upon oauth, to skip this check
-    if request.user:
+    if request.user.is_authenticated():
         # Try to retrieve an existing flow, or create one if it doesn't exist
         gflow = GoogleFlow.objects.filter(id=request.user).last()
         if not gflow:
@@ -74,7 +74,7 @@ def google_auth(request):
         return HttpResponseBadRequest("Authentication failed. Reason: {}".format(error))
     elif code:
         credentials = flow.step2_exchange(code)
-        if request.user:
+        if request.user.is_authenticated():
             # Save the credentials
             storage = Storage(GoogleCredentials, 'id', request.user, 'credential')
             storage.put(credentials)
