@@ -1,3 +1,7 @@
+{% block head %}
+{{ block.super }}
+<meta name="google-signin-client_id" content="{{ client_id }}">
+{% endblock %}
 {% block content %}
 <h1>Public homepage</h1>
 <a href="/auth/google">Login with Google</a><br>
@@ -6,4 +10,9 @@
   {{ login_form }}
   <input type="submit" value="login">
 </form>
+{% endblock %}
+
+{% block bottom_js %}
+{{ block.super }}
+<script src="https://apis.google.com/js/platform.js" async defer></script>
 {% endblock %}
