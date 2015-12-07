@@ -18,7 +18,7 @@ def home(request):
     login_form = AuthenticationForm(request)
     google_client_id = settings.GOOGLE_CALENDAR_API_CLIENT_ID
     return render_to_response(template_name='home_logged_out.html',
-                              context={'login_form': login_form
+                              context={'login_form': login_form,
                                        'google_client_id': google_client_id})
 
 

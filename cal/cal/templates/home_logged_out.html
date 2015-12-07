@@ -1,3 +1,4 @@
+{% extends "base.html" %}
 {% block head %}
 {{ block.super }}
 <meta name="google-signin-client_id" content="{{ client_id }}">
@@ -10,6 +11,7 @@
   {{ login_form }}
   <input type="submit" value="login">
 </form>
+<div class="g-signin2" data-onsuccess="onSignIn">Google Signin Button</div>
 {% endblock %}
 
 {% block bottom_js %}
