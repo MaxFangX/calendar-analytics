@@ -1,5 +1,19 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Logged in homepage</h1>
+
 <h3><a href="/logout">Log out</a></h3>
+
+<br><a href="#" onclick="signOut();">Google sign out</a>
+{% endblock %}
+
+{% block bottom_js %}
+<script>
+  function signOut() {
+    var auth2 = gapi.auth2.getAuthInstance();
+    auth2.signOut().then(function () {
+      console.log('User signed out.');
+    });
+  }
+</script>
 {% endblock %}
