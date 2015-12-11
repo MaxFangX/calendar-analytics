@@ -1,32 +1,55 @@
 {% extends "base.html" %}
-{% block head %}
-{{ block.super }}
-<meta name="google-signin-client_id" content="{{ client_id }}">
+
+{% block top_html %}
+  <html itemscope itemtype="http://schema.org/Article">
+  <!-- ^Google Sign In-->
 {% endblock %}
+
+{% block head %}
+  {{ block.super }}
+  <!-- BEGIN Pre-requisites -->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
+  </script>
+  <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer>
+  </script>
+  <!-- END Pre-requisites -->
+  <script>
+    function start() {
+      gapi.load('auth2', function() {
+        auth2 = gapi.auth2.init({
+          client_id: "{{ client_id }}.apps.googleusercontent.com",
+          // Scopes to request in addition to 'profile' and 'email'
+          //scope: 'additional_scope'
+        });
+      });
+    }
+  </script>
+{% endblock %}
+
 {% block content %}
-<h1>Public homepage</h1>
-<a href="/auth/google">Login with Google</a><br>
-<a href="/login">Log in to Calendar Journal</a>
-<form action="/login" method="POST">{% csrf_token %}
-  {{ login_form }}
-  <input type="submit" value="login">
-</form>
-<div class="g-signin2" data-onsuccess="onSignIn">Google Signin Button</div>
+  <h1>Public homepage</h1>
+  <a href="/auth/google">Login with Google</a><br>
+  <a href="/login">Log in to Calendar Journal</a>
+  <form action="/login" method="POST">{% csrf_token %}
+    {{ login_form }}
+    <input type="submit" value="login">
+  </form>
+  <div class="g-signin2" data-onsuccess="onSignIn">Google Signin Button</div>
 {% endblock %}
 
 {% block bottom_js %}
-{{ block.super }}
+  {{ block.super }}
 
-<!-- Google Sign in-->
-<script src="https://apis.google.com/js/platform.js" async defer></script>
-<script>
-  function onSignIn(googleUser) {
-    var profile = googleUser.getBasicProfile();
-    // console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
-    // console.log('Name: ' + profile.getName());
-    // console.log('Image URL: ' + profile.getImageUrl());
-    // console.log('Email: ' + profile.getEmail());
-  }
-</script>
+  <!-- Google Sign in-->
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
+  <script>
+    function onSignIn(googleUser) {
+      var profile = googleUser.getBasicProfile();
+      // console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+      // console.log('Name: ' + profile.getName());
+      // console.log('Image URL: ' + profile.getImageUrl());
+      // console.log('Email: ' + profile.getEmail());
+    }
+  </script>
 
 {% endblock %}
