@@ -1,2 +1,5 @@
 # Calendar Analytics
-The stats app for life hackers and efficiency whores. Know exactly how you've spent your time, so you know exactly how you can improve.
+#### by Max Fang
+###### Connect your Google Calendar and immediately see stats on how you've been spending your time.
+
+Mostly built for fun!
