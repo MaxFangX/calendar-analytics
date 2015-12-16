@@ -1,7 +1,10 @@
+from apiclient.discovery import build
+from cal.constants import GOOGLE_CALENDAR_COLORS
 from django.contrib.auth.models import User
 from django.db import models
-from cal.constants import GOOGLE_CALENDAR_COLORS
 from oauth2client.django_orm import CredentialsField, FlowField
+
+import httplib2
 
 EVENT_COLORS = [(key, GOOGLE_CALENDAR_COLORS['event'][key]['background']) for key in GOOGLE_CALENDAR_COLORS['event']]
 
@@ -80,3 +83,7 @@ class GoogleCredentials(models.Model):
 
     id = models.OneToOneField(User, primary_key=True)
     credential = CredentialsField()
+
+    def get_service(self):
+        http_auth = self.credential.authorize(httplib2.Http())
+        return build('calendar', 'v3', http=http_auth)
