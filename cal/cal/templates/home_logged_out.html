@@ -8,10 +8,7 @@
 {% block head %}
   {{ block.super }}
   <!-- BEGIN Pre-requisites -->
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js">
-  </script>
-  <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer>
-  </script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
   <!-- END Pre-requisites -->
   <script>
     function start() {
@@ -24,18 +21,29 @@
       });
     }
   </script>
+  <meta name="google-signin-client_id" content="{{ client_id }}.apps.googleusercontent.com">
 {% endblock %}
 
 {% block content %}
   <h1>Public homepage</h1>
-  <a href="/auth/google">Login with Google</a><br>
+  <a href="/auth/google">Google Auth</a><br>
   <form action="/login" method="POST">{% csrf_token %}
     {{ login_form }}
     <input type="submit" value="login">
   </form>
-  <div class="g-signin2" data-onsuccess="onSignIn">Google Signin Button</div>
+  <div class="g-signin2" data-onsuccess="onSignIn">Button</div>
 {% endblock %}
 
 {% block bottom_js %}
   {{ block.super }}
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
+  <script>
+    function onSignIn(googleUser) {
+      var profile = googleUser.getBasicProfile();
+      console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+      console.log('Name: ' + profile.getName());
+      console.log('Image URL: ' + profile.getImageUrl());
+      console.log('Email: ' + profile.getEmail());
+    }
+  </script>
 {% endblock %}
