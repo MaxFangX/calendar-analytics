@@ -35,7 +35,7 @@ def login_view(request):
         return render_to_response(template_name='home_logged_in.html', context_instance=context_instance)
     else:
         # TODO: change to failure page, or add failure message
-        return render_to_response(template_name='home_logged_out.html')
+        return render_to_response(template_name='home_logged_out.html', context={'client_id': settings.GOOGLE_CALENDAR_API_CLIENT_ID})
 
 
 def logout_view(request):
