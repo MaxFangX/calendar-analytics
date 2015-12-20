@@ -3,7 +3,7 @@ from cal.models import GoogleCredentials, GoogleFlow
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
+from django.http import HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.views.decorators.http import require_POST
@@ -81,8 +81,7 @@ def google_auth(request):
             storage = Storage(GoogleCredentials, 'id', request.user, 'credential')
             storage.put(credentials)
 
-        # TODO make this redirect to site or something
-        return HttpResponse("Success! You have authorized Panalytics (:")
+        return HttpResponseRedirect("/")
     else:
         auth_uri = flow.step1_get_authorize_url()
         return HttpResponseRedirect(auth_uri)
