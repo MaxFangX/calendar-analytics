@@ -3,7 +3,7 @@ from cal.models import GoogleCredentials, GoogleFlow
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import HttpResponseRedirect, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.views.decorators.http import require_POST
@@ -34,8 +34,7 @@ def login_view(request):
         login(request, user)
         return render_to_response(template_name='home_logged_in.html', context_instance=context_instance)
     else:
-        # TODO: change to failure page, or add failure message
-        return render_to_response(template_name='home_logged_out.html', context={'client_id': settings.GOOGLE_CALENDAR_API_CLIENT_ID})
+        return HttpResponse("Failed to log in.")
 
 
 def logout_view(request):
