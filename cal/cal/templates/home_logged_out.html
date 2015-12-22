@@ -14,14 +14,14 @@
     function start() {
       gapi.load('auth2', function() {
         auth2 = gapi.auth2.init({
-          client_id: "{{ client_id }}.apps.googleusercontent.com",
+          client_id: "{{ google_client_id }}",
           // Scopes to request in addition to 'profile' and 'email'
           //scope: 'additional_scope'
         });
       });
     }
   </script>
-  <meta name="google-signin-client_id" content="{{ client_id }}.apps.googleusercontent.com">
+  <meta name="google-signin-client_id" content="{{ google_client_id }}">
 {% endblock %}
 
 {% block content %}
