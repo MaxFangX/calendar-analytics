@@ -13,6 +13,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User)
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
+    main_calendar = models.ForeignKey("GCalendar", null=True)
 
 
 class UserCategory(models.Model):
