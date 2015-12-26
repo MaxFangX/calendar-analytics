@@ -14,9 +14,13 @@ from oauth2client.django_orm import Storage
 def home(request):
     if request.user.is_authenticated():
         return render_to_response(template_name='home_logged_in.html')
-    google_client_id = settings.GOOGLE_CALENDAR_API_CLIENT_ID
+
+    context = RequestContext(request, {
+        'google_client_id': settings.GOOGLE_CALENDAR_API_CLIENT_ID
+    })
+
     return render_to_response(template_name='home_logged_out.html',
-                              context={'google_client_id': google_client_id})
+                              context=context)
 
 
 @require_POST

@@ -18,7 +18,8 @@
         auth2 = gapi.auth2.init({
           client_id: "{{ google_client_id }}",
           // Scopes to request in addition to 'profile' and 'email'
-          //scope: 'additional_scope'
+          scope: 'https://www.googleapis.com/auth/calendar',
+          redirect_uri: 'postmessage'
         });
       });
     }
@@ -31,16 +32,16 @@
   <button id="signinButton">Sign in with Google</button>
   <script>
     $('#signinButton').click(function() {
-      // signInCallback defined in step 6.
       auth2.grantOfflineAccess({'redirect_uri': 'postmessage'}).then(signInCallback);
     });
   </script>
   <div id="result"></div>
+  
+  <h3>csrftoken: {{ csrf_token }}</h3>
 {% endblock %}
 
 {% block bottom_js %}
   {{ block.super }}
-  <!-- Last part of BODY element in file index.html -->
   <script>
   function signInCallback(authResult) {
     if (authResult['code']) {
@@ -48,19 +49,36 @@
       // Hide the sign-in button now that the user is authorized, for example:
       $('#signinButton').attr('style', 'display: none');
 
+      // CSRF implementation for ajax requests
+      function csrfSafeMethod(method) {
+          // these HTTP methods do not require CSRF protection
+          return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+      }
+      $.ajaxSetup({
+          beforeSend: function(xhr, settings) {
+              if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+              }
+          }
+      });
+
       // Send the code to the server
       $.ajax({
         type: 'POST',
-        url: 'http://example.com/storeauthcode',
+        url: 'https://maxfangx.ngrok.io/auth/google',
         contentType: 'application/octet-stream; charset=utf-8',
         success: function(result) {
           // Handle or verify the server response.
         },
         processData: false,
-        data: authResult['code']
+        data: {
+          csrfmiddlewaretoken: "{{ csrf_token }}",
+          code: authResult['code'],
+        }
       });
     } else {
       // There was an error.
+      console.log('no authResult["Code"]')
     }
   }
   </script>
