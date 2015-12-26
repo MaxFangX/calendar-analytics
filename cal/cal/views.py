@@ -16,7 +16,8 @@ def home(request):
         return render_to_response(template_name='home_logged_in.html')
 
     context = RequestContext(request, {
-        'google_client_id': settings.GOOGLE_CALENDAR_API_CLIENT_ID
+        'google_client_id': settings.GOOGLE_CALENDAR_API_CLIENT_ID,
+        'base_url': settings.BASE_URL,
     })
 
     return render_to_response(template_name='home_logged_out.html',

@@ -8,7 +8,7 @@
 {% block head %}
   {{ block.super }}
   <!-- BEGIN Google Server-Side App Sign In Pre-requisites -->
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
   <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer></script>
   <!-- END Google Server-Side App Sign In Pre-requisites -->
 
@@ -43,43 +43,46 @@
 {% block bottom_js %}
   {{ block.super }}
   <script>
-  function signInCallback(authResult) {
-    if (authResult['code']) {
+    function signInCallback(authResult) {
+      if (authResult['code']) {
 
-      // Hide the sign-in button now that the user is authorized, for example:
-      $('#signinButton').attr('style', 'display: none');
+        // Hide the sign-in button now that the user is authorized, for example:
+        $('#signinButton').attr('style', 'display: none');
 
-      // CSRF implementation for ajax requests
-      function csrfSafeMethod(method) {
+        // CSRF implementation for ajax requests
+        function csrfSafeMethod(method) {
           // these HTTP methods do not require CSRF protection
           return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-      }
-      $.ajaxSetup({
-          beforeSend: function(xhr, settings) {
-              if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
-              }
-          }
-      });
-
-      // Send the code to the server
-      $.ajax({
-        type: 'POST',
-        url: 'https://maxfangx.ngrok.io/auth/google',
-        contentType: 'application/octet-stream; charset=utf-8',
-        success: function(result) {
-          // Handle or verify the server response.
-        },
-        processData: false,
-        data: {
-          csrfmiddlewaretoken: "{{ csrf_token }}",
-          code: authResult['code'],
         }
-      });
-    } else {
-      // There was an error.
-      console.log('no authResult["Code"]')
+        $.ajaxSetup({
+          beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+              xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+            }
+          }
+        });
+
+        // Send the code to the server
+        $.ajax({
+          type: 'POST',
+          url: '{{ base_url }}/auth/google',
+          contentType: 'application/octet-stream; charset=utf-8',
+          success: function(result) {
+            // Handle or verify the server response.
+          },
+          error: function(result) {
+            console.log("Request failed: " + result);
+          },
+          processData: false,
+          data: {
+            csrfmiddlewaretoken: "{{ csrf_token }}",
+            code: authResult['code'],
+          }
+        });
+      } else {
+        // There was an error.
+        console.log('no authResult["Code"]')
+      }
     }
-  }
   </script>
 {% endblock %}

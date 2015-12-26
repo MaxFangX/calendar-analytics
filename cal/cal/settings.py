@@ -26,7 +26,7 @@ if PRODUCTION:
     DEBUG = False
     TEMPLATE_DEBUG = False
 else:
-    BASE_URL = os.getenv('BASE_URL', 'localhost:8000')
+    BASE_URL = os.getenv('BASE_URL', 'http://localhost:8000')
     DEBUG = True
     TEMPLATE_DEBUG = True
 
