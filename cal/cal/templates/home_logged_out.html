@@ -2,14 +2,16 @@
 
 {% block top_html %}
   <html itemscope itemtype="http://schema.org/Article">
-  <!-- ^Google Sign In-->
+  <!-- ^ Google Server-Side App Sign In-->
 {% endblock %}
 
 {% block head %}
   {{ block.super }}
-  <!-- BEGIN Pre-requisites -->
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-  <!-- END Pre-requisites -->
+  <!-- BEGIN Google Server-Side App Sign In Pre-requisites -->
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer></script>
+  <!-- END Google Server-Side App Sign In Pre-requisites -->
+
   <script>
     function start() {
       gapi.load('auth2', function() {
@@ -21,25 +23,45 @@
       });
     }
   </script>
-  <meta name="google-signin-client_id" content="{{ google_client_id }}">
 {% endblock %}
 
 {% block content %}
   <h1>Public homepage</h1>
   <a href="/auth/google">Connect Google Calendar</a><br>
-  <div class="g-signin2" data-onsuccess="onSignIn">Button</div>
+  <button id="signinButton">Sign in with Google</button>
+  <script>
+    $('#signinButton').click(function() {
+      // signInCallback defined in step 6.
+      auth2.grantOfflineAccess({'redirect_uri': 'postmessage'}).then(signInCallback);
+    });
+  </script>
+  <div id="result"></div>
 {% endblock %}
 
 {% block bottom_js %}
   {{ block.super }}
-  <script src="https://apis.google.com/js/platform.js" async defer></script>
+  <!-- Last part of BODY element in file index.html -->
   <script>
-    function onSignIn(googleUser) {
-      var profile = googleUser.getBasicProfile();
-      console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
-      console.log('Name: ' + profile.getName());
-      console.log('Image URL: ' + profile.getImageUrl());
-      console.log('Email: ' + profile.getEmail());
+  function signInCallback(authResult) {
+    if (authResult['code']) {
+
+      // Hide the sign-in button now that the user is authorized, for example:
+      $('#signinButton').attr('style', 'display: none');
+
+      // Send the code to the server
+      $.ajax({
+        type: 'POST',
+        url: 'http://example.com/storeauthcode',
+        contentType: 'application/octet-stream; charset=utf-8',
+        success: function(result) {
+          // Handle or verify the server response.
+        },
+        processData: false,
+        data: authResult['code']
+      });
+    } else {
+      // There was an error.
     }
+  }
   </script>
 {% endblock %}
