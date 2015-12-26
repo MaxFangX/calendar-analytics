@@ -26,11 +26,7 @@
 
 {% block content %}
   <h1>Public homepage</h1>
-  <a href="/auth/google">Google Auth</a><br>
-  <form action="/login" method="POST">{% csrf_token %}
-    {{ login_form }}
-    <input type="submit" value="login">
-  </form>
+  <a href="/auth/google">Connect Google Calendar</a><br>
   <div class="g-signin2" data-onsuccess="onSignIn">Button</div>
 {% endblock %}
 

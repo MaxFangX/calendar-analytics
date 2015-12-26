@@ -2,7 +2,6 @@ from cal.models import GoogleCredentials, GoogleFlow
 
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.forms import AuthenticationForm
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -15,11 +14,9 @@ from oauth2client.django_orm import Storage
 def home(request):
     if request.user.is_authenticated():
         return render_to_response(template_name='home_logged_in.html')
-    login_form = AuthenticationForm(request)
     google_client_id = settings.GOOGLE_CALENDAR_API_CLIENT_ID
     return render_to_response(template_name='home_logged_out.html',
-                              context={'login_form': login_form,
-                                       'google_client_id': google_client_id})
+                              context={'google_client_id': google_client_id})
 
 
 @require_POST
