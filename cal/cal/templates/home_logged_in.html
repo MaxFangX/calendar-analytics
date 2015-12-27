@@ -1,11 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Logged in homepage</h1>
-<a href="/auth/google">Connect Google Calendar</a><br>
-
-<h3><a href="/logout">CJ log out</a></h3>
-
-<a href="#" onclick="signOut();">Google sign out</a>
+<h3><a href="/auth/google">Connect Google Calendar</a></h3>
+<br>
+<a href="/logout" onclick="signOut();">Log out</a>
 {% endblock %}
 
 {% block bottom_js %}
