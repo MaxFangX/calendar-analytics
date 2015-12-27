@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
+from django.http import HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.views.decorators.http import require_POST
@@ -28,21 +28,6 @@ def home(request):
 
     return render_to_response(template_name='home_logged_out.html',
                               context=context)
-
-
-@require_POST
-def login_view(request):
-    username = request.POST.get('username')
-    password = request.POST.get('password')
-    user = authenticate(username=username, password=password)
-
-    context= RequestContext(request)
-
-    if user is not None:
-        login(request, user)
-        return render_to_response(template_name='home_logged_in.html', context=context)
-    else:
-        return HttpResponse("Failed to log in.")
 
 
 def logout_view(request):
@@ -92,12 +77,10 @@ def google_auth(request):
         auth_uri = flow.step1_get_authorize_url()
         return HttpResponseRedirect(auth_uri)
 
-
-def complete_google(request):
+@require_POST
+def login_google(request):
     """
-    Completes the Google oauth flow. For details, visit
-    https://developers.google.com/api-client-library/python/guide/aaa_oauth#OAuth2WebServerFlow
-    https://developers.google.com/api-client-library/python/guide/django
+    Logs in the user using Google sign in
     """
     id_token = request.POST.get('id_token', None)
     code = request.POST.get('code', None)
