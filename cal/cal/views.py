@@ -54,7 +54,7 @@ def google_auth(request):
     flow = None
     default_flow = OAuth2WebServerFlow(client_id=settings.GOOGLE_CALENDAR_API_CLIENT_ID,
                                        client_secret=settings.GOOGLE_CALENDAR_API_CLIENT_SECRET,
-                                       scope='https://www.googleapis.com/auth/calendar',
+                                       scope=['https://www.googleapis.com/auth/calendar','profile','email'],
                                        redirect_uri=settings.BASE_URL + '/auth/google')
 
     # TODO perhaps create a new user upon oauth, to skip this check
@@ -86,3 +86,13 @@ def google_auth(request):
     else:
         auth_uri = flow.step1_get_authorize_url()
         return HttpResponseRedirect(auth_uri)
+
+
+def complete_google(request):
+    """
+    Completes the Google oauth flow. For details, visit
+    https://developers.google.com/api-client-library/python/guide/aaa_oauth#OAuth2WebServerFlow
+    https://developers.google.com/api-client-library/python/guide/django
+    """
+    # TODO implement auth completion
+    return HttpResponse(status=200)

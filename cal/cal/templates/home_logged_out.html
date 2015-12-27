@@ -30,11 +30,6 @@
   <h1>Public homepage</h1>
   <a href="/auth/google">Connect Google Calendar</a><br>
   <button id="signinButton">Sign in with Google</button>
-  <script>
-    $('#signinButton').click(function() {
-      auth2.grantOfflineAccess({'redirect_uri': 'postmessage'}).then(signInCallback);
-    });
-  </script>
   <div id="result"></div>
   
   <h3>csrftoken: {{ csrf_token }}</h3>
@@ -65,13 +60,14 @@
         // Send the code to the server
         $.ajax({
           type: 'POST',
-          url: '{{ base_url }}/auth/google',
+          url: '{{ base_url }}/auth/google/complete',
           contentType: 'application/octet-stream; charset=utf-8',
           success: function(result) {
             // Handle or verify the server response.
+            console.debug("Auth result" + result);
           },
           error: function(result) {
-            console.log("Request failed: " + result);
+            console.log("Auth failed - result: " + result);
           },
           processData: false,
           data: {
@@ -84,5 +80,10 @@
         console.log('no authResult["Code"]')
       }
     }
+  </script>
+  <script>
+    $('#signinButton').click(function() {
+      auth2.grantOfflineAccess({'redirect_uri': 'postmessage'}).then(signInCallback);
+    });
   </script>
 {% endblock %}
