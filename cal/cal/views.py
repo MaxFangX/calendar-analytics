@@ -123,7 +123,7 @@ def complete_google(request):
 
     profile, created = Profile.get_or_create(user)
     if created:
-        # Fill in additional data for the first time
+        # Fill in additional data only for the first time
         profile.google_id = idinfo['sub']
         profile.locale = idinfo['locale']
         profile.main_calendar = None  # TODO make API call

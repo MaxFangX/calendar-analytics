@@ -1,22 +1,26 @@
 {% extends "base.html" %}
+
 {% block content %}
-<h1>Logged in homepage</h1>
-{% if user.profile.google_id %}
-<h3><a href="/auth/google">Connect Google Calendar</a></h3>
-{% else %}
-Stats and stuff - to be completed
-{% endif %}
-<br>
-<a href="/logout" onclick="signOut();">Log out</a>
+  <h1>Logged in homepage</h1>
+
+  {% if request.user.profile.google_id %}
+    <h3>Stats and stuff - to be completed</h3>
+  {% else %}
+    <h3><a href="/auth/google">Connect Google Calendar</a></h3>
+  {% endif %}
+
+  <br>
+  <a href="/logout" onclick="signOut();">Log out</a>
+
 {% endblock %}
 
 {% block bottom_js %}
-<script>
-  function signOut() {
-    var auth2 = gapi.auth2.getAuthInstance();
-    auth2.signOut().then(function () {
-        console.log('User signed out.');
-      });
-    }
-</script>
+  <script>
+    function signOut() {
+      var auth2 = gapi.auth2.getAuthInstance();
+      auth2.signOut().then(function () {
+          console.log('User signed out.');
+        });
+      }
+  </script>
 {% endblock %}
