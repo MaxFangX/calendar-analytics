@@ -7,6 +7,7 @@ from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.views.decorators.http import require_POST
 
+from oauth2client import client, crypt
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.django_orm import Storage
 
@@ -94,5 +95,17 @@ def complete_google(request):
     https://developers.google.com/api-client-library/python/guide/aaa_oauth#OAuth2WebServerFlow
     https://developers.google.com/api-client-library/python/guide/django
     """
-    # TODO implement auth completion
+    id_token = request.POST.get('id_token', None)
+    code = request.POST.get('code', None)
+    if not id_token or not code:
+        # TODO return missing params error
+        return HttpResponseBadRequest("Missing code or id_token")
+    try:
+        idinfo = client.verify_id_token(id_token, settings.GOOGLE_CALENDAR_API_CLIENT_ID)
+    except crypt.AppIdentityError:
+        # TODO Invalid token
+        return HttpResponseBadRequest("Invalid id token.")
+    user_id = idinfo['sub']
+    print user_id  # TODO remove
+
     return HttpResponse(status=200)

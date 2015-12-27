@@ -39,7 +39,8 @@
   {{ block.super }}
   <script>
     function signInCallback(authResult) {
-      if (authResult['code']) {
+      if (authResult['code'] && auth2.isSignedIn.get()) {
+        var google_user = auth2.currentUser.get();
 
         // Hide the sign-in button now that the user is authorized, for example:
         $('#signinButton').attr('style', 'display: none');
@@ -52,7 +53,7 @@
         $.ajaxSetup({
           beforeSend: function(xhr, settings) {
             if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-              xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+              xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}"); // TODO remove this if unnecessary
             }
           }
         });
@@ -60,28 +61,31 @@
         // Send the code to the server
         $.ajax({
           type: 'POST',
-          url: '{{ base_url }}/auth/google/complete',
-          contentType: 'application/octet-stream; charset=utf-8',
+          url: '{{ base_url }}/complete/google',
+          contentType: 'application/x-www-form-urlencoded',
+          processData: true,
+          dataType: "json",
+          data: {
+            csrfmiddlewaretoken: "{{ csrf_token }}", // TODO remove this if unnecessary
+            code: authResult['code'],
+            id_token: google_user.getAuthResponse().id_token,
+          },
           success: function(result) {
             // Handle or verify the server response.
-            console.debug("Auth result" + result);
+            // TODO reload page upon success
+            console.debug("Auth successful - result: " + result);
           },
           error: function(result) {
             console.log("Auth failed - result: " + result);
           },
-          processData: false,
-          data: {
-            csrfmiddlewaretoken: "{{ csrf_token }}",
-            code: authResult['code'],
-          }
         });
       } else {
         // There was an error.
         console.log('no authResult["Code"]')
       }
     }
-  </script>
-  <script>
+    </script>
+    <script>
     $('#signinButton').click(function() {
       auth2.grantOfflineAccess({'redirect_uri': 'postmessage'}).then(signInCallback);
     });
