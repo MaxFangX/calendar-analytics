@@ -12,10 +12,8 @@ class Profile(models.Model):
 
     user = models.OneToOneField(User)
     google_id = models.CharField(null=True, max_length=25)
-
     picture_url = models.URLField(null=True, blank=True)
     locale = models.CharField(max_length=10, default='en')
-
     main_calendar = models.ForeignKey("GCalendar", null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -44,6 +42,7 @@ class UserCategory(models.Model):
 class GCalendar(models.Model):
 
     user = models.ForeignKey(User)
+    calendar_id = models.CharField(max_length=250)
 
 
 class Event(models.Model):
@@ -102,7 +101,58 @@ class GoogleCredentials(models.Model):
 
     id = models.OneToOneField(User, primary_key=True, related_name='googlecredentials')
     credential = CredentialsField()
+    next_sync_token = models.CharField(max_length=100, null=True, blank=True)
 
     def get_service(self):
         http_auth = self.credential.authorize(httplib2.Http())
         return build('calendar', 'v3', http=http_auth)
+
+    def import_calendars(self, only_primary=True):
+        """
+        Hits the CalendarList.list() endpoint and updates database with any calendars found.
+        only_primary specifies if only the primary calendar is saved to the database.
+        """
+        
+        service = self.get_service()
+        result = service.calendarList().list().execute()
+
+        # Example:
+        # {
+        #   "kind": "calendar#calendarList",
+        #   "etag": etag,
+        #   "nextPageToken": string,
+        #   "nextSyncToken": string,
+        #   "items": [
+        #     {u'accessRole': u'owner',
+        #      u'backgroundColor': u'#9fc6e7',
+        #      u'colorId': u'15',
+        #      u'defaultReminders': [{u'method': u'popup', u'minutes': 10}],
+        #      u'etag': u'"1446592681590000"',
+        #      u'foregroundColor': u'#000000',
+        #      u'id': string,
+        #      u'kind': u'calendar#calendarListEntry',
+        #      u'notificationSettings': {u'notifications': [{u'method': u'email',
+        #         u'type': u'eventCreation'},
+        #        {u'method': u'email', u'type': u'eventChange'},
+        #        {u'method': u'email', u'type': u'eventCancellation'},
+        #        {u'method': u'email', u'type': u'eventResponse'}]},
+        #      u'primary': True,
+        #      u'selected': True,
+        #      u'summary': u'maxfangx@gmail.com',
+        #      u'timeZone': u'America/Los_Angeles'}
+        #   ]
+        # }
+
+        assert 'items' in result and 'nextSyncToken' in result, "import_calendars failed"
+
+        self.next_sync_token = result['nextSyncToken']
+
+        for item in result['items']:
+            if item.get('primary', False):
+                # This is the primary calendar, save it as such
+                gcal, _ = GCalendar.objects.get_or_create(user=self.user, calendar_id=item['id'])
+                profile = Profile.get_or_create(self.user)
+                profile.main_calendar = gcal
+                profile.save()
+            elif not only_primary:
+                gcal, _ = GCalendar.objects.get_or_create(user=self.user, calendar_id=item['id'])
