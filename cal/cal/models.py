@@ -11,9 +11,27 @@ EVENT_COLORS = [(key, GOOGLE_CALENDAR_COLORS['event'][key]['background']) for ke
 class Profile(models.Model):
 
     user = models.OneToOneField(User)
+    google_id = models.CharField(null=True, max_length=25)
+
+    picture_url = models.URLField(null=True, blank=True)
+    locale = models.CharField(max_length=10, default='en')
+
+    main_calendar = models.ForeignKey("GCalendar", null=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
-    main_calendar = models.ForeignKey("GCalendar", null=True)
+
+    @classmethod
+    def get_or_create(cls, user):
+        created = False
+        try:
+            profile = cls.objects.get(user=user)
+        except cls.DoesNotExist:
+            # Create a profile, but don't save it yet
+            created = True
+            profile = cls(user=user)
+            profile.save()
+        return profile, created
 
 
 class UserCategory(models.Model):

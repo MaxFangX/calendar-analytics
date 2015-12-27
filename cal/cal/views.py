@@ -1,7 +1,8 @@
-from cal.models import GoogleCredentials, GoogleFlow
+from cal.models import GoogleCredentials, GoogleFlow, Profile
 
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -98,14 +99,32 @@ def complete_google(request):
     id_token = request.POST.get('id_token', None)
     code = request.POST.get('code', None)
     if not id_token or not code:
-        # TODO return missing params error
         return HttpResponseBadRequest("Missing code or id_token")
     try:
         idinfo = client.verify_id_token(id_token, settings.GOOGLE_CALENDAR_API_CLIENT_ID)
     except crypt.AppIdentityError:
-        # TODO Invalid token
-        return HttpResponseBadRequest("Invalid id token.")
-    user_id = idinfo['sub']
-    print user_id  # TODO remove
+        return HttpResponseBadRequest("Invalid id_token.")
+
+    try:
+        user = User.objects.get(email=idinfo['email'])
+    except User.DoesNotExist:
+        # TODO allow changing the username
+        first_name = idinfo['given_name']
+        last_name = idinfo['family_name']
+        username = (first_name + last_name)[:30]
+        extra_fields = {
+            'first_name': first_name,
+            'last_name' : last_name,
+        }
+        user = User.objects.create_user(username=username, email=idinfo['email'], extra_fields=extra_fields)
+
+    profile, created = Profile.get_or_create(user)
+    if created:
+        # Fill in additional data for the first time
+        profile.google_id = idinfo['sub']
+        profile.locale = idinfo['locale']
+        profile.main_calendar = None  # TODO make API call
+        profile.picture_url = idinfo['picture']
+        profile.save()
 
     return HttpResponse(status=200)
