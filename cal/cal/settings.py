@@ -40,13 +40,12 @@ GOOGLE_CALENDAR_API_CLIENT_SECRET = os.getenv('CJ_GOOGLE_CALENDAR_API_CLIENT_SEC
 assert GOOGLE_CALENDAR_API_CLIENT_ID, "GOOGLE_CALENDAR_API_CLIENT_ID environment variable must be set"
 assert GOOGLE_CALENDAR_API_CLIENT_SECRET, "GOOGLE_CALENDAR_API_CLIENT_SECRET environment variable must be set"
 
-# Django REST Framework
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAdminUser',),
-    'PAGE_SIZE': 10,
-}
-
 ALLOWED_HOSTS = ['panalytics.elasticbeanstalk.com', 'localhost', '127.0.0.1', 'ngrok.io']
+
+AUTHENTICATION_BACKENDS = (
+    'cal.auth_backend.PasswordlessAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
 
 
 # Application definition
@@ -79,6 +78,12 @@ MIDDLEWARE_CLASSES = (
     # Custom middleware
     'cal.middleware.UserBasedExceptionMiddleware',
 )
+# Django REST Framework
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAdminUser',),
+    'PAGE_SIZE': 10,
+}
+
 
 ROOT_URLCONF = 'cal.urls'
 
