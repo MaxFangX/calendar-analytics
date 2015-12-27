@@ -4,6 +4,7 @@ from cal.models import GoogleCredentials, GoogleFlow, Profile
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -50,6 +51,7 @@ def logout_view(request):
     return render_to_response(template_name='home_logged_out.html', context=context)
 
 
+@login_required
 def google_auth(request):
     """
     Handles Google oauth flow. For details, visit
@@ -63,17 +65,13 @@ def google_auth(request):
                                        scope=['https://www.googleapis.com/auth/calendar','profile','email'],
                                        redirect_uri=settings.BASE_URL + '/auth/google')
 
-    # TODO perhaps create a new user upon oauth, to skip this check
-    if request.user.is_authenticated():
-        # Try to retrieve an existing flow, or create one if it doesn't exist
-        gflow = GoogleFlow.objects.filter(id=request.user).last()
-        if not gflow:
-            gflow = GoogleFlow(id=request.user,
-                              flow=default_flow)
-            gflow.save()
-        flow = gflow.flow
-    else:
-        flow = default_flow
+    # Try to retrieve an existing flow, or create one if it doesn't exist
+    gflow = GoogleFlow.objects.filter(id=request.user).last()
+    if not gflow:
+        gflow = GoogleFlow(id=request.user,
+                          flow=default_flow)
+        gflow.save()
+    flow = gflow.flow
 
     code = request.GET.get('code', None)
     error = request.GET.get('error', None)
@@ -82,11 +80,12 @@ def google_auth(request):
         # TODO eventually make this prettier, like redirect to some landing page
         return HttpResponseBadRequest("Authentication failed. Reason: {}".format(error))
     elif code:
-        credentials = flow.step2_exchange(code)
-        if request.user.is_authenticated():
-            # Save the credentials
-            storage = Storage(GoogleCredentials, 'id', request.user, 'credential')
-            storage.put(credentials)
+        credential = flow.step2_exchange(code)
+        # Save the credentials
+        storage = Storage(GoogleCredentials, 'user', request.user, 'credential')
+        storage.put(credential)
+        # TODO improve the latency over here
+        request.user.googlecredentials.import_calendars()
 
         return HttpResponseRedirect("/")
     else:

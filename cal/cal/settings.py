@@ -66,6 +66,9 @@ INSTALLED_APPS = (
     'rest_framework'
 )
 
+# TODO make an actual login page for redirection
+LOGIN_URL = "/"
+
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

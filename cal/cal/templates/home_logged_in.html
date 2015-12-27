@@ -1,7 +1,11 @@
 {% extends "base.html" %}
 {% block content %}
 <h1>Logged in homepage</h1>
+{% if user.profile.google_id %}
 <h3><a href="/auth/google">Connect Google Calendar</a></h3>
+{% else %}
+Stats and stuff - to be completed
+{% endif %}
 <br>
 <a href="/logout" onclick="signOut();">Log out</a>
 {% endblock %}

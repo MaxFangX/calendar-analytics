@@ -151,8 +151,10 @@ class GoogleCredentials(models.Model):
             if item.get('primary', False):
                 # This is the primary calendar, save it as such
                 gcal, _ = GCalendar.objects.get_or_create(user=self.user, calendar_id=item['id'])
-                profile = Profile.get_or_create(self.user)
+                profile, _ = Profile.get_or_create(self.user)
                 profile.main_calendar = gcal
                 profile.save()
             elif not only_primary:
                 gcal, _ = GCalendar.objects.get_or_create(user=self.user, calendar_id=item['id'])
+        
+        self.save()
