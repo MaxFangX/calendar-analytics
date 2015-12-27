@@ -29,6 +29,7 @@ pickleshare==0.5
 psycopg2==2.6.1
 pyasn1==0.1.8
 pyasn1-modules==0.0.7
+pycrypto==2.6.1
 python-dateutil==2.4.2
 PyYAML==3.11
 requests==2.6.2
