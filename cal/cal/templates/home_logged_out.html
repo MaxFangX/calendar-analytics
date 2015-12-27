@@ -42,17 +42,17 @@
           processData: true,
           dataType: "json",
           data: {
-            csrfmiddlewaretoken: getCookie('csrftoken'), // TODO remove this if unnecessary
             code: authResult['code'],
             id_token: google_user.getAuthResponse().id_token,
           },
           success: function(result) {
-            // Handle or verify the server response.
-            // TODO reload page upon success
-            console.debug("Auth successful - result: " + result);
+            console.debug("Auth successful");
           },
           error: function(result) {
-            console.log("Auth failed - result: " + result);
+            console.log("Auth failed");
+          },
+          complete: function(result) {
+            location.reload();
           },
         });
       } else {

@@ -8,12 +8,14 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadReque
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 from oauth2client import client, crypt
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.django_orm import Storage
 
 
+@ensure_csrf_cookie
 def home(request):
     context = RequestContext(request, {
         'base_url': settings.BASE_URL,
