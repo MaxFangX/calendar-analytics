@@ -1,3 +1,4 @@
+from cal.helpers import json_response
 from cal.models import GoogleCredentials, GoogleFlow, Profile
 
 from django.conf import settings
@@ -140,4 +141,4 @@ def complete_google(request):
             return HttpResponseBadRequest("Failed to log in user")
 
     # At this point, all users should be logged in.
-    return HttpResponse(status=200)
+    return json_response({"message": "Successfully logged in!"}, status=200)
