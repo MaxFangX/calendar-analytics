@@ -87,6 +87,15 @@ REST_FRAMEWORK = {
 
 ROOT_URLCONF = 'cal.urls'
 
+TEMPLATE_CONTEXT_PROCESSORS = [
+    'django.template.context_processors.debug',
+    'django.template.context_processors.request',
+    'django.contrib.auth.context_processors.auth',
+    'django.contrib.messages.context_processors.messages',
+
+    'cal.context_processors.google_client_id_processor'
+]
+
 WSGI_APPLICATION = 'cal.wsgi.application'
 
 # Database

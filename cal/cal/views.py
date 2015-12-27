@@ -14,13 +14,13 @@ from oauth2client.django_orm import Storage
 
 
 def home(request):
-    if request.user.is_authenticated():
-        return render_to_response(template_name='home_logged_in.html')
-
     context = RequestContext(request, {
-        'google_client_id': settings.GOOGLE_CALENDAR_API_CLIENT_ID,
         'base_url': settings.BASE_URL,
     })
+
+    if request.user.is_authenticated():
+        return render_to_response(template_name='home_logged_in.html',
+                                  context=context)
 
     return render_to_response(template_name='home_logged_out.html',
                               context=context)
@@ -32,18 +32,19 @@ def login_view(request):
     password = request.POST.get('password')
     user = authenticate(username=username, password=password)
 
-    context_instance = RequestContext(request)
+    context= RequestContext(request)
 
     if user is not None:
         login(request, user)
-        return render_to_response(template_name='home_logged_in.html', context_instance=context_instance)
+        return render_to_response(template_name='home_logged_in.html', context=context)
     else:
         return HttpResponse("Failed to log in.")
 
 
 def logout_view(request):
+    context= RequestContext(request)
     logout(request)
-    return render_to_response(template_name='home_logged_out.html')
+    return render_to_response(template_name='home_logged_out.html', context=context)
 
 
 def google_auth(request):
