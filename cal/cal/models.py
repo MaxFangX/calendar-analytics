@@ -99,7 +99,7 @@ class GoogleCredentials(models.Model):
     See: https://developers.google.com/api-client-library/python/guide/django
     """
 
-    id = models.OneToOneField(User, primary_key=True, related_name='googlecredentials')
+    user = models.OneToOneField(User, primary_key=True, related_name='googlecredentials')
     credential = CredentialsField()
     next_sync_token = models.CharField(max_length=100, null=True, blank=True)
 
