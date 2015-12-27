@@ -130,15 +130,14 @@ def complete_google(request):
 
     if not request.user.is_authenticated():
         # Log them in
-        authed_user = authenticate(email=user.email)
-        if authed_user is not None:
-            if authed_user.is_active:
-                login(request, authed_user)
+        user = authenticate(email=user.email)
+        if user is not None:
+            if user.is_active:
+                login(request, user)
             else:
                 return HttpResponseBadRequest("User inactive - likely banned")
         else:
             return HttpResponseBadRequest("Failed to log in user")
 
-    # At this point, all users should be logged in
-
+    # At this point, all users should be logged in.
     return HttpResponse(status=200)
