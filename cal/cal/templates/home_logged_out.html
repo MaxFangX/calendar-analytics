@@ -7,11 +7,8 @@
 
 {% block content %}
   <h1>Public homepage</h1>
-  <a href="/auth/google">Connect Google Calendar</a><br>
   <button id="signinButton">Sign in with Google</button>
   <div id="result"></div>
-  
-  <h3>csrftoken: {{ csrf_token }}</h3>
 {% endblock %}
 
 {% block bottom_js %}
@@ -32,7 +29,7 @@
         $.ajaxSetup({
           beforeSend: function(xhr, settings) {
             if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-              xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}"); // TODO remove this if unnecessary
+              xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken')); // TODO remove this if unnecessary
             }
           }
         });
@@ -45,7 +42,7 @@
           processData: true,
           dataType: "json",
           data: {
-            csrfmiddlewaretoken: "{{ csrf_token }}", // TODO remove this if unnecessary
+            csrfmiddlewaretoken: getCookie('csrftoken'), // TODO remove this if unnecessary
             code: authResult['code'],
             id_token: google_user.getAuthResponse().id_token,
           },
