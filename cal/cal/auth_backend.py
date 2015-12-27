@@ -10,10 +10,13 @@ class PasswordlessAuthBackend(ModelBackend):
     # TODO Perhaps add a token or something to make sure this backend isn't used accidentally
     def authenticate(self, username=None, email=None):
         """
-        Authenticate by supplying the username or the email (or both)
+        Authenticate by supplying the username or the email
         """
         try:
-            return User.objects.get(username=username, email=email)
+            if username:
+                return User.objects.get(username=username)
+            else:
+                return User.objects.get(email=email)
         except User.DoesNotExist:
             return None
 

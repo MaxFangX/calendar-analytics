@@ -127,4 +127,10 @@ def complete_google(request):
         profile.picture_url = idinfo['picture']
         profile.save()
 
+    if not request.user.is_authenticated():
+        # Log them in
+        authed_user = authenticate(email=user.email)
+        if authed_user is not None and authed_user.is_active:
+            login(request, authed_user)
+
     return HttpResponse(status=200)
