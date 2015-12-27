@@ -100,7 +100,7 @@ class GoogleCredentials(models.Model):
     See: https://developers.google.com/api-client-library/python/guide/django
     """
 
-    id = models.OneToOneField(User, primary_key=True)
+    id = models.OneToOneField(User, primary_key=True, related_name='googlecredentials')
     credential = CredentialsField()
 
     def get_service(self):
