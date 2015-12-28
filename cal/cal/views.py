@@ -12,7 +12,7 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from oauth2client import client, crypt
-from oauth2client.client import OAuth2WebServerFlow
+from oauth2client.client import OAuth2WebServerFlow, AccessTokenRefreshError
 from oauth2client.django_orm import Storage
 
 
@@ -109,7 +109,6 @@ def login_google(request):
         # Fill in additional data only for the first time
         profile.google_id = idinfo['sub']
         profile.locale = idinfo['locale']
-        profile.main_calendar = None  # TODO make API call
         profile.picture_url = idinfo['picture']
         profile.save()
 

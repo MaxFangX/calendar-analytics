@@ -3,6 +3,7 @@ from cal.constants import GOOGLE_CALENDAR_COLORS
 from django.contrib.auth.models import User
 from django.db import models
 from oauth2client.django_orm import CredentialsField, FlowField
+from oauth2client.client import AccessTokenRefreshError
 
 import httplib2
 
@@ -105,7 +106,11 @@ class GoogleCredentials(models.Model):
 
     def get_service(self):
         http_auth = self.credential.authorize(httplib2.Http())
-        return build('calendar', 'v3', http=http_auth)
+        try:
+            return build('calendar', 'v3', http=http_auth)
+        except AccessTokenRefreshError:
+            return None
+        return None
 
     def import_calendars(self, only_primary=True):
         """
