@@ -106,10 +106,14 @@ class GoogleCredentials(models.Model):
 
     def get_service(self):
         http_auth = self.credential.authorize(httplib2.Http())
-        try:
-            return build('calendar', 'v3', http=http_auth)
-        except AccessTokenRefreshError:
-            return None
+
+        # Try up to 3 times
+        for _ in range(3):
+            try:
+                return build('calendar', 'v3', http=http_auth)
+            except AccessTokenRefreshError:
+                pass
+        # TODO update some kind of state here to indicate that the user needs to reauth
         return None
 
     def import_calendars(self, only_primary=True):
