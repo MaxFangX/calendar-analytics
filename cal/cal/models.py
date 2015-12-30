@@ -16,6 +16,7 @@ class Profile(models.Model):
     picture_url = models.URLField(null=True, blank=True)
     locale = models.CharField(max_length=10, default='en')
     main_calendar = models.ForeignKey("GCalendar", null=True)
+    authed = models.BooleanField(default=False, help_text="If the user's oauth credentials are currently valid")
 
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -113,7 +114,11 @@ class GoogleCredentials(models.Model):
                 return build('calendar', 'v3', http=http_auth)
             except AccessTokenRefreshError:
                 pass
-        # TODO update some kind of state here to indicate that the user needs to reauth
+
+        profile = Profile.get_or_create(self.user)[0]
+        profile.authed = False
+        profile.save()
+
         return None
 
     def import_calendars(self, only_primary=True):

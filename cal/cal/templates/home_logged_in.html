@@ -3,7 +3,7 @@
 {% block content %}
   <h1>Logged in homepage</h1>
 
-  {% if request.user.profile.google_id %}
+  {% if request.user.profile.authed %}
     <h3>Stats and stuff - to be completed</h3>
   {% else %}
     <h3><a href="/auth/google">Connect Google Calendar</a></h3>
