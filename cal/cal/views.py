@@ -12,15 +12,13 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from oauth2client import client, crypt
-from oauth2client.client import OAuth2WebServerFlow, AccessTokenRefreshError
+from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.django_orm import Storage
 
 
 @ensure_csrf_cookie
 def home(request):
-    context = RequestContext(request, {
-        'base_url': settings.BASE_URL,
-    })
+    context = RequestContext(request)
 
     if request.user.is_authenticated():
         return render_to_response(template_name='home_logged_in.html',

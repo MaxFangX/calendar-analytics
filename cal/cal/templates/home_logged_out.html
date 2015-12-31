@@ -29,7 +29,7 @@
         $.ajaxSetup({
           beforeSend: function(xhr, settings) {
             if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-              xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken')); // TODO remove this if unnecessary
+              xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
             }
           }
         });
@@ -37,7 +37,7 @@
         // Send the code to the server
         $.ajax({
           type: 'POST',
-          url: '{{ base_url }}/login/google',
+          url: '/login/google',
           contentType: 'application/x-www-form-urlencoded',
           processData: true,
           dataType: "json",
