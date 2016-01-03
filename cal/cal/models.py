@@ -113,11 +113,10 @@ class GoogleCredentials(models.Model):
             try:
                 return build('calendar', 'v3', http=http_auth)
             except AccessTokenRefreshError:
-                pass
-
-        profile = Profile.get_or_create(self.user)[0]
-        profile.authed = False
-        profile.save()
+                # TODO add logging to see this exception
+                profile = Profile.get_or_create(self.user)[0]
+                profile.authed = False
+                profile.save()
 
         return None
 
