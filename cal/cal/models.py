@@ -2,6 +2,7 @@ from apiclient.discovery import build
 from cal.constants import GOOGLE_CALENDAR_COLORS
 from django.contrib.auth.models import User
 from django.db import models
+from jsonfield import JSONField
 from oauth2client.django_orm import CredentialsField, FlowField
 from oauth2client.client import AccessTokenRefreshError
 
@@ -27,7 +28,7 @@ class Profile(models.Model):
         try:
             profile = cls.objects.get(user=user)
         except cls.DoesNotExist:
-            # Create a profile, but don't save it yet
+            # Create a profile
             created = True
             profile = cls(user=user)
             profile.save()
@@ -45,7 +46,28 @@ class GCalendar(models.Model):
 
     user = models.ForeignKey(User)
     calendar_id = models.CharField(max_length=250)
+    meta = JSONField(default="{}", blank=True)
 
+    def update_meta(self):
+        service = self.user.googlecredentials.get_service()
+        try:
+            result = service.calendars().get(calendarId=self.calendar_id).execute()
+        except Exception as e:
+            raise Exception("Could not update meta for GCalendar {}. Error: {}".format(self.calendar_id, e))
+        # `result` looks like this:
+        # {
+        #     u'etag': u'[redacted]',
+        #     u'id': u'maxfangx@gmail.com',
+        #     u'kind': u'calendar#calendar',
+        #     u'summary': u'maxfangx@gmail.com',
+        #     u'timeZone': u'Asia/Shanghai'
+        # }
+
+        # Prune duplicate values
+        if result and 'id' in result:
+            result.pop('id')
+        self.meta = result
+        self.save()
 
 class Event(models.Model):
 
@@ -163,11 +185,15 @@ class GoogleCredentials(models.Model):
         for item in result['items']:
             if item.get('primary', False):
                 # This is the primary calendar, save it as such
-                gcal, _ = GCalendar.objects.get_or_create(user=self.user, calendar_id=item['id'])
+                gcal, gcal_created = GCalendar.objects.get_or_create(user=self.user, calendar_id=item['id'])
+                if gcal_created:
+                    gcal.update_meta()
                 profile, _ = Profile.get_or_create(self.user)
                 profile.main_calendar = gcal
                 profile.save()
             elif not only_primary:
-                gcal, _ = GCalendar.objects.get_or_create(user=self.user, calendar_id=item['id'])
+                gcal, gcal_created = GCalendar.objects.get_or_create(user=self.user, calendar_id=item['id'])
+                if gcal_created:
+                    gcal.update_meta()
         
         self.save()
