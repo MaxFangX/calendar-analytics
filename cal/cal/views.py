@@ -67,6 +67,9 @@ def google_auth(request):
         # Save the credentials
         storage = Storage(GoogleCredentials, 'user', request.user, 'credential')
         storage.put(credential)
+        profile = request.user.profile
+        profile.authed = True
+        profile.save()
         # TODO improve the latency over here
         request.user.googlecredentials.import_calendars()
 
