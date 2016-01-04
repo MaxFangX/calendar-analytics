@@ -8,6 +8,7 @@ from oauth2client.client import AccessTokenRefreshError
 
 import httplib2
 
+# TODO make this more readable
 EVENT_COLORS = [(key, GOOGLE_CALENDAR_COLORS['event'][key]['background']) for key in GOOGLE_CALENDAR_COLORS['event']]
 
 class Profile(models.Model):
@@ -21,6 +22,8 @@ class Profile(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
+
+    # TODO add a field for when calendar analysis will start
 
     @classmethod
     def get_or_create(cls, user):
@@ -43,10 +46,18 @@ class UserCategory(models.Model):
 
 
 class GCalendar(models.Model):
+    
+    """
+    Represents a Google Calendar. The GEvents associated with this are designed to maintain
+    the state of the User's Google Calendar.
+    """
 
     user = models.ForeignKey(User)
     calendar_id = models.CharField(max_length=250)
     meta = JSONField(default="{}", blank=True)
+
+    def sync(self):
+        raise NotImplementedError()
 
     def update_meta(self):
         service = self.user.googlecredentials.get_service()
@@ -71,12 +82,12 @@ class GCalendar(models.Model):
 
 class Event(models.Model):
 
-    name = models.CharField(max_length=1000)
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField()
-    location = models.CharField(max_length=1000)
-    created_at = models.DateTimeField(auto_now_add=True)
-    modified_at = models.DateTimeField(auto_now=True)
+    name = models.CharField(max_length=150, default="(No name)", blank=True)
+    start = models.DateTimeField(help_text="When the event started. 12AM for all day events")
+    end = models.DateTimeField(help_text="When the event ended. 12AM the next day for all day events")
+    location = models.CharField(max_length=500, blank=True, help_text="Geographic location as free form text")
+    created = models.DateTimeField(help_text="When the event was created, on Google")
+    updated = models.DateTimeField(help_text="When the event was last updated, on Google")
 
     class Meta:
         abstract = True
@@ -84,10 +95,44 @@ class Event(models.Model):
 
 class GEvent(Event):
 
+    """
+    Represents a Google event.
+
+    Reference:
+    https://developers.google.com/google-apps/calendar/v3/reference/events#resource-representations
+    """
+
+    STATUS_CHOICES = (
+        ('confirmed', 'Confirmed'),
+        ('tentative', 'Tentative'),
+        ('cancelled', 'Cancelled'),
+    )
+
+    TRANSPARENCY_CHOICES = (
+        ('opaque', "Opaque - The event blocks time on the calendar"),
+        ('transparent', "Transparent - The event does not block time on the calendar"),
+    )
+
+    # TODO support attendees for analyzing spending time with other people
+
     calendar = models.ForeignKey(GCalendar)
-    # TODO: Add choices for color
+    id_event = models.CharField(max_length=1024, help_text="Unique id per calendar")
+    i_cal_uid = models.CharField(max_length=1024, help_text="Unique id across calendaring systems. Only 1 per recurring event")
     color = models.CharField(max_length=10, choices=EVENT_COLORS)
-    note = models.TextField(max_length=20000)
+    description = models.TextField(max_length=20000, blank=True)
+    status = models.CharField(max_length=50, default='confirmed', blank=True, choices=STATUS_CHOICES)
+    transparency = models.CharField(max_length=50, default='opaque', blank=True, choices=TRANSPARENCY_CHOICES, help_text="Whether the event blocks time on the calendar.")
+
+    all_day_event = models.BooleanField(default=False, blank=True)
+    end_timezone = models.CharField(max_length=200, blank=True, help_text="IANA Time Zone Database Name")
+    end_time_unspecified = models.BooleanField(default=False, help_text="If an end time is actually unspecified, since an end time is always specified for compatibility reasons")
+    recurrent_event_id = models.CharField(max_length=1024, blank=True, help_text="For an instance of a recurring event, the id of the recurring event to which this instance belongs")
+
+    # TODO handle all_day_event not being counted in time
+    # TODO handle transparency being counted in time
+    # TODO on save, handle description length
+    # TODO on save, handle title length
+    # TODO change default of title to google calendar default
 
 
 class Statistic(models.Model):
@@ -95,6 +140,7 @@ class Statistic(models.Model):
     user = models.ForeignKey(User)
     name = models.CharField(max_length=100)
     display_name = models.CharField(max_length=100)
+    # TODO Include helpful help_text
     start_time = models.DateTimeField(null=True)
     end_time = models.DateTimeField(null=True)
 
