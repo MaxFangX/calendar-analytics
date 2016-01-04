@@ -4,8 +4,9 @@
 {% endblock %}
   <head>
     {% block head %}
+      <script src="{% static "js/jquery-1.11.3.min.js" %}"></script>
+
       <!-- BEGIN Google Server-Side App Sign In -->
-      <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
       <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer></script>
       <script>
         function start() {
