@@ -40,7 +40,7 @@ class Profile(models.Model):
 
 class UserCategory(models.Model):
 
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, related_name='usercategories')
     color = models.CharField(max_length=100)
     label = models.CharField(max_length=100)
 
@@ -52,7 +52,7 @@ class GCalendar(models.Model):
     the state of the User's Google Calendar.
     """
 
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, related_name='gcalendars')
     calendar_id = models.CharField(max_length=250)
     meta = JSONField(default="{}", blank=True)
 
@@ -115,7 +115,7 @@ class GEvent(Event):
 
     # TODO support attendees for analyzing spending time with other people
 
-    calendar = models.ForeignKey(GCalendar)
+    calendar = models.ForeignKey(GCalendar, related_name='gevents')
     id_event = models.CharField(max_length=1024, help_text="Unique id per calendar")
     i_cal_uid = models.CharField(max_length=1024, help_text="Unique id across calendaring systems. Only 1 per recurring event")
     color = models.CharField(max_length=10, choices=EVENT_COLORS)
@@ -137,7 +137,7 @@ class GEvent(Event):
 
 class Statistic(models.Model):
 
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, related_name='statistics')
     name = models.CharField(max_length=100)
     display_name = models.CharField(max_length=100)
     # TODO Include helpful help_text
