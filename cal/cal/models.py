@@ -127,7 +127,7 @@ class GEvent(Event):
     all_day_event = models.BooleanField(default=False, blank=True)
     end_timezone = models.CharField(max_length=200, blank=True, help_text="IANA Time Zone Database Name")
     end_time_unspecified = models.BooleanField(default=False, help_text="If an end time is actually unspecified, since an end time is always specified for compatibility reasons")
-    recurrent_event_id = models.CharField(max_length=1024, blank=True, help_text="For an instance of a recurring event, the id of the recurring event to which this instance belongs")
+    recurring_event_id = models.CharField(max_length=1024, blank=True, help_text="For an instance of a recurring event, the id of the recurring event to which this instance belongs")
 
     # TODO handle all_day_event not being counted in time
     # TODO handle transparency being counted in time
