@@ -2,6 +2,7 @@ from apiclient.discovery import build
 from cal.constants import GOOGLE_CALENDAR_COLORS
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils.dateparse import parse_datetime
 from jsonfield import JSONField
 from oauth2client.django_orm import CredentialsField, FlowField
 from oauth2client.client import AccessTokenRefreshError
@@ -55,7 +56,50 @@ class GCalendar(models.Model):
     calendar_id = models.CharField(max_length=250)
     meta = JSONField(default="{}", blank=True)
 
-    def sync(self):
+    def sync(self, full_sync=False):
+        if full_sync:
+            result = None
+            try:
+                service = self.user.googlecredentials.get_service()
+                result = service.events().list(calendarId=self.calendar_id).execute()
+            except Exception as e:
+                raise ("Could not sync. Error: {}".format(e))
+
+            # Assume at this point it's a correctly formatted event
+            for event in result['items']:
+                if event.get('status', 'confirmed') in ['confirmed', 'tentative']:
+                    # Create or update the event
+                    g, _ = GEvent.objects.get_or_create(id_event=event['id'])
+                    g.name = event.get('summary', '')
+                    if event['start'].get('dateTime'):
+                        # This is a date time
+                        g.start = parse_datetime(event['start']['dateTime'])
+                        g.end = parse_datetime(event['end']['dateTime'])
+                    else:
+                        # TODO This is a date, convert it to a datetime
+                        pass
+                    g.location = event.get('location', '')
+                    if event.get('created', None):
+                        g.created = parse_datetime(event['created'])
+                        g.updated = parse_datetime(event['updated'])
+
+                    g.calendar = self
+                    g.id_event = event['id']
+                    g.i_cal_uid = event['iCalUID']
+                    g.color = event.get('colorId', '')
+                    g.description = event.get('description', '')
+                    g.status = event.get('status', 'confirmed')
+                    g.transparency = event.get('transparency', 'opaque')
+                    g.all_day_event = True if event['start'].get('date', None) else False
+                    g.end_timezone = event['start']['timeZone']
+                    g.end_time_unspecified = event.get('endTimeUnspecified', False)
+                    g.recurring_event_id = event.get('recurringEventId', '')
+                    g.save()
+
+                else:
+                    # TODO delete the event
+                    pass
+
         raise NotImplementedError()
 
     def update_meta(self):
