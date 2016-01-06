@@ -9,7 +9,6 @@ from oauth2client.client import AccessTokenRefreshError
 import httplib2
 
 # TODO make this more readable
-EVENT_COLORS = [(key, GOOGLE_CALENDAR_COLORS['event'][key]['background']) for key in GOOGLE_CALENDAR_COLORS['event']]
 
 class Profile(models.Model):
 
@@ -102,6 +101,8 @@ class GEvent(Event):
     https://developers.google.com/google-apps/calendar/v3/reference/events#resource-representations
     """
 
+    EVENT_COLORS = [(k, GOOGLE_CALENDAR_COLORS['event'][k]['background']) for k in GOOGLE_CALENDAR_COLORS['event'].keys()]  # '1', '2', '3', etc
+
     STATUS_CHOICES = (
         ('confirmed', 'Confirmed'),
         ('tentative', 'Tentative'),
@@ -118,7 +119,7 @@ class GEvent(Event):
     calendar = models.ForeignKey(GCalendar, related_name='gevents')
     id_event = models.CharField(max_length=1024, help_text="Unique id per calendar")
     i_cal_uid = models.CharField(max_length=1024, help_text="Unique id across calendaring systems. Only 1 per recurring event")
-    color = models.CharField(max_length=10, choices=EVENT_COLORS)
+    color = models.CharField(max_length=10, blank=True, choices=EVENT_COLORS)
     description = models.TextField(max_length=20000, blank=True)
     status = models.CharField(max_length=50, default='confirmed', blank=True, choices=STATUS_CHOICES)
     transparency = models.CharField(max_length=50, default='opaque', blank=True, choices=TRANSPARENCY_CHOICES, help_text="Whether the event blocks time on the calendar.")
