@@ -230,6 +230,9 @@ class GoogleCredentials(models.Model):
                 profile = Profile.get_or_create(self.user)[0]
                 profile.authed = False
                 profile.save()
+                break
+            except Exception:
+                pass
 
         return None
 
