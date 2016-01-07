@@ -175,9 +175,18 @@ class GEvent(Event):
 
     # TODO handle all_day_event not being counted in time
     # TODO handle transparency being counted in time
-    # TODO on save, handle description length
-    # TODO on save, handle title length
     # TODO change default of title to google calendar default
+
+    def save(self, *args, **kwargs):
+        if self.name is None:
+            self.name = ""
+        self.name = self.name[:150]
+
+        if self.description is None:
+            self.description = ""
+        self.description = self.description[:20000]
+
+        super(GEvent, self).save(*args, **kwargs)
 
 
 class Statistic(models.Model):
