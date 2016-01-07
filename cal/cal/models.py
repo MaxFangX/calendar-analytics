@@ -125,7 +125,7 @@ class GCalendar(models.Model):
 
 class Event(models.Model):
 
-    name = models.CharField(max_length=150, default="(No name)", blank=True)
+    name = models.CharField(max_length=150, default="(No title)", blank=True)
     start = models.DateTimeField(help_text="When the event started. 12AM for all day events")
     end = models.DateTimeField(help_text="When the event ended. 12AM the next day for all day events")
     location = models.CharField(max_length=500, blank=True, help_text="Geographic location as free form text")
@@ -175,7 +175,6 @@ class GEvent(Event):
 
     # TODO handle all_day_event not being counted in time
     # TODO handle transparency being counted in time
-    # TODO change default of title to google calendar default
 
     def save(self, *args, **kwargs):
         if self.name is None:
