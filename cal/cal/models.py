@@ -1,8 +1,9 @@
 from apiclient.discovery import build
 from cal.constants import GOOGLE_CALENDAR_COLORS
+from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 from django.db import models
-from django.utils.dateparse import parse_datetime
+from django.utils.dateparse import parse_date, parse_datetime
 from jsonfield import JSONField
 from oauth2client.django_orm import CredentialsField, FlowField
 from oauth2client.client import AccessTokenRefreshError
@@ -76,8 +77,10 @@ class GCalendar(models.Model):
                         g.start = parse_datetime(event['start']['dateTime'])
                         g.end = parse_datetime(event['end']['dateTime'])
                     else:
-                        # TODO This is a date, convert it to a datetime
-                        pass
+                        # This is a date, convert it to a datetime starting/ending at midnight
+                        g.start = datetime.combine(parse_date(event['start']['date']), datetime.min.time())
+                        g.end = g.start + timedelta(days=1)
+                        g.all_day_event = True
                     g.location = event.get('location', '')
                     if event.get('created', None):
                         g.created = parse_datetime(event['created'])
@@ -96,9 +99,12 @@ class GCalendar(models.Model):
                     g.recurring_event_id = event.get('recurringEventId', '')
                     g.save()
 
-                else:
-                    # TODO delete the event
-                    pass
+                else:  # Status is cancelled, delete the event
+                    try:
+                        query = GEvent.objects.get(calendar=self, id_event=event['id'])
+                        query.delete()
+                    except GEvent.DoesNotExist:
+                        pass
 
         raise NotImplementedError()
 
