@@ -197,11 +197,9 @@ class GEvent(Event):
 class Statistic(models.Model):
 
     user = models.ForeignKey(User, related_name='statistics')
-    name = models.CharField(max_length=100)
-    display_name = models.CharField(max_length=100)
-    # TODO Include helpful help_text
-    start_time = models.DateTimeField(null=True)
-    end_time = models.DateTimeField(null=True)
+    name = models.CharField(max_length=100, help_text="The name of the statistic ")
+    start_time = models.DateTimeField(null=True, help_text="The starting point for this statistic")
+    end_time = models.DateTimeField(null=True, help_text="The ending point for this statistic")
 
     def query(self):
         qs = GEvent.objects.filter(user=self.user, name=self.name)
