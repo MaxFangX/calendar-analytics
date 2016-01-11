@@ -12,13 +12,18 @@
 {% endblock %}
 
 {% block content %}
-  <h1>Public homepage</h1>
+  <h1>CalendarAnalytics</h1>
+  <h3>If you use your calendar often, then you must have a decent timeline of how you spend your time.<br>Why not analyze it?</h3>
+  <p>Tip: If you fill in the gaps, your stats will be even more meaningful!</p>
+  <br>
+  <h4>Log in to see stats on how you've been spending your time:</h4>
   <button id="signinButton">Sign in with Google</button>
   <div id="result"></div>
 {% endblock %}
 
 {% block bottom_js %}
   {{ block.super }}
+  <!--BEGIN Sign in with Google-->
   <script>
     function signInCallback(authResult) {
       if (authResult['code'] && auth2.isSignedIn.get()) {
@@ -72,4 +77,5 @@
       auth2.grantOfflineAccess({'redirect_uri': 'postmessage'}).then(signInCallback);
     });
   </script>
+  <!--END Sign in with Google-->
 {% endblock %}
