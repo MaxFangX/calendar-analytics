@@ -12,13 +12,16 @@
 {% endblock %}
 
 {% block content %}
-  <h1>CalendarAnalytics</h1>
-  <h3>If you use your calendar often, then you must have a decent timeline of how you spend your time.<br>Why not analyze it?</h3>
-  <p>Tip: If you fill in the gaps, your stats will be even more meaningful!</p>
-  <br>
-  <h4>Log in to see stats on how you've been spending your time:</h4>
-  <button id="signinButton">Sign in with Google</button>
-  <div id="result"></div>
+  <div class="jumbotron main-display">
+    <h1>CalendarAnalytics</h1>
+    <h3>If you use your calendar often, then you must have a decent timeline of how you spend your time.<br>Why not analyze it?</h3>
+    <br><br>
+    <h4 class="call-to-action-text">Log in to see stats on how you've been spending your time:</h4>
+    <button id="signinButton" class="signin-button">Sign in with Google</button>
+    <div id="result"></div>
+    <!-- TODO Find a place to put this-->
+    <!--<p>Tip: If you fill in the gaps, your stats will be even more meaningful!</p>-->
+  </div>
 {% endblock %}
 
 {% block bottom_js %}
