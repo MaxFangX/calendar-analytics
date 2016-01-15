@@ -36,6 +36,9 @@ class Profile(models.Model):
             profile.save()
         return profile, created
 
+    def __str__(self):
+        return "{}'s profile".format(self.user)
+
 
 class UserCategory(models.Model):
 
@@ -54,6 +57,9 @@ class GCalendar(models.Model):
     user = models.ForeignKey(User, related_name='gcalendars')
     calendar_id = models.CharField(max_length=250)
     meta = JSONField(default="{}", blank=True)
+
+    def __str__(self):
+        return "{}'s calendar {}".format(self.user, self.calendar_id)
 
     def sync(self, full_sync=False):
         if full_sync:
