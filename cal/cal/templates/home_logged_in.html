@@ -1,6 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
+  <ul class="nav nav-tabs">
+    <li>
+      <a href="/">CalendarAnalytics</a>
+    </li>
+    <li class="pull-right">
+      <a href="/logout" onclick="signOut();">Log out</a>
+    </li>
+  </ul>
   <h1>Logged in homepage</h1>
 
   {% if request.user.profile.authed %}
@@ -10,7 +18,6 @@
   {% endif %}
 
   <br>
-  <a href="/logout" onclick="signOut();">Log out</a>
 
 {% endblock %}
 
