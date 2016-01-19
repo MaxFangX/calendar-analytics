@@ -9,13 +9,13 @@
       <a href="/logout" onclick="signOut();">Log out</a>
     </li>
   </ul>
-  <h1>Logged in homepage</h1>
-
-  {% if request.user.profile.authed %}
-    <h3>Stats and stuff - to be completed</h3>
-  {% else %}
-    <h3><a href="/auth/google">Connect Google Calendar</a></h3>
-  {% endif %}
+  <div class="jumbotron">
+    {% if request.user.profile.authed %}
+      <h1>Stats and stuff - to be completed</h1>
+    {% else %}
+      <h1><a href="/auth/google">Connect Google Calendar</a></h1>
+    {% endif %}
+  </div>
 
   <br>
 
