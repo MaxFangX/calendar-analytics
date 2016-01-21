@@ -29,9 +29,8 @@ def home(request):
 
 
 def logout_view(request):
-    context= RequestContext(request)
     logout(request)
-    return render_to_response(template_name='home_logged_out.html', context=context)
+    return HttpResponseRedirect("/")
 
 
 @login_required
