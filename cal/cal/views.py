@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, HttpResponseBadRequest
+from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseServerError
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.views.decorators.http import require_POST
@@ -90,6 +90,8 @@ def login_google(request):
         idinfo = client.verify_id_token(id_token, settings.GOOGLE_CALENDAR_API_CLIENT_ID)
     except crypt.AppIdentityError:
         return HttpResponseBadRequest("Invalid id_token.")
+    except Exception as e:
+        return HttpResponseServerError("Error: {}".format(e))
 
     try:
         user = User.objects.get(email=idinfo['email'])
