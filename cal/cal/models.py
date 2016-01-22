@@ -39,6 +39,13 @@ class Profile(models.Model):
     def __str__(self):
         return "{}'s profile".format(self.user)
 
+    def clear_credentials(self):
+        qs = GoogleCredentials.objects.filter(user=self.user)
+        if qs:
+            qs.last().delete()
+        self.authed = False
+        self.save()
+
 
 class UserCategory(models.Model):
 
