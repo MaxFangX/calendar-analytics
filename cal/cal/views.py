@@ -32,6 +32,15 @@ def logout_view(request):
     logout(request)
     return HttpResponseRedirect("/")
 
+@login_required
+def clear_auth(request):
+    """
+    Clears the credentials for the requesting user
+    """
+    if request.user:
+        profile, _ = Profile.get_or_create(user=request.user)
+        profile.clear_credentials()
+    return HttpResponseRedirect("/")
 
 @login_required
 def google_auth(request):

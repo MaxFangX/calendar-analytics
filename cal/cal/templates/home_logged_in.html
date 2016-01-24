@@ -11,12 +11,14 @@
   </ul>
   <div class="jumbotron">
     {% if request.user.profile.authed %}
-      <!--TODO buttont to clear credentials-->
       <h1>Stats and stuff - to be completed</h1>
     {% else %}
-      <h1><a href="/auth/google">Connect Google Calendar</a></h1>
+      <h3><a href="/auth/google">Connect Google Calendar</a></h3>
     {% endif %}
   </div>
+  {% if request.user.profile.authed %}
+    <button class="btn btn-primary pull-right"><a href="/auth/clear">Reset credentials</a></button>
+  {% endif %}
 
   <br>
 
