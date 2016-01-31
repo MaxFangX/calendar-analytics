@@ -81,7 +81,10 @@ class GCalendar(models.Model):
             for event in result['items']:
                 if event.get('status', 'confirmed') in ['confirmed', 'tentative']:
                     # Create or update the event
-                    g, _ = GEvent.objects.get_or_create(id_event=event['id'])
+                    try:
+                        g = GEvent.objects.get(id_event=event['id'])
+                    except GEvent.DoesNotExist:
+                        g = GEvent()
                     g.name = event.get('summary', '')
                     if event['start'].get('dateTime'):
                         # This is a date time
@@ -105,7 +108,9 @@ class GCalendar(models.Model):
                     g.status = event.get('status', 'confirmed')
                     g.transparency = event.get('transparency', 'opaque')
                     g.all_day_event = True if event['start'].get('date', None) else False
-                    g.end_timezone = event['start']['timeZone']
+                    if not g.all_day_event:
+                        # Some events don't have timezones
+                        g.end_timezone = event['start'].get('timeZone')
                     g.end_time_unspecified = event.get('endTimeUnspecified', False)
                     g.recurring_event_id = event.get('recurringEventId', '')
                     g.save()
@@ -117,7 +122,8 @@ class GCalendar(models.Model):
                     except GEvent.DoesNotExist:
                         pass
 
-        raise NotImplementedError()
+        else:
+            raise NotImplementedError()
 
     def update_meta(self):
         service = self.user.googlecredentials.get_service()
@@ -186,7 +192,7 @@ class GEvent(Event):
     transparency = models.CharField(max_length=50, default='opaque', blank=True, choices=TRANSPARENCY_CHOICES, help_text="Whether the event blocks time on the calendar.")
 
     all_day_event = models.BooleanField(default=False, blank=True)
-    end_timezone = models.CharField(max_length=200, blank=True, help_text="IANA Time Zone Database Name")
+    end_timezone = models.CharField(max_length=200, null=True, blank=True, help_text="IANA Time Zone Database Name")
     end_time_unspecified = models.BooleanField(default=False, help_text="If an end time is actually unspecified, since an end time is always specified for compatibility reasons")
     recurring_event_id = models.CharField(max_length=1024, blank=True, help_text="For an instance of a recurring event, the id of the recurring event to which this instance belongs")
 
