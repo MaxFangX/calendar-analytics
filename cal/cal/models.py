@@ -72,7 +72,9 @@ class GCalendar(models.Model):
         if full_sync:
             next_page_token = None
             result = None
-            service = self.user.googlecredentials.get_service()
+            creds = self.user.googlecredentials
+            service = creds.get_service()
+
             while True:
                 result = service.events().list(calendarId=self.calendar_id, pageToken=next_page_token).execute()
                 next_page_token = result.get('nextPageToken')
@@ -123,7 +125,9 @@ class GCalendar(models.Model):
                             pass
 
                 if not next_page_token:
-                    # We've reached the last page.
+                    # We've reached the last page. Store the sync token.
+                    creds.next_sync_token = result['nextSyncToken']
+                    creds.save()
                     break
 
         else:
