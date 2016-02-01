@@ -70,57 +70,61 @@ class GCalendar(models.Model):
 
     def sync(self, full_sync=False):
         if full_sync:
+            next_page_token = None
             result = None
-            try:
-                service = self.user.googlecredentials.get_service()
-                result = service.events().list(calendarId=self.calendar_id).execute()
-            except Exception as e:
-                raise ("Could not sync. Error: {}".format(e))
+            service = self.user.googlecredentials.get_service()
+            while True:
+                result = service.events().list(calendarId=self.calendar_id, pageToken=next_page_token).execute()
+                next_page_token = result.get('nextPageToken')
 
-            # Assume at this point it's a correctly formatted event
-            for event in result['items']:
-                if event.get('status', 'confirmed') in ['confirmed', 'tentative']:
-                    # Create or update the event
-                    try:
-                        g = GEvent.objects.get(id_event=event['id'])
-                    except GEvent.DoesNotExist:
-                        g = GEvent()
-                    g.name = event.get('summary', '')
-                    if event['start'].get('dateTime'):
-                        # This is a date time
-                        g.start = parse_datetime(event['start']['dateTime'])
-                        g.end = parse_datetime(event['end']['dateTime'])
-                    else:
-                        # This is a date, convert it to a datetime starting/ending at midnight
-                        g.start = datetime.combine(parse_date(event['start']['date']), datetime.min.time())
-                        g.end = g.start + timedelta(days=1)
-                        g.all_day_event = True
-                    g.location = event.get('location', '')
-                    if event.get('created', None):
-                        g.created = parse_datetime(event['created'])
-                        g.updated = parse_datetime(event['updated'])
+                # Assume at this point it's a correctly formatted event
+                for event in result['items']:
+                    if event.get('status', 'confirmed') in ['confirmed', 'tentative']:
+                        # Create or update the event
+                        try:
+                            g = GEvent.objects.get(id_event=event['id'])
+                        except GEvent.DoesNotExist:
+                            g = GEvent()
+                        g.name = event.get('summary', '')
+                        if event['start'].get('dateTime'):
+                            # This is a date time
+                            g.start = parse_datetime(event['start']['dateTime'])
+                            g.end = parse_datetime(event['end']['dateTime'])
+                        else:
+                            # This is a date, convert it to a datetime starting/ending at midnight
+                            g.start = datetime.combine(parse_date(event['start']['date']), datetime.min.time())
+                            g.end = g.start + timedelta(days=1)
+                            g.all_day_event = True
+                        g.location = event.get('location', '')
+                        if event.get('created', None):
+                            g.created = parse_datetime(event['created'])
+                            g.updated = parse_datetime(event['updated'])
 
-                    g.calendar = self
-                    g.id_event = event['id']
-                    g.i_cal_uid = event['iCalUID']
-                    g.color = event.get('colorId', '')
-                    g.description = event.get('description', '')
-                    g.status = event.get('status', 'confirmed')
-                    g.transparency = event.get('transparency', 'opaque')
-                    g.all_day_event = True if event['start'].get('date', None) else False
-                    if not g.all_day_event:
-                        # Some events don't have timezones
-                        g.end_timezone = event['start'].get('timeZone')
-                    g.end_time_unspecified = event.get('endTimeUnspecified', False)
-                    g.recurring_event_id = event.get('recurringEventId', '')
-                    g.save()
+                        g.calendar = self
+                        g.id_event = event['id']
+                        g.i_cal_uid = event['iCalUID']
+                        g.color = event.get('colorId', '')
+                        g.description = event.get('description', '')
+                        g.status = event.get('status', 'confirmed')
+                        g.transparency = event.get('transparency', 'opaque')
+                        g.all_day_event = True if event['start'].get('date', None) else False
+                        if not g.all_day_event:
+                            # Some events don't have timezones
+                            g.end_timezone = event['start'].get('timeZone')
+                        g.end_time_unspecified = event.get('endTimeUnspecified', False)
+                        g.recurring_event_id = event.get('recurringEventId', '')
+                        g.save()
 
-                else:  # Status is cancelled, delete the event
-                    try:
-                        query = GEvent.objects.get(calendar=self, id_event=event['id'])
-                        query.delete()
-                    except GEvent.DoesNotExist:
-                        pass
+                    else:  # Status is cancelled, delete the event
+                        try:
+                            query = GEvent.objects.get(calendar=self, id_event=event['id'])
+                            query.delete()
+                        except GEvent.DoesNotExist:
+                            pass
+
+                if not next_page_token:
+                    # We've reached the last page.
+                    break
 
         else:
             raise NotImplementedError()
