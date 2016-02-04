@@ -238,6 +238,17 @@ class GEvent(Event):
         super(GEvent, self).save(*args, **kwargs)
 
 
+    def conflicts_with(self, gevent):
+        """
+        Takes in another GEvent and returns True if the two events conflict, false otherwise.
+        """
+        # TODO incorporate this
+        return False if self.end <= gevent.start or self.start >= gevent.end else True
+
+    # TODO find conflicting events
+    # TODO find gaps between start and end time
+
+
 class Statistic(models.Model):
 
     user = models.ForeignKey(User, related_name='statistics')
