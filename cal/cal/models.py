@@ -151,6 +151,19 @@ class GCalendar(models.Model):
 
         print "Successfully synced calendar."
 
+    def find_gaps(self, start=None, end=None):
+        qs = GEvent.objects.filter(calendar=self)
+        if start:
+            qs = qs.filter(start__gte=start)
+        if end:
+            qs = qs.filter(end__lte=end)
+        qs.order_by('start')
+
+        # TODO data structure for tracking start/stop times
+        return qs
+
+    # TODO find conflicting events
+
 
     def update_meta(self):
         service = self.user.googlecredentials.get_service()
@@ -244,9 +257,6 @@ class GEvent(Event):
         """
         # TODO incorporate this
         return False if self.end <= gevent.start or self.start >= gevent.end else True
-
-    # TODO find conflicting events
-    # TODO find gaps between start and end time
 
 
 class Statistic(models.Model):
