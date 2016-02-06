@@ -159,7 +159,6 @@ class GCalendar(models.Model):
             qs = qs.filter(end__lte=end)
         qs.order_by('start')
 
-        # TODO data structure for tracking start/stop times
         return qs
 
     # TODO find conflicting events
