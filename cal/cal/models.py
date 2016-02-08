@@ -163,7 +163,6 @@ class GCalendar(models.Model):
 
     # TODO find conflicting events
 
-
     def update_meta(self):
         service = self.user.googlecredentials.get_service()
         try:

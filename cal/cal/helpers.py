@@ -16,7 +16,7 @@ class TimeNode:
         self.start = start
         self.end = end
 
-    def insert(timenode):
+    def insert(self, timenode):
         """
         Inserts a single TimeNode in O(n) time and returns the head node. Use sparingly
         """
@@ -37,6 +37,8 @@ class TimeNode:
                 return self
             return self
         elif timenode.end <= self.start:
+            if timenode.tail:
+                print "Warning! Overwriting timenode.tail"
             timenode.tail = self
             return timenode
         else:
