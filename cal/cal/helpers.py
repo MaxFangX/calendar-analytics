@@ -21,23 +21,30 @@ class TimeNode:
         Inserts a single TimeNode in O(n) time and returns the head node. Use sparingly
         """
 
-        if not self.start or self.end:
-            raise Exception("Missing start or end time")
-        if self.start > self.end:
-            raise Exception("Start time must be after end time")
+        # Basic sanity chex
+        if not self.start or self.end or self.start > self.end:
+            raise Exception("Base node missing start or end time, or start time > end time")
+        if not timenode.start or timenode.end or timenode.start > timenode.end:
+            raise Exception("Timenode missing start or end time, or start time > end time")
+        if timenode.tail:
+            print "Warning! Timenode to be inserted has a tail"
 
-        if not self.tail and timenode.start >= self.end:
-            self.tail = timenode
-            return self
-        elif self.tail and timenode.start >= self.end:
-            self.tail.insert(timenode)
+        if timenode.start >= self.end:
+            if not self.tail:
+                self.tail = timenode
+            else:
+                self.tail.insert(timenode)
+                return self
             return self
         elif timenode.end <= self.start:
             timenode.tail = self
             return timenode
-        elif timenode.end > self.start and timenode.start <= self.start or
-            timenode.start < self.end and timenode.end >= self.end or
-            timenode.start <= self.start and timenode.end >= self.end or
-            timenode.start >= self.start and timenode.end <= self.end:
+        else:
+            # Overwrite the current node
+            if not self.tail:
+                return timenode
+            else:
+                # Recurse; call insert on the current tail
+                return self.tail.insert(timenode)
             # TODO remove conflicting nodes
             raise Exception("Conflicting node")
