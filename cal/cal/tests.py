@@ -1,6 +1,7 @@
 from django.contrib.auth.models import User
 from django.test import TestCase
 from cal.models import GCalendar, GEvent, Statistic
+from cal.helpers import TimeNodeChain, TimeNode
 
 import datetime
 
@@ -58,5 +59,58 @@ class TimeTestCase(TestCase):
             self.d < self.e and self.e < self.f and self.f < self.g and self.g < self.h:
             print "Initialized times a-g"
 
-    def test_timenodes(self):
-        pass
+    def test_insert(self):
+
+        # Test proper initialization
+        ab = TimeNode(self.a, self.b, "ab")
+        self.assertEquals("ab", ab.event_id)
+        self.assertEquals(self.a, ab.start)
+        self.assertEquals(self.b, ab.end)
+        self.assertIsNone(ab.tail)
+        chain1 = TimeNodeChain()
+        self.assertIsNone(chain1.get_first())
+        chain2 = TimeNodeChain(ab)
+        self.assertEquals(ab, chain2.get_first())
+
+        # AB CD EF Insert at front
+        chain = TimeNodeChain()
+        ab = TimeNode(self.a, self.b, "ab")
+        cd = TimeNode(self.c, self.d, "cd")
+        ef = TimeNode(self.e, self.f, "ef")
+        chain.insert(ab)
+        chain.insert(cd)
+        chain.insert(ef)
+        first = chain.get_first()
+        self.assertEquals(cd, ab.tail)
+        self.assertEquals(ef, cd.tail)
+        self.assertEquals(ef, ab.tail.tail)
+        self.assertEquals(ef, first.tail.tail)
+        self.assertIsNone(ef.tail)
+        self.assertIsNone(cd.tail.tail)
+        self.assertIsNone(ab.tail.tail.tail)
+        self.assertIsNone(first.tail.tail.tail)
+
+        # EF CD AB (inserted backwards)
+        chain = TimeNodeChain()
+        ab = TimeNode(self.a, self.b, "ab")
+        cd = TimeNode(self.c, self.d, "cd")
+        ef = TimeNode(self.e, self.f, "ef")
+        chain.insert(ef)
+        chain.insert(cd)
+        chain.insert(ab)
+        first = chain.get_first()
+        self.assertEquals(cd, ab.tail)
+        self.assertEquals(ef, cd.tail)
+        self.assertEquals(ef, ab.tail.tail)
+        self.assertEquals(ef, first.tail.tail)
+        self.assertIsNone(ef.tail)
+        self.assertIsNone(cd.tail.tail)
+        self.assertIsNone(ab.tail.tail.tail)
+        self.assertIsNone(first.tail.tail.tail)
+
+        # TODO
+        # CD EF AB
+        # AB EF CD
+
+        # AB BC CD
+        # CD BC AB

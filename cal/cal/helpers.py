@@ -8,6 +8,28 @@ def json_response(data, status=200):
     return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), status=status, content_type="application/json")
 
 
+class TimeNodeChain:
+
+    """
+    A data structure that functions as a wrapper around a linked list of TimeNodes.
+    """
+
+    def __init__(self, node=None):
+        self.first = node
+
+    def get_first(self):
+        return self.first
+
+    def insert(self, timenode):
+        """
+        Wrapper function for TimeNode.insert, so that TimeNodeChain().insert(node) mutates the chain object
+        """
+        if self.first:
+            self.first = self.first.insert(timenode)
+        else:
+            self.first = timenode
+
+
 class TimeNode:
 
     def __init__(self, start, end, event_id=None):
