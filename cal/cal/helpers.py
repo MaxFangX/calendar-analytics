@@ -22,9 +22,9 @@ class TimeNode:
         """
 
         # Basic sanity chex
-        if not self.start or self.end or self.start > self.end:
+        if not self.start or not self.end or self.start > self.end:
             raise Exception("Base node missing start or end time, or start time > end time")
-        if not timenode.start or timenode.end or timenode.start > timenode.end:
+        if not timenode.start or not timenode.end or timenode.start > timenode.end:
             raise Exception("Timenode missing start or end time, or start time > end time")
         if timenode.tail:
             print "Warning! Timenode to be inserted has a tail"
