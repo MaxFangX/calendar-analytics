@@ -55,7 +55,7 @@ class TimeNode:
             if not self.tail:
                 self.tail = timenode
             else:
-                self.tail.insert(timenode)
+                self.tail = self.tail.insert(timenode)
                 return self
             return self
         elif timenode.end <= self.start:
