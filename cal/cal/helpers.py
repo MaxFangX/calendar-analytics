@@ -15,19 +15,19 @@ class TimeNodeChain:
     """
 
     def __init__(self, node=None):
-        self.first = node
+        self.head = node
 
-    def get_first(self):
-        return self.first
+    def get_head(self):
+        return self.head
 
     def insert(self, timenode):
         """
         Wrapper function for TimeNode.insert, so that TimeNodeChain().insert(node) mutates the chain object
         """
-        if self.first:
-            self.first = self.first.insert(timenode)
+        if self.head:
+            self.head = self.head.insert(timenode)
         else:
-            self.first = timenode
+            self.head = timenode
 
 
 class TimeNode:

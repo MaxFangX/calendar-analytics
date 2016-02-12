@@ -68,9 +68,9 @@ class TimeTestCase(TestCase):
         self.assertEquals(self.b, ab.end)
         self.assertIsNone(ab.tail)
         chain1 = TimeNodeChain()
-        self.assertIsNone(chain1.get_first())
+        self.assertIsNone(chain1.get_head())
         chain2 = TimeNodeChain(ab)
-        self.assertEquals(ab, chain2.get_first())
+        self.assertEquals(ab, chain2.get_head())
 
         def check_ordering(head, first, second, third):
             self.assertEquals(first, head)
@@ -91,7 +91,7 @@ class TimeTestCase(TestCase):
         chain.insert(ab)
         chain.insert(cd)
         chain.insert(ef)
-        head = chain.get_first()
+        head = chain.get_head()
         check_ordering(head, ab, cd, ef)
 
         # EF CD AB (inserted backwards)
@@ -102,7 +102,7 @@ class TimeTestCase(TestCase):
         chain.insert(ef)
         chain.insert(cd)
         chain.insert(ab)
-        head = chain.get_first()
+        head = chain.get_head()
         check_ordering(head, ab, cd, ef)
 
         # TODO
@@ -114,7 +114,7 @@ class TimeTestCase(TestCase):
         chain.insert(cd)
         chain.insert(ef)
         chain.insert(ab)
-        head = chain.get_first()
+        head = chain.get_head()
         check_ordering(head, ab, cd, ef)
 
         # AB EF CD (more mixed orderings)
@@ -125,7 +125,7 @@ class TimeTestCase(TestCase):
         chain.insert(ab)
         chain.insert(ef)
         chain.insert(cd)
-        head = chain.get_first()
+        head = chain.get_head()
         check_ordering(head, ab, cd, ef)
 
         # AB BC CD (exactly equal start/end times, out of order)
@@ -136,7 +136,7 @@ class TimeTestCase(TestCase):
         chain.insert(ab)
         chain.insert(bc)
         chain.insert(cd)
-        head = chain.get_first()
+        head = chain.get_head()
         check_ordering(head, ab, bc, cd)
 
         # AB CD BC (exactly equal start/end times, out of order)
@@ -147,7 +147,7 @@ class TimeTestCase(TestCase):
         chain.insert(ab)
         chain.insert(cd)
         chain.insert(bc)
-        head = chain.get_first()
+        head = chain.get_head()
         check_ordering(head, ab, bc, cd)
 
     def test_insert_with_overwrite(self):
