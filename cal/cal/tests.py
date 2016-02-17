@@ -105,7 +105,6 @@ class TimeTestCase(TestCase):
         head = chain.get_head()
         check_ordering(head, ab, cd, ef)
 
-        # TODO
         # CD EF AB (mixed ordering)
         chain = TimeNodeChain()
         ab = TimeNode(self.a, self.b, "ab")
@@ -151,5 +150,56 @@ class TimeTestCase(TestCase):
         check_ordering(head, ab, bc, cd)
 
     def test_insert_with_overwrite(self):
-        print "TESTS WITH OVERWRITE UNIMPLEMENTED"
-        pass
+
+        def check_ordering(head, first, second, third=None):
+            self.assertEquals(first, head)
+            self.assertEquals(second, first.tail)
+            self.assertEquals(third, second.tail)
+            self.assertEquals(third, first.tail.tail)
+            self.assertEquals(third, head.tail.tail)
+            if third:  # Sometimes we just want to check ordering of two events
+                self.assertIsNone(third.tail)
+                self.assertIsNone(second.tail.tail)
+                self.assertIsNone(first.tail.tail.tail)
+                self.assertIsNone(head.tail.tail.tail)
+
+        # AB1 CD EF + AB2 = AB2 CD EF
+        chain = TimeNodeChain()
+        ab = TimeNode(self.a, self.b, "ab")
+        cd = TimeNode(self.c, self.d, "cd")
+        ef = TimeNode(self.e, self.f, "ef")
+        ab1 = TimeNode(self.a, self.b, "ab")
+        chain.insert(ab)
+        chain.insert(cd)
+        chain.insert(ef)
+        chain.insert(ab1)
+        head = chain.get_head()
+        check_ordering(head, ab1, cd, ef)
+
+        # CD EF AB1 + AB2 = AB2 CD EF
+        chain = TimeNodeChain()
+        ab = TimeNode(self.a, self.b, "ab")
+        cd = TimeNode(self.c, self.d, "cd")
+        ef = TimeNode(self.e, self.f, "ef")
+        ab1 = TimeNode(self.a, self.b, "ab")
+        chain.insert(cd)
+        chain.insert(ef)
+        chain.insert(ab)
+        chain.insert(ab1)
+        head = chain.get_head()
+        check_ordering(head, ab1, cd, ef)
+
+        # AB CD EF + AD = AD EF
+        chain = TimeNodeChain()
+        ab = TimeNode(self.a, self.b, "ab")
+        cd = TimeNode(self.c, self.d, "cd")
+        ef = TimeNode(self.e, self.f, "ef")
+        ad = TimeNode(self.a, self.d, "ad")
+        chain.insert(ab)
+        chain.insert(cd)
+        chain.insert(ef)
+        chain.insert(ad)
+        head = chain.get_head()
+        check_ordering(head, ad, ef, None)
+
+        # TODO more tests

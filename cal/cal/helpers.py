@@ -70,5 +70,3 @@ class TimeNode:
             else:
                 # Recurse; call insert on the current tail
                 return self.tail.insert(timenode)
-            # TODO remove conflicting nodes
-            raise Exception("Conflicting node")
