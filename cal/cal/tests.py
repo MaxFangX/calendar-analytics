@@ -63,7 +63,7 @@ class TimeTestCase(TestCase):
 
         # Test proper initialization
         ab = TimeNode(self.a, self.b, "ab")
-        self.assertEquals("ab", ab.event_id)
+        self.assertEquals("ab", ab.id)
         self.assertEquals(self.a, ab.start)
         self.assertEquals(self.b, ab.end)
         self.assertIsNone(ab.tail)

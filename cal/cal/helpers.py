@@ -14,14 +14,25 @@ class TimeNodeChain:
     A data structure that functions as a wrapper around a linked list of TimeNodes.
     """
 
-    def __init__(self, node=None):
-        self.head = node
+    def __init__(self, timenodes=None, is_sorted=False):
+        """
+        Initializes a TimeNodeChain, and, if supplied, inserts a list or QuerySet of 
+        timenodes in an efficient manner.
+
+        ~O(n) if sorted by start time, else O(nlog(n))
+        """
+        self.head = None
+        if timenodes:
+            self.insert_all(timenodes, is_sorted)
+
 
     def get_head(self):
         return self.head
 
+    # TODO determine if this function is actually needed
     def insert(self, timenode):
         """
+        Inserts a single TimeNode in O(n) time.
         Wrapper function for TimeNode.insert, so that TimeNodeChain().insert(node) mutates the chain object
         """
         if self.head:
@@ -29,18 +40,36 @@ class TimeNodeChain:
         else:
             self.head = timenode
 
+    def insert_all(self, timenodes, is_sorted=False):
+        """
+        Inserts a list or QuerySet of timenodes in an efficient manner
+        ~O(n) if sorted by start time, else O(nlog(n))
+        """
+        if not is_sorted:
+            timenodes.sorted(key=lambda node: node.start)
+        
+        last = timenodes[0]
+        self.head = last
+
+        for i in range(1, len(timenodes)):
+            node = timenodes[i]
+            last.insert(node)
+            last = node
+
 
 class TimeNode:
+    # TODO make this two way
 
-    def __init__(self, start, end, event_id=None):
-        self.event_id = event_id
+    def __init__(self, start, end, id=None):
+        self.id = id
+        # TODO change this to head/tail
         self.tail = None
         self.start = start
         self.end = end
 
     def insert(self, timenode):
         """
-        Inserts a single TimeNode in O(n) time and returns the head node. Use sparingly
+        Inserts a single TimeNode in O(n) time and returns the head node.
         """
 
         # Basic sanity chex
