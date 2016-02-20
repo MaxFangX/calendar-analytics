@@ -66,22 +66,23 @@ class TimeTestCase(TestCase):
         self.assertEquals("ab", ab.id)
         self.assertEquals(self.a, ab.start)
         self.assertEquals(self.b, ab.end)
-        self.assertIsNone(ab.tail)
+        self.assertIsNone(ab.next)
         chain1 = TimeNodeChain()
         self.assertIsNone(chain1.get_head())
-        chain2 = TimeNodeChain(ab)
+        chain2 = TimeNodeChain()
+        chain2.insert(ab)
         self.assertEquals(ab, chain2.get_head())
 
         def check_ordering(head, first, second, third):
             self.assertEquals(first, head)
-            self.assertEquals(second, first.tail)
-            self.assertEquals(third, second.tail)
-            self.assertEquals(third, first.tail.tail)
-            self.assertEquals(third, head.tail.tail)
-            self.assertIsNone(third.tail)
-            self.assertIsNone(second.tail.tail)
-            self.assertIsNone(first.tail.tail.tail)
-            self.assertIsNone(head.tail.tail.tail)
+            self.assertEquals(second, first.next)
+            self.assertEquals(third, second.next)
+            self.assertEquals(third, first.next.next)
+            self.assertEquals(third, head.next.next)
+            self.assertIsNone(third.next)
+            self.assertIsNone(second.next.next)
+            self.assertIsNone(first.next.next.next)
+            self.assertIsNone(head.next.next.next)
 
         # AB CD EF Insert at front
         chain = TimeNodeChain()
@@ -153,15 +154,15 @@ class TimeTestCase(TestCase):
 
         def check_ordering(head, first, second, third=None):
             self.assertEquals(first, head)
-            self.assertEquals(second, first.tail)
-            self.assertEquals(third, second.tail)
-            self.assertEquals(third, first.tail.tail)
-            self.assertEquals(third, head.tail.tail)
+            self.assertEquals(second, first.next)
+            self.assertEquals(third, second.next)
+            self.assertEquals(third, first.next.next)
+            self.assertEquals(third, head.next.next)
             if third:  # Sometimes we just want to check ordering of two events
-                self.assertIsNone(third.tail)
-                self.assertIsNone(second.tail.tail)
-                self.assertIsNone(first.tail.tail.tail)
-                self.assertIsNone(head.tail.tail.tail)
+                self.assertIsNone(third.next)
+                self.assertIsNone(second.next.next)
+                self.assertIsNone(first.next.next.next)
+                self.assertIsNone(head.next.next.next)
 
         # AB1 CD EF + AB2 = AB2 CD EF
         chain = TimeNodeChain()

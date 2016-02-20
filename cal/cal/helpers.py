@@ -12,6 +12,9 @@ class TimeNodeChain:
 
     """
     A data structure that functions as a wrapper around a linked list of TimeNodes.
+    It represents how someone is spending their time at different events. And since
+    no one can be at two events at the same time, TimeNodes will overwrite any
+    conflicting TimeNodes on insert.
     """
 
     def __init__(self, timenodes=None, is_sorted=False):
@@ -62,8 +65,7 @@ class TimeNode:
 
     def __init__(self, start, end, id=None):
         self.id = id
-        # TODO change this to head/tail
-        self.tail = None
+        self.next = None
         self.start = start
         self.end = end
 
@@ -77,25 +79,25 @@ class TimeNode:
             raise Exception("Base node missing start or end time, or start time > end time")
         if not timenode.start or not timenode.end or timenode.start > timenode.end:
             raise Exception("Timenode missing start or end time, or start time > end time")
-        if timenode.tail:
-            print "Warning! Timenode to be inserted has a tail"
+        if timenode.next:
+            print "Warning! Timenode to be inserted has a next"
 
         if timenode.start >= self.end:
-            if not self.tail:
-                self.tail = timenode
+            if not self.next:
+                self.next = timenode
             else:
-                self.tail = self.tail.insert(timenode)
+                self.next = self.next.insert(timenode)
                 return self
             return self
         elif timenode.end <= self.start:
-            if timenode.tail:
-                print "Warning! Overwriting timenode.tail"
-            timenode.tail = self
+            if timenode.next:
+                print "Warning! Overwriting timenode.next"
+            timenode.next = self
             return timenode
         else:
             # Overwrite the current node
-            if not self.tail:
+            if not self.next:
                 return timenode
             else:
-                # Recurse; call insert on the current tail
-                return self.tail.insert(timenode)
+                # Recurse; call insert on the current next
+                return self.next.insert(timenode)
