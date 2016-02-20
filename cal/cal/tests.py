@@ -73,16 +73,18 @@ class TimeTestCase(TestCase):
         chain2.insert(ab)
         self.assertEquals(ab, chain2.get_head())
 
-        def check_ordering(head, first, second, third):
+        def check_ordering(head, first, second, third=None):
             self.assertEquals(first, head)
+            self.assertEquals(first, first.next.prev)
             self.assertEquals(second, first.next)
             self.assertEquals(third, second.next)
             self.assertEquals(third, first.next.next)
-            self.assertEquals(third, head.next.next)
-            self.assertIsNone(third.next)
-            self.assertIsNone(second.next.next)
-            self.assertIsNone(first.next.next.next)
-            self.assertIsNone(head.next.next.next)
+            if third:  # Sometimes we just want to check ordering of two events
+                self.assertIsNone(third.next)
+                self.assertIsNone(second.next.next)
+                self.assertIsNone(first.next.next.next)
+                self.assertEquals(first, first.next.next.prev.prev)
+                self.assertEquals(second, first.next.next.prev)
 
         # AB CD EF Insert at front
         chain = TimeNodeChain()
@@ -154,15 +156,16 @@ class TimeTestCase(TestCase):
 
         def check_ordering(head, first, second, third=None):
             self.assertEquals(first, head)
+            self.assertEquals(first, first.next.prev)
             self.assertEquals(second, first.next)
             self.assertEquals(third, second.next)
             self.assertEquals(third, first.next.next)
-            self.assertEquals(third, head.next.next)
             if third:  # Sometimes we just want to check ordering of two events
                 self.assertIsNone(third.next)
                 self.assertIsNone(second.next.next)
                 self.assertIsNone(first.next.next.next)
-                self.assertIsNone(head.next.next.next)
+                self.assertEquals(first, first.next.next.prev.prev)
+                self.assertEquals(second, first.next.next.prev)
 
         # AB1 CD EF + AB2 = AB2 CD EF
         chain = TimeNodeChain()
@@ -204,3 +207,5 @@ class TimeTestCase(TestCase):
         check_ordering(head, ad, ef, None)
 
         # TODO more tests
+
+    # TODO write tests for insert_all

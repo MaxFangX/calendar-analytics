@@ -61,10 +61,10 @@ class TimeNodeChain:
 
 
 class TimeNode:
-    # TODO make this two way
 
     def __init__(self, start, end, id=None):
         self.id = id
+        self.prev = None
         self.next = None
         self.start = start
         self.end = end
@@ -79,19 +79,26 @@ class TimeNode:
             raise Exception("Base node missing start or end time, or start time > end time")
         if not timenode.start or not timenode.end or timenode.start > timenode.end:
             raise Exception("Timenode missing start or end time, or start time > end time")
+        if timenode.prev:
+            print "Warning! Timenode to be inserted has a prev"
         if timenode.next:
             print "Warning! Timenode to be inserted has a next"
 
         if timenode.start >= self.end:
             if not self.next:
+                if timenode.prev:
+                    print "Warning! Overwriting timenode.prev"
                 self.next = timenode
+                timenode.prev = self
             else:
                 self.next = self.next.insert(timenode)
+                self.next.prev = self
                 return self
             return self
         elif timenode.end <= self.start:
             if timenode.next:
                 print "Warning! Overwriting timenode.next"
+            self.prev = timenode
             timenode.next = self
             return timenode
         else:
