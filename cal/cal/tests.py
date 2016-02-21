@@ -206,6 +206,76 @@ class TimeTestCase(TestCase):
         head = chain.get_head()
         check_ordering(head, ad, ef, None)
 
-        # TODO more tests
+        # AB CD EF + AD + DE = AD DE EF
+        chain = TimeNodeChain()
+        ab = TimeNode(self.a, self.b, "ab")
+        cd = TimeNode(self.c, self.d, "cd")
+        ef = TimeNode(self.e, self.f, "ef")
+        ad = TimeNode(self.a, self.d, "ad")
+        de = TimeNode(self.d, self.e, "de")
+        chain.insert(ab)
+        chain.insert(cd)
+        chain.insert(ef)
+        chain.insert(ad)
+        chain.insert(de)
+        head = chain.get_head()
+        check_ordering(head, ad, de, ef)
+
+        # AC DE EF + BD = BD DE EF
+        chain = TimeNodeChain()
+        ac = TimeNode(self.a, self.c, "ac")
+        de = TimeNode(self.d, self.e, "de")
+        ef = TimeNode(self.e, self.f, "ef")
+        bd = TimeNode(self.b, self.d, "bd")
+        chain.insert(ac)
+        chain.insert(de)
+        chain.insert(ef)
+        chain.insert(bd)
+        head = chain.get_head()
+        check_ordering(head, bd, de, ef)
+
+        # AC DE EF + BD + BE = BE EF
+        chain = TimeNodeChain()
+        ac = TimeNode(self.a, self.c, "ac")
+        de = TimeNode(self.d, self.e, "de")
+        ef = TimeNode(self.e, self.f, "ef")
+        bd = TimeNode(self.b, self.d, "bd")
+        be = TimeNode(self.b, self.e, "be")
+        chain.insert(ac)
+        chain.insert(de)
+        chain.insert(ef)
+        chain.insert(bd)
+        chain.insert(be)
+        head = chain.get_head()
+        check_ordering(head, be, ef, None)
+
+        # BE EF FG + EG = BE EG
+        chain = TimeNodeChain()
+        be = TimeNode(self.b, self.e, "be")
+        ef = TimeNode(self.e, self.f, "ef")
+        fg = TimeNode(self.f, self.g, "fg")
+        eg = TimeNode(self.e, self.g, "eg")
+        chain.insert(be)
+        chain.insert(ef)
+        chain.insert(fg)
+        chain.insert(eg)
+        head = chain.get_head()
+        check_ordering(head, be, eg, None)
+
+        # AB CD EF + GH + AG = AG GH
+        chain = TimeNodeChain()
+        ab = TimeNode(self.a, self.b, "ab")
+        cd = TimeNode(self.c, self.d, "cd")
+        ef = TimeNode(self.e, self.f, "ef")
+        gh = TimeNode(self.g, self.h, "gh")
+        ag = TimeNode(self.a, self.g, "ag")
+        chain.insert(ab)
+        chain.insert(cd)
+        chain.insert(ef)
+        chain.insert(gh)
+        chain.insert(ag)
+        head = chain.get_head()
+        check_ordering(head, ag, gh, None)
+
 
     # TODO write tests for insert_all
