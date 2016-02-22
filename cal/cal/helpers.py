@@ -39,7 +39,11 @@ class TimeNodeChain:
         Wrapper function for TimeNode.insert, so that TimeNodeChain().insert(node) mutates the chain object
         """
         if self.head:
-            self.head = self.head.insert(timenode)
+            current = self.head.insert(timenode)
+            while current.prev:
+                current = current.prev
+            self.head = current
+
         else:
             self.head = timenode
 
@@ -49,7 +53,7 @@ class TimeNodeChain:
         ~O(n) if sorted by start time, else O(nlog(n))
         """
         if not is_sorted:
-            timenodes.sorted(key=lambda node: node.start)
+            sorted(timenodes, key=lambda node: node.start)
         
         last = timenodes[0]
         self.head = last
@@ -71,7 +75,7 @@ class TimeNode:
 
     def insert(self, timenode):
         """
-        Inserts a single TimeNode in O(n) time and returns the head node.
+        Inserts a single TimeNode in O(n) time and returns the current node.
         """
 
         # Basic sanity chex
@@ -96,11 +100,15 @@ class TimeNode:
                 return self
             return self
         elif timenode.end <= self.start:
-            if timenode.next:
-                print "Warning! Overwriting timenode.next"
-            self.prev = timenode
-            timenode.next = self
-            return timenode
+            if not self.prev:
+                if timenode.next:
+                    print "Warning! Overwriting timenode.next"
+                self.prev = timenode
+                timenode.next = self
+            else:
+                self.prev = self.prev.insert(timenode)
+                self.prev.next = self
+            return self
         else:
             # Overwrite the current node
             if not self.next:

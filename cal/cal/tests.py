@@ -277,5 +277,85 @@ class TimeTestCase(TestCase):
         head = chain.get_head()
         check_ordering(head, ag, gh, None)
 
+    def test_insert_all(self):
 
-    # TODO write tests for insert_all
+        # Test proper initialization
+        ab = TimeNode(self.a, self.b, "ab")
+        self.assertEquals("ab", ab.id)
+        self.assertEquals(self.a, ab.start)
+        self.assertEquals(self.b, ab.end)
+        self.assertIsNone(ab.next)
+        chain1 = TimeNodeChain()
+        self.assertIsNone(chain1.get_head())
+        chain2 = TimeNodeChain()
+        chain2.insert(ab)
+        self.assertEquals(ab, chain2.get_head())
+
+        def check_ordering(head, first, second, third=None):
+            self.assertEquals(first, head)
+            self.assertEquals(first, first.next.prev)
+            self.assertEquals(second, first.next)
+            self.assertEquals(third, second.next)
+            self.assertEquals(third, first.next.next)
+            if third:  # Sometimes we just want to check ordering of two events
+                self.assertIsNone(third.next)
+                self.assertIsNone(second.next.next)
+                self.assertIsNone(first.next.next.next)
+                self.assertEquals(first, first.next.next.prev.prev)
+                self.assertEquals(second, first.next.next.prev)
+
+        # AB CD EF
+        chain = TimeNodeChain()
+        ab = TimeNode(self.a, self.b, "ab")
+        cd = TimeNode(self.c, self.d, "cd")
+        ef = TimeNode(self.e, self.f, "ef")
+        chain.insert_all([ab, cd, ef])
+        head = chain.get_head()
+        check_ordering(head, ab, cd, ef)
+
+        # EF CD AB (inserted backwards)
+        chain = TimeNodeChain()
+        ab = TimeNode(self.a, self.b, "ab")
+        cd = TimeNode(self.c, self.d, "cd")
+        ef = TimeNode(self.e, self.f, "ef")
+        chain.insert_all([ef, cd, ab])
+        head = chain.get_head()
+        check_ordering(head, ab, cd, ef)
+
+        # CD EF AB (mixed ordering)
+        chain = TimeNodeChain()
+        ab = TimeNode(self.a, self.b, "ab")
+        cd = TimeNode(self.c, self.d, "cd")
+        ef = TimeNode(self.e, self.f, "ef")
+        chain.insert_all([cd, ef, ab])
+        head = chain.get_head()
+        check_ordering(head, ab, cd, ef)
+
+        # AB EF CD (more mixed orderings)
+        chain = TimeNodeChain()
+        ab = TimeNode(self.a, self.b, "ab")
+        cd = TimeNode(self.c, self.d, "cd")
+        ef = TimeNode(self.e, self.f, "ef")
+        chain.insert_all([ab, ef, cd])
+        head = chain.get_head()
+        check_ordering(head, ab, cd, ef)
+
+        # AB BC CD (exactly equal start/end times, out of order)
+        chain = TimeNodeChain()
+        ab = TimeNode(self.a, self.b, "ab")
+        bc = TimeNode(self.c, self.d, "bc")
+        cd = TimeNode(self.e, self.f, "cd")
+        chain.insert_all([ab, bc, cd])
+        head = chain.get_head()
+        check_ordering(head, ab, bc, cd)
+
+        # AB CD BC (exactly equal start/end times, out of order)
+        chain = TimeNodeChain()
+        ab = TimeNode(self.a, self.b, "ab")
+        bc = TimeNode(self.c, self.d, "bc")
+        cd = TimeNode(self.e, self.f, "cd")
+        chain.insert_all([ab, cd, bc])
+        head = chain.get_head()
+        check_ordering(head, ab, bc, cd)
+
+    # TODO tests for insert_all with conflicts
