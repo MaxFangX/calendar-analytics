@@ -55,9 +55,8 @@ class TimeTestCase(TestCase):
         self.g = self.start + datetime.timedelta(hours=7)
         self.h = self.start + datetime.timedelta(hours=8)
 
-        if self.a < self.b and self.b < self.c and self.c < self.d and\
-            self.d < self.e and self.e < self.f and self.f < self.g and self.g < self.h:
-            print "Initialized times a-g"
+        assert self.a < self.b and self.b < self.c and self.c < self.d and\
+            self.d < self.e and self.e < self.f and self.f < self.g and self.g < self.h
 
     def test_insert(self):
 

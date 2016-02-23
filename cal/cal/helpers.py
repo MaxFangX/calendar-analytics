@@ -52,9 +52,12 @@ class TimeNodeChain:
         Inserts a list or QuerySet of timenodes in an efficient manner
         ~O(n) if sorted by start time, else O(nlog(n))
         """
+        if len(timenodes) == 0:
+            return
+
         if not is_sorted:
             sorted(timenodes, key=lambda node: node.start)
-        
+
         last = timenodes[0]
         self.head = last
 
@@ -62,6 +65,10 @@ class TimeNodeChain:
             node = timenodes[i]
             last.insert(node)
             last = node
+
+        while last.prev:
+            last = last.prev
+        self.head = last
 
 
 class TimeNode:
@@ -77,6 +84,7 @@ class TimeNode:
         """
         Inserts a single TimeNode in O(n) time and returns the current node.
         """
+        # TODO make this return the inserted node
 
         # Basic sanity chex
         if not self.start or not self.end or self.start > self.end:
@@ -89,30 +97,50 @@ class TimeNode:
             print "Warning! Timenode to be inserted has a next"
 
         if timenode.start >= self.end:
-            if not self.next:
+            if self.next:
+                # Handle the case of a "sandwiched" node
+                if self.next.start >= timenode.end:
+                    self.next.prev = timenode
+                    timenode.next = self.next
+                    self.next = timenode
+                    timenode.prev = self
+                else:
+                    self.next = self.next.insert(timenode)
+                    self.next.prev = self
+            else:
                 if timenode.prev:
                     print "Warning! Overwriting timenode.prev"
                 self.next = timenode
                 timenode.prev = self
-            else:
-                self.next = self.next.insert(timenode)
-                self.next.prev = self
-                return self
             return self
         elif timenode.end <= self.start:
-            if not self.prev:
+            if self.prev:
+                # Handle the case of a "sandwiched" node
+                if self.prev.end <= timenode.start:
+                    self.prev.next = timenode
+                    timenode.prev = self.prev
+                    self.prev = timenode
+                    timenode.next = self
+                else:
+                    self.prev = self.prev.insert(timenode)
+                    self.prev.next = self
+            else:
                 if timenode.next:
                     print "Warning! Overwriting timenode.next"
                 self.prev = timenode
                 timenode.next = self
-            else:
-                self.prev = self.prev.insert(timenode)
-                self.prev.next = self
             return self
         else:
-            # Overwrite the current node
-            if not self.next:
-                return timenode
-            else:
-                # Recurse; call insert on the current next
-                return self.next.insert(timenode)
+            # Remove the current node
+            if self.prev:
+                self.prev.next = self.next
+            if self.next:
+                self.next.prev = self.prev
+
+            # Recurse; call insert on an adjacent node or return self
+            if self.next:
+                self.next.insert(timenode)
+            elif self.prev:
+                self.prev.insert(timenode)
+            
+            return timenode
