@@ -357,4 +357,106 @@ class TimeTestCase(TestCase):
         head = chain.get_head()
         check_ordering(head, ab, bc, cd)
 
-    # TODO tests for insert_all with conflicts
+    def test_insert_all_with_overwrite(self):
+
+        def check_ordering(head, first, second, third=None):
+            self.assertEquals(first, head)
+            self.assertEquals(first, first.next.prev)
+            self.assertEquals(second, first.next)
+            self.assertEquals(third, second.next)
+            self.assertEquals(third, first.next.next)
+            if third:  # Sometimes we just want to check ordering of two events
+                self.assertIsNone(third.next)
+                self.assertIsNone(second.next.next)
+                self.assertIsNone(first.next.next.next)
+                self.assertEquals(first, first.next.next.prev.prev)
+                self.assertEquals(second, first.next.next.prev)
+
+        # AB1 CD EF + AB2 = AB2 CD EF
+        chain = TimeNodeChain()
+        ab = TimeNode(self.a, self.b, "ab")
+        cd = TimeNode(self.c, self.d, "cd")
+        ef = TimeNode(self.e, self.f, "ef")
+        ab1 = TimeNode(self.a, self.b, "ab")
+        chain.insert_all([ab, cd, ef, ab1])
+        head = chain.get_head()
+        check_ordering(head, ab1, cd, ef)
+
+        # CD EF AB1 + AB2 = AB2 CD EF
+        chain = TimeNodeChain()
+        ab = TimeNode(self.a, self.b, "ab")
+        cd = TimeNode(self.c, self.d, "cd")
+        ef = TimeNode(self.e, self.f, "ef")
+        ab1 = TimeNode(self.a, self.b, "ab")
+        chain.insert_all([cd, ef, ab, ab1])
+        head = chain.get_head()
+        check_ordering(head, ab1, cd, ef)
+
+        # AB CD EF + AD = AD EF
+        chain = TimeNodeChain()
+        ab = TimeNode(self.a, self.b, "ab")
+        cd = TimeNode(self.c, self.d, "cd")
+        ef = TimeNode(self.e, self.f, "ef")
+        ad = TimeNode(self.a, self.d, "ad")
+        chain.insert_all([ab, cd, ef, ad])
+        head = chain.get_head()
+        check_ordering(head, ad, ef, None)
+
+        # AB CD EF + AD + DE = AD DE EF
+        chain = TimeNodeChain()
+        ab = TimeNode(self.a, self.b, "ab")
+        cd = TimeNode(self.c, self.d, "cd")
+        ef = TimeNode(self.e, self.f, "ef")
+        ad = TimeNode(self.a, self.d, "ad")
+        de = TimeNode(self.d, self.e, "de")
+        chain.insert_all([ab, cd, ef, ad, de])
+        head = chain.get_head()
+        check_ordering(head, ad, de, ef)
+
+        # AC DE EF + BD = BD DE EF
+        chain = TimeNodeChain()
+        ac = TimeNode(self.a, self.c, "ac")
+        de = TimeNode(self.d, self.e, "de")
+        ef = TimeNode(self.e, self.f, "ef")
+        bd = TimeNode(self.b, self.d, "bd")
+        chain.insert_all([ac, de, ef, bd])
+        head = chain.get_head()
+        check_ordering(head, bd, de, ef)
+
+        # AC DE EF + BD + BE = BE EF
+        chain = TimeNodeChain()
+        ac = TimeNode(self.a, self.c, "ac")
+        de = TimeNode(self.d, self.e, "de")
+        ef = TimeNode(self.e, self.f, "ef")
+        bd = TimeNode(self.b, self.d, "bd")
+        be = TimeNode(self.b, self.e, "be")
+        chain.insert_all([ac, de, ef, bd, be])
+        head = chain.get_head()
+        check_ordering(head, be, ef, None)
+
+        # BE EF FG + EG = BE EG
+        chain = TimeNodeChain()
+        be = TimeNode(self.b, self.e, "be")
+        ef = TimeNode(self.e, self.f, "ef")
+        fg = TimeNode(self.f, self.g, "fg")
+        eg = TimeNode(self.e, self.g, "eg")
+        chain.insert_all([be, ef, fg, eg])
+        head = chain.get_head()
+        check_ordering(head, be, eg, None)
+
+        # AB CD EF + GH + AG = AG GH
+        chain = TimeNodeChain()
+        ab = TimeNode(self.a, self.b, "ab")
+        cd = TimeNode(self.c, self.d, "cd")
+        ef = TimeNode(self.e, self.f, "ef")
+        gh = TimeNode(self.g, self.h, "gh")
+        ag = TimeNode(self.a, self.g, "ag")
+        chain.insert_all([ab, cd, ef, gh, ag])
+        chain.insert(ab)
+        chain.insert(cd)
+        chain.insert(ef)
+        chain.insert(gh)
+        chain.insert(ag)
+        head = chain.get_head()
+        check_ordering(head, ag, gh, None)
+
