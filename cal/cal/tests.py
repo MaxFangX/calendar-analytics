@@ -58,6 +58,19 @@ class TimeTestCase(TestCase):
         assert self.a < self.b and self.b < self.c and self.c < self.d and\
             self.d < self.e and self.e < self.f and self.f < self.g and self.g < self.h
 
+    def check_ordering(self, head, first, second, third=None):
+        self.assertEquals(first, head)
+        self.assertEquals(first, first.next.prev)
+        self.assertEquals(second, first.next)
+        self.assertEquals(third, second.next)
+        self.assertEquals(third, first.next.next)
+        if third:  # Sometimes we just want to check ordering of two events
+            self.assertIsNone(third.next)
+            self.assertIsNone(second.next.next)
+            self.assertIsNone(first.next.next.next)
+            self.assertEquals(first, first.next.next.prev.prev)
+            self.assertEquals(second, first.next.next.prev)
+
     def test_insert(self):
 
         # Test proper initialization
@@ -72,19 +85,6 @@ class TimeTestCase(TestCase):
         chain2.insert(ab)
         self.assertEquals(ab, chain2.get_head())
 
-        def check_ordering(head, first, second, third=None):
-            self.assertEquals(first, head)
-            self.assertEquals(first, first.next.prev)
-            self.assertEquals(second, first.next)
-            self.assertEquals(third, second.next)
-            self.assertEquals(third, first.next.next)
-            if third:  # Sometimes we just want to check ordering of two events
-                self.assertIsNone(third.next)
-                self.assertIsNone(second.next.next)
-                self.assertIsNone(first.next.next.next)
-                self.assertEquals(first, first.next.next.prev.prev)
-                self.assertEquals(second, first.next.next.prev)
-
         # AB CD EF Insert at front
         chain = TimeNodeChain()
         ab = TimeNode(self.a, self.b, "ab")
@@ -94,7 +94,7 @@ class TimeTestCase(TestCase):
         chain.insert(cd)
         chain.insert(ef)
         head = chain.get_head()
-        check_ordering(head, ab, cd, ef)
+        self.check_ordering(head, ab, cd, ef)
 
         # EF CD AB (inserted backwards)
         chain = TimeNodeChain()
@@ -105,7 +105,7 @@ class TimeTestCase(TestCase):
         chain.insert(cd)
         chain.insert(ab)
         head = chain.get_head()
-        check_ordering(head, ab, cd, ef)
+        self.check_ordering(head, ab, cd, ef)
 
         # CD EF AB (mixed ordering)
         chain = TimeNodeChain()
@@ -116,7 +116,7 @@ class TimeTestCase(TestCase):
         chain.insert(ef)
         chain.insert(ab)
         head = chain.get_head()
-        check_ordering(head, ab, cd, ef)
+        self.check_ordering(head, ab, cd, ef)
 
         # AB EF CD (more mixed orderings)
         chain = TimeNodeChain()
@@ -127,7 +127,7 @@ class TimeTestCase(TestCase):
         chain.insert(ef)
         chain.insert(cd)
         head = chain.get_head()
-        check_ordering(head, ab, cd, ef)
+        self.check_ordering(head, ab, cd, ef)
 
         # AB BC CD (exactly equal start/end times, out of order)
         chain = TimeNodeChain()
@@ -138,7 +138,7 @@ class TimeTestCase(TestCase):
         chain.insert(bc)
         chain.insert(cd)
         head = chain.get_head()
-        check_ordering(head, ab, bc, cd)
+        self.check_ordering(head, ab, bc, cd)
 
         # AB CD BC (exactly equal start/end times, out of order)
         chain = TimeNodeChain()
@@ -149,22 +149,9 @@ class TimeTestCase(TestCase):
         chain.insert(cd)
         chain.insert(bc)
         head = chain.get_head()
-        check_ordering(head, ab, bc, cd)
+        self.check_ordering(head, ab, bc, cd)
 
     def test_insert_with_overwrite(self):
-
-        def check_ordering(head, first, second, third=None):
-            self.assertEquals(first, head)
-            self.assertEquals(first, first.next.prev)
-            self.assertEquals(second, first.next)
-            self.assertEquals(third, second.next)
-            self.assertEquals(third, first.next.next)
-            if third:  # Sometimes we just want to check ordering of two events
-                self.assertIsNone(third.next)
-                self.assertIsNone(second.next.next)
-                self.assertIsNone(first.next.next.next)
-                self.assertEquals(first, first.next.next.prev.prev)
-                self.assertEquals(second, first.next.next.prev)
 
         # AB1 CD EF + AB2 = AB2 CD EF
         chain = TimeNodeChain()
@@ -177,7 +164,7 @@ class TimeTestCase(TestCase):
         chain.insert(ef)
         chain.insert(ab1)
         head = chain.get_head()
-        check_ordering(head, ab1, cd, ef)
+        self.check_ordering(head, ab1, cd, ef)
 
         # CD EF AB1 + AB2 = AB2 CD EF
         chain = TimeNodeChain()
@@ -190,7 +177,7 @@ class TimeTestCase(TestCase):
         chain.insert(ab)
         chain.insert(ab1)
         head = chain.get_head()
-        check_ordering(head, ab1, cd, ef)
+        self.check_ordering(head, ab1, cd, ef)
 
         # AB CD EF + AD = AD EF
         chain = TimeNodeChain()
@@ -203,7 +190,7 @@ class TimeTestCase(TestCase):
         chain.insert(ef)
         chain.insert(ad)
         head = chain.get_head()
-        check_ordering(head, ad, ef, None)
+        self.check_ordering(head, ad, ef, None)
 
         # AB CD EF + AD + DE = AD DE EF
         chain = TimeNodeChain()
@@ -218,7 +205,7 @@ class TimeTestCase(TestCase):
         chain.insert(ad)
         chain.insert(de)
         head = chain.get_head()
-        check_ordering(head, ad, de, ef)
+        self.check_ordering(head, ad, de, ef)
 
         # AC DE EF + BD = BD DE EF
         chain = TimeNodeChain()
@@ -231,7 +218,7 @@ class TimeTestCase(TestCase):
         chain.insert(ef)
         chain.insert(bd)
         head = chain.get_head()
-        check_ordering(head, bd, de, ef)
+        self.check_ordering(head, bd, de, ef)
 
         # AC DE EF + BD + BE = BE EF
         chain = TimeNodeChain()
@@ -246,7 +233,7 @@ class TimeTestCase(TestCase):
         chain.insert(bd)
         chain.insert(be)
         head = chain.get_head()
-        check_ordering(head, be, ef, None)
+        self.check_ordering(head, be, ef, None)
 
         # BE EF FG + EG = BE EG
         chain = TimeNodeChain()
@@ -259,7 +246,7 @@ class TimeTestCase(TestCase):
         chain.insert(fg)
         chain.insert(eg)
         head = chain.get_head()
-        check_ordering(head, be, eg, None)
+        self.check_ordering(head, be, eg, None)
 
         # AB CD EF + GH + AG = AG GH
         chain = TimeNodeChain()
@@ -274,7 +261,7 @@ class TimeTestCase(TestCase):
         chain.insert(gh)
         chain.insert(ag)
         head = chain.get_head()
-        check_ordering(head, ag, gh, None)
+        self.check_ordering(head, ag, gh, None)
 
     def test_insert_all(self):
 
@@ -290,19 +277,6 @@ class TimeTestCase(TestCase):
         chain2.insert(ab)
         self.assertEquals(ab, chain2.get_head())
 
-        def check_ordering(head, first, second, third=None):
-            self.assertEquals(first, head)
-            self.assertEquals(first, first.next.prev)
-            self.assertEquals(second, first.next)
-            self.assertEquals(third, second.next)
-            self.assertEquals(third, first.next.next)
-            if third:  # Sometimes we just want to check ordering of two events
-                self.assertIsNone(third.next)
-                self.assertIsNone(second.next.next)
-                self.assertIsNone(first.next.next.next)
-                self.assertEquals(first, first.next.next.prev.prev)
-                self.assertEquals(second, first.next.next.prev)
-
         # AB CD EF
         chain = TimeNodeChain()
         ab = TimeNode(self.a, self.b, "ab")
@@ -310,7 +284,7 @@ class TimeTestCase(TestCase):
         ef = TimeNode(self.e, self.f, "ef")
         chain.insert_all([ab, cd, ef])
         head = chain.get_head()
-        check_ordering(head, ab, cd, ef)
+        self.check_ordering(head, ab, cd, ef)
 
         # EF CD AB (inserted backwards)
         chain = TimeNodeChain()
@@ -319,7 +293,7 @@ class TimeTestCase(TestCase):
         ef = TimeNode(self.e, self.f, "ef")
         chain.insert_all([ef, cd, ab])
         head = chain.get_head()
-        check_ordering(head, ab, cd, ef)
+        self.check_ordering(head, ab, cd, ef)
 
         # CD EF AB (mixed ordering)
         chain = TimeNodeChain()
@@ -328,7 +302,7 @@ class TimeTestCase(TestCase):
         ef = TimeNode(self.e, self.f, "ef")
         chain.insert_all([cd, ef, ab])
         head = chain.get_head()
-        check_ordering(head, ab, cd, ef)
+        self.check_ordering(head, ab, cd, ef)
 
         # AB EF CD (more mixed orderings)
         chain = TimeNodeChain()
@@ -337,7 +311,7 @@ class TimeTestCase(TestCase):
         ef = TimeNode(self.e, self.f, "ef")
         chain.insert_all([ab, ef, cd])
         head = chain.get_head()
-        check_ordering(head, ab, cd, ef)
+        self.check_ordering(head, ab, cd, ef)
 
         # AB BC CD (exactly equal start/end times, out of order)
         chain = TimeNodeChain()
@@ -346,7 +320,7 @@ class TimeTestCase(TestCase):
         cd = TimeNode(self.e, self.f, "cd")
         chain.insert_all([ab, bc, cd])
         head = chain.get_head()
-        check_ordering(head, ab, bc, cd)
+        self.check_ordering(head, ab, bc, cd)
 
         # AB CD BC (exactly equal start/end times, out of order)
         chain = TimeNodeChain()
@@ -355,22 +329,9 @@ class TimeTestCase(TestCase):
         cd = TimeNode(self.e, self.f, "cd")
         chain.insert_all([ab, cd, bc])
         head = chain.get_head()
-        check_ordering(head, ab, bc, cd)
+        self.check_ordering(head, ab, bc, cd)
 
     def test_insert_all_with_overwrite(self):
-
-        def check_ordering(head, first, second, third=None):
-            self.assertEquals(first, head)
-            self.assertEquals(first, first.next.prev)
-            self.assertEquals(second, first.next)
-            self.assertEquals(third, second.next)
-            self.assertEquals(third, first.next.next)
-            if third:  # Sometimes we just want to check ordering of two events
-                self.assertIsNone(third.next)
-                self.assertIsNone(second.next.next)
-                self.assertIsNone(first.next.next.next)
-                self.assertEquals(first, first.next.next.prev.prev)
-                self.assertEquals(second, first.next.next.prev)
 
         # AB1 CD EF + AB2 = AB2 CD EF
         chain = TimeNodeChain()
@@ -380,7 +341,7 @@ class TimeTestCase(TestCase):
         ab1 = TimeNode(self.a, self.b, "ab")
         chain.insert_all([ab, cd, ef, ab1])
         head = chain.get_head()
-        check_ordering(head, ab1, cd, ef)
+        self.check_ordering(head, ab1, cd, ef)
 
         # CD EF AB1 + AB2 = AB2 CD EF
         chain = TimeNodeChain()
@@ -390,7 +351,7 @@ class TimeTestCase(TestCase):
         ab1 = TimeNode(self.a, self.b, "ab")
         chain.insert_all([cd, ef, ab, ab1])
         head = chain.get_head()
-        check_ordering(head, ab1, cd, ef)
+        self.check_ordering(head, ab1, cd, ef)
 
         # AB CD EF + AD = AD EF
         chain = TimeNodeChain()
@@ -400,7 +361,7 @@ class TimeTestCase(TestCase):
         ad = TimeNode(self.a, self.d, "ad")
         chain.insert_all([ab, cd, ef, ad])
         head = chain.get_head()
-        check_ordering(head, ad, ef, None)
+        self.check_ordering(head, ad, ef, None)
 
         # AB CD EF + AD + DE = AD DE EF
         chain = TimeNodeChain()
@@ -411,7 +372,7 @@ class TimeTestCase(TestCase):
         de = TimeNode(self.d, self.e, "de")
         chain.insert_all([ab, cd, ef, ad, de])
         head = chain.get_head()
-        check_ordering(head, ad, de, ef)
+        self.check_ordering(head, ad, de, ef)
 
         # AC DE EF + BD = BD DE EF
         chain = TimeNodeChain()
@@ -421,7 +382,7 @@ class TimeTestCase(TestCase):
         bd = TimeNode(self.b, self.d, "bd")
         chain.insert_all([ac, de, ef, bd])
         head = chain.get_head()
-        check_ordering(head, bd, de, ef)
+        self.check_ordering(head, bd, de, ef)
 
         # AC DE EF + BD + BE = BE EF
         chain = TimeNodeChain()
@@ -432,7 +393,7 @@ class TimeTestCase(TestCase):
         be = TimeNode(self.b, self.e, "be")
         chain.insert_all([ac, de, ef, bd, be])
         head = chain.get_head()
-        check_ordering(head, be, ef, None)
+        self.check_ordering(head, be, ef, None)
 
         # BE EF FG + EG = BE EG
         chain = TimeNodeChain()
@@ -442,7 +403,7 @@ class TimeTestCase(TestCase):
         eg = TimeNode(self.e, self.g, "eg")
         chain.insert_all([be, ef, fg, eg])
         head = chain.get_head()
-        check_ordering(head, be, eg, None)
+        self.check_ordering(head, be, eg, None)
 
         # AB CD EF + GH + AG = AG GH
         chain = TimeNodeChain()
@@ -458,5 +419,5 @@ class TimeTestCase(TestCase):
         chain.insert(gh)
         chain.insert(ag)
         head = chain.get_head()
-        check_ordering(head, ag, gh, None)
+        self.check_ordering(head, ag, gh, None)
 

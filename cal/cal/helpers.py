@@ -17,22 +17,18 @@ class TimeNodeChain:
     conflicting TimeNodes on insert.
     """
 
-    def __init__(self, timenodes=None, is_sorted=False):
+    def __init__(self, timenodes=None):
         """
-        Initializes a TimeNodeChain, and, if supplied, inserts a list or QuerySet of 
-        timenodes in an efficient manner.
-
-        ~O(n) if sorted by start time, else O(nlog(n))
+        Initializes a TimeNodeChain, and, if supplied, inserts an iterable of timenodes.
         """
         self.head = None
         if timenodes:
-            self.insert_all(timenodes, is_sorted)
+            self.insert_all(timenodes)
 
 
     def get_head(self):
         return self.head
 
-    # TODO determine if this function is actually needed
     def insert(self, timenode):
         """
         Inserts a single TimeNode in O(n) time.
@@ -47,16 +43,11 @@ class TimeNodeChain:
         else:
             self.head = timenode
 
-    def insert_all(self, timenodes, is_sorted=False):
+    def insert_all(self, timenodes):
         """
-        Inserts a list or QuerySet of timenodes in an efficient manner
-        ~O(n) if sorted by start time, else O(nlog(n))
+        Inserts an iterable of TimeNodes (list, QuerySet)
+        If the list is ordered by start time, this operation will take roughly O(n)
         """
-        if len(timenodes) == 0:
-            return
-
-        if not is_sorted:
-            sorted(timenodes, key=lambda node: node.start)
 
         last = timenodes[0]
         self.head = last
@@ -70,8 +61,20 @@ class TimeNodeChain:
             last = last.prev
         self.head = last
 
+    def get_inverse(self):
+        """
+        Returns a TimeNodeChain representing the gaps between TimeNodes
+        """
+        # TODO implement.
+        # TODO come up with a logical scheme for generating ids
+        # TODO use this somewhere to encourage completeness
+        pass
+
 
 class TimeNode:
+    """
+    Class representing a block of time.
+    """
 
     def __init__(self, start, end, id=None):
         self.id = id
