@@ -1,5 +1,6 @@
 from apiclient.discovery import build
 from cal.constants import GOOGLE_CALENDAR_COLORS
+from cal.helpers import TimeNode
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 from django.db import models
@@ -161,7 +162,14 @@ class GCalendar(models.Model):
 
         return qs
 
-    # TODO find conflicting events
+    def time_log(self):
+        """
+        Forms a TimeNodeChain based off events in this Calendar
+        """
+        events = GEvent.objects.filter(calendar=self).order_by('updated')
+        print events
+        # TODO implement
+    
 
     def update_meta(self):
         service = self.user.googlecredentials.get_service()
@@ -184,7 +192,7 @@ class GCalendar(models.Model):
         self.meta = result
         self.save()
 
-class Event(models.Model):
+class Event(models.Model, TimeNode):
 
     name = models.CharField(max_length=150, default="(No title)", blank=True)
     start = models.DateTimeField(help_text="When the event started. 12AM for all day events")
@@ -195,6 +203,13 @@ class Event(models.Model):
 
     class Meta:
         abstract = True
+    
+    def __init__(self, *args, **kwargs):
+
+        TimeNode.__init__(self, start=kwargs.get('start'), end=kwargs.get('end'), id=kwargs.get('id'))
+
+        super(Event, self).__init__(*args, **kwargs)
+
 
 
 class GEvent(Event):
