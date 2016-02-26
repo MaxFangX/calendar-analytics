@@ -1,6 +1,6 @@
 from apiclient.discovery import build
 from cal.constants import GOOGLE_CALENDAR_COLORS
-from cal.helpers import TimeNode
+from cal.helpers import TimeNode, TimeNodeChain
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 from django.db import models
@@ -166,10 +166,7 @@ class GCalendar(models.Model):
         """
         Forms a TimeNodeChain based off events in this Calendar
         """
-        events = GEvent.objects.filter(calendar=self).order_by('updated')
-        print events
-        # TODO implement
-    
+        return TimeNodeChain(GEvent.objects.filter(calendar=self).order_by('updated'))
 
     def update_meta(self):
         service = self.user.googlecredentials.get_service()
