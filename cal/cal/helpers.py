@@ -48,9 +48,16 @@ class TimeNodeChain:
         Inserts an iterable of TimeNodes (list, QuerySet)
         If the list is ordered by start time, this operation will take roughly O(n)
         """
+        if len(timenodes) == 0:
+            return
 
-        last = timenodes[0]
-        self.head = last
+        # Add the first node to avoid erroring on None.insert
+        if self.head:
+            last = self.head
+            last.insert(timenodes[0])
+        else:
+            self.head = timenodes[0]
+            last = self.head
 
         for i in range(1, len(timenodes)):
             node = timenodes[i]
@@ -95,9 +102,9 @@ class TimeNode:
         if not timenode.start or not timenode.end or timenode.start > timenode.end:
             raise Exception("Timenode missing start or end time, or start time > end time")
         if timenode.prev:
-            print "Warning! Timenode to be inserted has a prev"
+            print "Warning! Timenode '{}' to be inserted has a prev".format(timenode.id)
         if timenode.next:
-            print "Warning! Timenode to be inserted has a next"
+            print "Warning! Timenode '{}' to be inserted has a next".format(timenode.id)
 
         if timenode.start >= self.end:
             if self.next:
@@ -129,7 +136,7 @@ class TimeNode:
                     self.prev.next = self
             else:
                 if timenode.next:
-                    print "Warning! Overwriting timenode.next"
+                    print "Warning! Overwriting timenode.next of timenode '{}'".format(timenode.id)
                 self.prev = timenode
                 timenode.next = self
             return self

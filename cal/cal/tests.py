@@ -413,11 +413,5 @@ class TimeTestCase(TestCase):
         gh = TimeNode(self.g, self.h, "gh")
         ag = TimeNode(self.a, self.g, "ag")
         chain.insert_all([ab, cd, ef, gh, ag])
-        chain.insert(ab)
-        chain.insert(cd)
-        chain.insert(ef)
-        chain.insert(gh)
-        chain.insert(ag)
         head = chain.get_head()
         self.check_ordering(head, ag, gh, None)
-
