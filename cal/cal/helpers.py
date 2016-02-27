@@ -72,10 +72,23 @@ class TimeNodeChain:
         """
         Returns a TimeNodeChain representing the gaps between TimeNodes
         """
-        # TODO implement.
-        # TODO come up with a logical scheme for generating ids
         # TODO use this somewhere to encourage completeness
-        pass
+        if not self.head:
+            return None
+
+        inverse = []
+        current = self.head
+        while current.next:
+            if current.end == current.next.start:
+                continue
+
+            inverse.append(TimeNode(current.end, current.next.start, "GAP: {}--{}".
+                format(current.id, current.next.id)))
+            current = current.next
+
+        chain = TimeNodeChain()
+        chain.insert_all(inverse)
+        return chain
 
 
 class TimeNode:
