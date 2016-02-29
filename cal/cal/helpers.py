@@ -119,6 +119,67 @@ class TimeNode:
         if timenode.next:
             print "Warning! Timenode '{}' to be inserted has a next".format(timenode.id)
 
+        # Go right
+        current = self
+        while timenode.start < current.end and current.next:
+            current = current.next
+
+        if timenode.start < current.end:  # Overwrite the current node
+            if current.prev:
+                current.prev.next = timenode
+                timenode.prev = current.prev
+                return timenode
+            else:
+                return timenode
+        # TODO
+        
+        if not current.next:  # Easiest case - the current node is the last node
+            if timenode.start >= current.end:
+                if timenode.prev:
+                    print "Warning! Overwriting timenode.prev"
+                current.next = timenode
+                timenode.prev = current
+                return timenode
+            else:
+                # Conflicts with the current node; replace the current
+                current.prev.next = timenode
+                timenode.prev = current.prev
+                return timenode
+        else:  # Harder case - the current node is not the last node
+            if timenode.start >= current.end:
+                if current.next.start >= timenode.end:
+                    current.next.prev = timenode
+                    timenode.next = current.next
+                    current.next = timenode
+                    timenode.prev = current
+                    return timenode
+                else:
+                    # Conflicts with current.next
+                    after = current.next
+                    while after.start < timenode.end:
+                        if not after.next:
+                            current.next = timenode
+                            timenode.prev = current
+                            return timenode
+                        after = after.next
+                    
+
+    def old_insert(self, timenode):
+        """
+        Inserts a single TimeNode in O(n) time and returns the current node.
+        """
+        # TODO make this return the inserted node
+
+        # Basic sanity chex
+        if not self.start or not self.end or self.start > self.end:
+            raise Exception("Base node missing start or end time, or start time > end time")
+        if not timenode.start or not timenode.end or timenode.start > timenode.end:
+            raise Exception("Timenode missing start or end time, or start time > end time")
+        if timenode.prev:
+            print "Warning! Timenode '{}' to be inserted has a prev".format(timenode.id)
+        if timenode.next:
+            print "Warning! Timenode '{}' to be inserted has a next".format(timenode.id)
+
         if timenode.start >= self.end:
             if self.next:
                 # Handle the case of a "sandwiched" node
