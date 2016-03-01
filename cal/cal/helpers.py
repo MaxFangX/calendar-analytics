@@ -107,63 +107,70 @@ class TimeNode:
         """
         Inserts a single TimeNode in O(n) time and returns the current node.
         """
-        # TODO make this return the inserted node
 
         # Basic sanity chex
-        if not self.start or not self.end or self.start > self.end:
-            raise Exception("Base node missing start or end time, or start time > end time")
-        if not timenode.start or not timenode.end or timenode.start > timenode.end:
-            raise Exception("Timenode missing start or end time, or start time > end time")
         if timenode.prev:
             print "Warning! Timenode '{}' to be inserted has a prev".format(timenode.id)
         if timenode.next:
             print "Warning! Timenode '{}' to be inserted has a next".format(timenode.id)
+        if not timenode.start or not timenode.end or timenode.start > timenode.end:
+            raise Exception("Timenode missing start or end time, or start time > end time")
 
-        # Go right
-        current = self
-        while timenode.start < current.end and current.next:
-            current = current.next
-
-        if timenode.start < current.end:  # Overwrite the current node
-            if current.prev:
-                current.prev.next = timenode
-                timenode.prev = current.prev
-                return timenode
-            else:
-                return timenode
-        # TODO
-        
-        if not current.next:  # Easiest case - the current node is the last node
-            if timenode.start >= current.end:
-                if timenode.prev:
-                    print "Warning! Overwriting timenode.prev"
-                current.next = timenode
-                timenode.prev = current
-                return timenode
-            else:
-                # Conflicts with the current node; replace the current
-                current.prev.next = timenode
-                timenode.prev = current.prev
-                return timenode
-        else:  # Harder case - the current node is not the last node
-            if timenode.start >= current.end:
-                if current.next.start >= timenode.end:
-                    current.next.prev = timenode
-                    timenode.next = current.next
-                    current.next = timenode
-                    timenode.prev = current
-                    return timenode
+        def try_insert(node):
+            if not node.start or not node.end or node.start > node.end:
+                raise Exception("Base node missing start or end time, or start time > end time")
+            if timenode.start >= node.end:
+                if node.next:
+                    # Handle the case of a "sandwiched" node
+                    if node.next.start >= timenode.end:
+                        node.next.prev = timenode
+                        timenode.next = node.next
+                        node.next = timenode
+                        timenode.prev = node
+                    else:
+                        return False, node.next
                 else:
-                    # Conflicts with current.next
-                    after = current.next
-                    while after.start < timenode.end:
-                        if not after.next:
-                            current.next = timenode
-                            timenode.prev = current
-                            return timenode
-                        after = after.next
-                    
+                    if timenode.prev:
+                        print "Warning! Overwriting timenode.prev"
+                    node.next = timenode
+                    timenode.prev = node
+                return True, None
+            elif timenode.end <= node.start:
+                if node.prev:
+                    # Handle the case of a "sandwiched" node
+                    if node.prev.end <= timenode.start:
+                        node.prev.next = timenode
+                        timenode.prev = node.prev
+                        node.prev = timenode
+                        timenode.next = node
+                    else:
+                        return False, node.prev
+                else:
+                    if timenode.next:
+                        print "Warning! Overwriting timenode.next of timenode '{}'".format(timenode.id)
+                    node.prev = timenode
+                    timenode.next = node
+                return True, None
+            else:
+                # Remove the current node
+                if node.prev:
+                    node.prev.next = node.next
+                if node.next:
+                    node.next.prev = node.prev
+                # Recurse; call insert on an adjacent node or return node
+                if node.next:
+                    return False, node.next
+                elif node.prev:
+                    return False, node.prev
+                return True, None
 
+        inserted = None
+        next_node = self
+        while not inserted:
+            inserted, next_node = try_insert(next_node)
+
+        return timenode
+                    
     def old_insert(self, timenode):
         """
         Inserts a single TimeNode in O(n) time and returns the current node.
