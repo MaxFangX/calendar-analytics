@@ -22,12 +22,22 @@ class TimeNodeChain:
         Initializes a TimeNodeChain, and, if supplied, inserts an iterable of timenodes.
         """
         self.head = None
+        self.length = None
         if timenodes:
             self.insert_all(timenodes)
-
+        self.get_length()
 
     def get_head(self):
         return self.head
+
+    def get_length(self):
+        if not self.length:
+            current = self.get_head()
+            self.length = 0
+            while current:
+                self.length += 1
+                current = current.next
+        return self.length
 
     def insert(self, timenode):
         """
@@ -42,6 +52,8 @@ class TimeNodeChain:
 
         else:
             self.head = timenode
+
+        self.length = None
 
     def insert_all(self, timenodes):
         """
@@ -67,6 +79,8 @@ class TimeNodeChain:
         while last.prev:
             last = last.prev
         self.head = last
+
+        self.get_length()
 
     def get_inverse(self):
         """
