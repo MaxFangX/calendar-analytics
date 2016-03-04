@@ -249,6 +249,9 @@ class GEvent(Event):
     # TODO handle all_day_event not being counted in time
     # TODO handle transparency being counted in time
 
+    def __str__(self):
+        return "{} | {}".format(self.id, self.name)
+
     def save(self, *args, **kwargs):
         if self.name is None:
             self.name = ""

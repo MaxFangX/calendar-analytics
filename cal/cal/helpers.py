@@ -92,7 +92,14 @@ class TimeNodeChain:
 
         inverse = []
         current = self.head
-        while current.next:
+        seen = set()
+        while current.next and current.id not in seen:
+            if current.next.next and current.next.next.next:
+                print 'current: {}, next: {}, nextnext: {}, nextnextnext: {}'.format(current.id,
+                        current.next.id, current.next.next.id, current.next.next.next.id)
+
+            seen.add(current.id)
+            
             if current.end == current.next.start:
                 continue
 
@@ -103,6 +110,19 @@ class TimeNodeChain:
         chain = TimeNodeChain()
         chain.insert_all(inverse)
         return chain
+    
+    def __str__(self):
+        if not self.head:
+            return "<Empty TimeNodeChain>"
+        else:
+            current = self.head
+            counter = 0
+            result = ""
+            while current.next and counter < 10:
+                result += "<{}>".format(current.id)
+                current = current.next
+                counter += 1
+            return result
 
 
 class TimeNode:
