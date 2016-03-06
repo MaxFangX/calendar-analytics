@@ -42,7 +42,7 @@ class TimeNodeChain:
 
     def insert(self, timenode):
         """
-        Inserts a single TimeNode in O(n) time.
+        Inserts a single TimeNode in O(n) time and returns the inserted node
         Wrapper function for TimeNode.insert, so that TimeNodeChain().insert(node) mutates the chain object
         """
         if self.head:
@@ -55,6 +55,8 @@ class TimeNodeChain:
             self.head = timenode
 
         self._length = None
+
+        return timenode
 
     def insert_all(self, timenodes):
         """
@@ -86,6 +88,9 @@ class TimeNodeChain:
     def get_inverse(self):
         """
         Returns a TimeNodeChain representing the gaps between TimeNodes
+
+        Example: If a TimeNode chain has nodes 1-2, 3-4, 5-6, 6-9,
+        get_inverse() returns a chain with nodes 2-3, 4-5
         """
         # TODO use this somewhere to encourage completeness
         if not self.head:
@@ -95,9 +100,12 @@ class TimeNodeChain:
         chain = TimeNodeChain()
         last = None
         while current.next:
-            if current.end >= current.next.start:
+            if current.end == current.next.start:
                 current = current.next
                 continue
+            elif current.end > current.next.start:
+                raise Exception("Inconsistent start and end times between TimeNodes {} and {}".
+                        format(current.id, current.next.id))
 
             node = TimeNode(current.end, current.next.start, "GAP: {}--{}".format(current.id, current.next.id))
             if last:
