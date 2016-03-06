@@ -48,9 +48,9 @@ class Profile(models.Model):
         self.save()
 
 
-class UserCategory(models.Model):
+class ColorCategory(models.Model):
 
-    user = models.ForeignKey(User, related_name='usercategories')
+    user = models.ForeignKey(User, related_name='colorcategories')
     color = models.CharField(max_length=100)
     label = models.CharField(max_length=100)
 
