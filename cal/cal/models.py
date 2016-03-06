@@ -1,7 +1,7 @@
 from apiclient.discovery import build
 from cal.constants import GOOGLE_CALENDAR_COLORS
 from cal.helpers import TimeNode, TimeNodeChain
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils.dateparse import parse_date, parse_datetime
@@ -51,8 +51,27 @@ class Profile(models.Model):
 class ColorCategory(models.Model):
 
     user = models.ForeignKey(User, related_name='colorcategories')
-    color = models.CharField(max_length=100)
+    color = models.CharField(max_length=100, help_text="str of the number of the event color in constants.py")
     label = models.CharField(max_length=100)
+    # Consider adding a ForeignKey(null=True) to this model to allow for
+    # categorizing on multiple calendars
+
+    def get_last_week(self, calendar=None):
+        """
+        Returns the last week's worth of GEvents in a calendar
+        """
+        if not calendar:
+            calendar = self.user.profile.main_calendar
+
+        qs = GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color=self.color)
+        now = date.today()
+        one_week_ago = now - timedelta(days=7)
+        qs.filter(start__range=(one_week_ago, now), end__range=(one_week_ago, now))
+        qs.order_by('updated')
+        return qs
+
+    def get_last_month(self):
+        pass
 
 
 class GCalendar(models.Model):
