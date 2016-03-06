@@ -22,22 +22,23 @@ class TimeNodeChain:
         Initializes a TimeNodeChain, and, if supplied, inserts an iterable of timenodes.
         """
         self.head = None
-        self.length = None
+        self._length = None
         if timenodes:
             self.insert_all(timenodes)
-        self.get_length()
+        self.length
 
     def get_head(self):
         return self.head
 
-    def get_length(self):
-        if not self.length:
+    @property
+    def length(self):
+        if not self._length:
             current = self.get_head()
-            self.length = 0
+            self._length = 0
             while current:
-                self.length += 1
+                self._length += 1
                 current = current.next
-        return self.length
+        return self._length
 
     def insert(self, timenode):
         """
@@ -53,7 +54,7 @@ class TimeNodeChain:
         else:
             self.head = timenode
 
-        self.length = None
+        self._length = None
 
     def insert_all(self, timenodes):
         """
@@ -80,7 +81,7 @@ class TimeNodeChain:
             last = last.prev
         self.head = last
 
-        self.get_length()
+        self.length
 
     def get_inverse(self):
         """
@@ -90,25 +91,23 @@ class TimeNodeChain:
         if not self.head:
             return None
 
-        inverse = []
         current = self.head
-        seen = set()
-        while current.next and current.id not in seen:
-            if current.next.next and current.next.next.next:
-                print 'current: {}, next: {}, nextnext: {}, nextnextnext: {}'.format(current.id,
-                        current.next.id, current.next.next.id, current.next.next.next.id)
-
-            seen.add(current.id)
-            
-            if current.end == current.next.start:
+        chain = TimeNodeChain()
+        last = None
+        while current.next:
+            if current.end >= current.next.start:
+                current = current.next
                 continue
 
-            inverse.append(TimeNode(current.end, current.next.start, "GAP: {}--{}".
-                format(current.id, current.next.id)))
+            node = TimeNode(current.end, current.next.start, "GAP: {}--{}".format(current.id, current.next.id))
+            if last:
+                last.insert(node)
+            else:
+                chain.insert(node)
+                last = node
+
             current = current.next
 
-        chain = TimeNodeChain()
-        chain.insert_all(inverse)
         return chain
     
     def __str__(self):
