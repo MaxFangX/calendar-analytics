@@ -2,6 +2,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
 
 import json
+import datetime
 
 
 def json_response(data, status=200):
@@ -43,8 +44,17 @@ class TimeNodeChain:
 
     @property
     def total_time(self):
+        """
+        Returns the total time in seconds in this TimeNodeChain
+        """
         if not self._total_time:
-            pass
+            total = datetime.timedelta()
+            current = self.get_head()
+            while current and current.next:
+                total += current.end - current.start
+                current = current.next
+
+            self._total_time = total.total_seconds()
         
         return self._total_time
 
