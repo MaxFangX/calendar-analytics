@@ -1,3 +1,5 @@
 <ul class="list-group">
-  <li class="list-group-item">Item</li>
+  {% for category in color_categories %}
+  <li class="list-group-item">{{category.label}}: {{category.hours}} hours</li>
+  {% endfor %}
 </ul>

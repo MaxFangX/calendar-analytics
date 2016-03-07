@@ -1,5 +1,5 @@
-from cal.helpers import json_response
-from cal.models import GoogleCredentials, GoogleFlow, Profile
+from cal.helpers import json_response, TimeNodeChain
+from cal.models import ColorCategory, GoogleCredentials, GoogleFlow, Profile
 
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
@@ -21,6 +21,12 @@ def home(request):
     context = RequestContext(request)
 
     if request.user.is_authenticated():
+        color_categories = [{
+            'label': c.label,
+            'hours': TimeNodeChain(c.get_last_week()).total_time / 3600 }
+            for c in ColorCategory.objects.filter(user=request.user)]
+        context['color_categories'] = color_categories
+
         return render_to_response(template_name='home_logged_in.html',
                                   context=context)
 
