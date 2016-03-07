@@ -14,4 +14,7 @@ urlpatterns = patterns(
     # Django REST framework
     url(r'^', include('api.urls')),
 
+    # Python social auth
+    url('', include('social.apps.django_app.urls', namespace='social')),
+
 )

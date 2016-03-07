@@ -45,6 +45,9 @@ ALLOWED_HOSTS = ['panalytics.elasticbeanstalk.com', 'localhost', '127.0.0.1', 'n
 AUTHENTICATION_BACKENDS = (
     'cal.auth_backend.PasswordlessAuthBackend',
     'django.contrib.auth.backends.ModelBackend',
+
+    # Python social auth
+    'social.backends.google.GoogleOAuth2',
 )
 
 
@@ -63,7 +66,8 @@ INSTALLED_APPS = (
     'api',
 
     # Vendor App(s)
-    'rest_framework'
+    'rest_framework',
+    'social.apps.django_app.default',
 )
 
 # TODO make an actual login page for redirection
@@ -96,7 +100,13 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     'django.contrib.auth.context_processors.auth',
     'django.contrib.messages.context_processors.messages',
 
-    'cal.context_processors.google_client_id_processor'
+    # Custom processors
+    'cal.context_processors.google_client_id_processor',
+
+    # Vendor processors
+    'social.apps.django_app.context_processors.backends',
+    'social.apps.django_app.context_processors.login_redirect',  # TODO ensure this is used
+    
 ]
 
 WSGI_APPLICATION = 'cal.wsgi.application'
