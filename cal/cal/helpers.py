@@ -23,6 +23,7 @@ class TimeNodeChain:
         """
         self.head = None
         self._length = None
+        self._total_time = None
         if timenodes:
             self.insert_all(timenodes)
         self.length
@@ -40,6 +41,13 @@ class TimeNodeChain:
                 current = current.next
         return self._length
 
+    @property
+    def total_time(self):
+        if not self._total_time:
+            pass
+        
+        return self._total_time
+
     def insert(self, timenode):
         """
         Inserts a single TimeNode in O(n) time and returns the inserted node
@@ -55,6 +63,7 @@ class TimeNodeChain:
             self.head = timenode
 
         self._length = None
+        self._total_time = None
 
         return timenode
 
@@ -84,6 +93,7 @@ class TimeNodeChain:
         self.head = last
 
         self.length
+        self.total_time
 
     def get_inverse(self):
         """

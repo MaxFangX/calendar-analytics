@@ -66,12 +66,20 @@ class ColorCategory(models.Model):
         qs = GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color=self.color)
         now = date.today()
         one_week_ago = now - timedelta(days=7)
-        qs.filter(start__range=(one_week_ago, now), end__range=(one_week_ago, now))
-        qs.order_by('updated')
+        qs = qs.filter(start__range=(one_week_ago, now), end__range=(one_week_ago, now))
+        qs = qs.order_by('updated')
         return qs
 
-    def get_last_month(self):
-        pass
+    def get_last_month(self, calendar=None):
+        if not calendar:
+            calendar = self.user.profile.main_calendar
+
+        qs = GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color=self.color)
+        now = date.today()
+        one_month_ago = now - timedelta(days=28)  # 28 days to maintain consistency between weeks
+        qs = qs.filter(start__range=(one_month_ago, now), end__range=(one_month_ago, now))
+        qs = qs.order_by('updated')
+        return qs
 
 
 class GCalendar(models.Model):

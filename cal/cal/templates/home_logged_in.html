@@ -28,6 +28,7 @@
 {% endblock %}
 
 {% block bottom_js %}
+  {{ block.super }}
   <script>
     function signOut() {
       var auth2 = gapi.auth2.getAuthInstance();
