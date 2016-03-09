@@ -43,11 +43,11 @@ assert GOOGLE_CALENDAR_API_CLIENT_SECRET, "GOOGLE_CALENDAR_API_CLIENT_SECRET env
 ALLOWED_HOSTS = ['panalytics.elasticbeanstalk.com', 'localhost', '127.0.0.1', 'ngrok.io']
 
 AUTHENTICATION_BACKENDS = (
-    'cal.auth_backend.PasswordlessAuthBackend',
-    'django.contrib.auth.backends.ModelBackend',
-
     # Python social auth
     'social.backends.google.GoogleOAuth2',
+
+    'cal.auth_backend.PasswordlessAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',
 )
 
 
@@ -93,6 +93,14 @@ REST_FRAMEWORK = {
 
 
 ROOT_URLCONF = 'cal.urls'
+
+# Python Social Auth
+SOCIAL_AUTH_UUID_LENGTH = 3
+# TODO disambiguate between these two
+SOCIAL_AUTH_GOOGLE_AUTH_EXTRA_ARGUMENTS = {'access_type': 'offline'}
+SOCIAL_AUTH_GOOGLE_REQUEST_TOKEN_EXTRA_ARGUMENTS = {'access_type': 'offline'}
+
+
 
 TEMPLATE_CONTEXT_PROCESSORS = [
     'django.template.context_processors.debug',
