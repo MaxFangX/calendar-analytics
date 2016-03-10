@@ -58,9 +58,10 @@ class TimeNodeChain:
         
         return self._total_time
 
-    def insert(self, timenode):
+    def insert(self, timenode, return_overwrites=False):
         """
-        Inserts a single TimeNode in O(n) time and returns the inserted node
+        Inserts a single TimeNode in O(n) time and returns the inserted node.
+        If return_overwrites is set to True, a set of overwritten nodes will be returned as well.
         Wrapper function for TimeNode.insert, so that TimeNodeChain().insert(node) mutates the chain object
         """
         if self.head:
@@ -77,9 +78,10 @@ class TimeNodeChain:
 
         return timenode
 
-    def insert_all(self, timenodes):
+    def insert_all(self, timenodes, return_overwrites=False):
         """
-        Inserts an iterable of TimeNodes (list, QuerySet)
+        Inserts an iterable of TimeNodes (list, QuerySet).
+        If return_overwrites is set to True, a set of overwritten nodes will be returned
         If the list is ordered by start time, this operation will take roughly O(n)
         """
         if len(timenodes) == 0:
@@ -164,7 +166,7 @@ class TimeNode:
         self.start = start
         self.end = end
 
-    def insert(self, timenode):
+    def insert(self, timenode, return_overwrites=False):
         """
         Inserts a single TimeNode in O(n) time and returns the current node.
         """
