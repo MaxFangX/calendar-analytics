@@ -155,7 +155,14 @@ class GCalendar(models.Model):
             result = service.events().list(calendarId=self.calendar_id).execute()
         else:
             # Incremental sync, initial request needs syncToken
-            result = service.events().list(calendarId=self.calendar_id, syncToken=creds.next_sync_token).execute()
+            try:
+                result = service.events().list(calendarId=self.calendar_id, syncToken=creds.next_sync_token).execute()
+            except Exception as e:
+                if e.resp.status == 410:
+                    # Sync token is no longer value, perform full sync
+                    result = service.events().list(calendarId=self.calendar_id).execute()
+                else:
+                    raise Exception(e)
 
         # Run the first iteration, for the first request
         for item in result['items']:

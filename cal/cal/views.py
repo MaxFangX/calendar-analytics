@@ -61,6 +61,7 @@ def google_auth(request):
                                        client_secret=settings.GOOGLE_CALENDAR_API_CLIENT_SECRET,
                                        scope=['https://www.googleapis.com/auth/calendar','profile','email'],
                                        redirect_uri=settings.BASE_URL + '/auth/google')
+    default_flow.params['access_type'] = 'offline'
 
     # Try to retrieve an existing flow, or create one if it doesn't exist
     gflow = GoogleFlow.objects.filter(id=request.user).last()
