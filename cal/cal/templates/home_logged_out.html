@@ -22,11 +22,63 @@
     <!-- TODO Find a place to put this-->
     <!--<p>Tip: If you fill in the gaps, your stats will be even more meaningful!</p>-->
   </div>
+
+  <!--BEGIN PSA -->
+  <a href="{% url 'social:begin' 'google-auth2' %}">login</a>
+
+  <form action="{% url 'social:begin' 'google-oauth2' %}" method="POST">
+    <button type="submit">Second login</button>
+  </form>
+  <div id="google-plus-button">Google+ Sign In</div>
+  <!--END PSA -->
+  
 {% endblock %}
 
 {% block bottom_js %}
   {{ block.super }}
+  <!-- BEGIN PSA G+ signin-->
+	<script src="https://apis.google.com/js/api:client.js"></script>
+
+	<script type="text/javascript">
+		gapi.load('auth2', function () {
+			var auth2;
+
+			auth2 = gapi.auth2.init({
+				client_id: "{{ google_client_id }}",
+				scope: "https://www.googleapis.com/auth/calendar"
+			});
+
+			auth2.then(function () {
+				var button = document.getElementById("google-plus-button");
+				console.log("User is signed-in in Google+ platform?", auth2.isSignedIn.get() ? "Yes" : "No");
+
+				auth2.attachClickHandler(button, {}, function (googleUser) {
+					// Send access-token to backend to finish the authenticate
+					// with your application
+
+					var authResponse = googleUser.getAuthResponse();
+					var $form;
+					var $input;
+
+					$form = $("<form>");
+					$form.attr("action", "/complete/google-plus/");
+					$form.attr("method", "post");
+					$input = $("<input>");
+					$input.attr("name", "access_token");
+					$input.attr("value", authResponse.access_token);
+					$form.append($input);
+					// Add csrf-token if needed
+					$(document.body).append($form);
+					$form.submit();
+				});
+			});
+		});
+	</script>
+  <!-- END PSA G+ signin-->
+
+
   <!--BEGIN Sign in with Google-->
+  <!--
   <script>
     function signInCallback(authResult) {
       if (authResult['code'] && auth2.isSignedIn.get()) {
@@ -80,5 +132,6 @@
       auth2.grantOfflineAccess({'redirect_uri': 'postmessage'}).then(signInCallback);
     });
   </script>
+  -->
   <!--END Sign in with Google-->
 {% endblock %}

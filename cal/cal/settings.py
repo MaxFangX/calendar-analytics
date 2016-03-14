@@ -45,8 +45,9 @@ ALLOWED_HOSTS = ['panalytics.elasticbeanstalk.com', 'localhost', '127.0.0.1', 'n
 AUTHENTICATION_BACKENDS = (
     # Python social auth
     'social.backends.google.GoogleOAuth2',
+    'social.backends.google.GooglePlusAuth',
 
-    'cal.auth_backend.PasswordlessAuthBackend',
+    'cal.auth_backend.PasswordlessAuthBackend',  # TODO remove
     'django.contrib.auth.backends.ModelBackend',
 )
 
@@ -96,6 +97,15 @@ ROOT_URLCONF = 'cal.urls'
 
 # Python Social Auth
 SOCIAL_AUTH_UUID_LENGTH = 3
+SOCIAL_AUTH_RAISE_EXCEPTIONS = True
+
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = GOOGLE_CALENDAR_API_CLIENT_ID
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = GOOGLE_CALENDAR_API_CLIENT_SECRET
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['profile', 'email', 'https://www.googleapis.com/auth/calendar']
+
+SOCIAL_AUTH_GOOGLE_PLUS_KEY = GOOGLE_CALENDAR_API_CLIENT_ID
+SOCIAL_AUTH_GOOGLE_PLUS_SECRET = GOOGLE_CALENDAR_API_CLIENT_ID
+
 # TODO disambiguate between these two
 SOCIAL_AUTH_GOOGLE_AUTH_EXTRA_ARGUMENTS = {'access_type': 'offline'}
 SOCIAL_AUTH_GOOGLE_REQUEST_TOKEN_EXTRA_ARGUMENTS = {'access_type': 'offline'}
