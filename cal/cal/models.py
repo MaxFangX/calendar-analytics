@@ -10,6 +10,7 @@ from oauth2client.django_orm import CredentialsField, FlowField
 from oauth2client.client import AccessTokenRefreshError
 
 import httplib2
+import sys
 
 
 class Profile(models.Model):
@@ -158,11 +159,12 @@ class GCalendar(models.Model):
             try:
                 result = service.events().list(calendarId=self.calendar_id, syncToken=creds.next_sync_token).execute()
             except Exception as e:
-                if e.resp.status == 410:
+                t, v, tb = sys.exc_info()
+                if hasattr(e, 'resp') and e.resp.status == 410:
                     # Sync token is no longer value, perform full sync
                     result = service.events().list(calendarId=self.calendar_id).execute()
                 else:
-                    raise Exception(e)
+                    raise t, v, tb
 
         # Run the first iteration, for the first request
         for item in result['items']:
