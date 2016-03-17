@@ -1,5 +1,14 @@
 {% extends "base.html" %}
 
+{% block head %}
+  {{ block.super }}
+	<!-- BEGIN FullCalendar -->
+  <link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.css' />
+  <script src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.12.0/moment.min.js'></script>
+  <script src='//cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.js'></script>
+	<!-- END FullCalendar -->
+{% endblock %}
+
 {% block content %}
   <ul class="nav nav-tabs">
     <li>
@@ -12,6 +21,7 @@
   {% if request.user.profile.authed %}
     <div class="jumbotron">
         <h1>Stats and stuff - to be completed</h1>
+				<div id='calendar'></div>
     </div>
     {% include "_stats_list.html"%}
   {% else %}
@@ -29,6 +39,16 @@
 
 {% block bottom_js %}
   {{ block.super }}
+	<!-- BEGIN FullCalendar -->
+	<script>
+		$(document).ready(function() {
+			// page is now ready, initialize the calendar...
+			$('#calendar').fullCalendar({
+					// put your options and callbacks here
+			})
+		});
+	</script>
+	<!-- END FullCalendar -->
   <script>
     function signOut() {
       var auth2 = gapi.auth2.getAuthInstance();
