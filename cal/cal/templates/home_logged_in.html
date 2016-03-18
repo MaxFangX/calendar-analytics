@@ -20,7 +20,6 @@
   </ul>
   {% if request.user.profile.authed %}
     <div class="jumbotron">
-        <h1>Stats and stuff - to be completed</h1>
 				<div id='calendar'></div>
     </div>
     {% include "_stats_list.html"%}
@@ -42,10 +41,9 @@
 	<!-- BEGIN FullCalendar -->
 	<script>
 		$(document).ready(function() {
-			// page is now ready, initialize the calendar...
-			$('#calendar').fullCalendar({
-					// put your options and callbacks here
-			})
+				$('#calendar').fullCalendar({
+            defaultView: 'agendaWeek',
+				})
 		});
 	</script>
 	<!-- END FullCalendar -->
