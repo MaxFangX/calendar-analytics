@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load staticfiles %}
 
 {% block head %}
   {{ block.super }}
@@ -7,6 +8,8 @@
   <script src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.12.0/moment.min.js'></script>
   <script src='//cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.js'></script>
 	<!-- END FullCalendar -->
+
+  <link rel='stylesheet' href="{% static "css/home_logged_in.css" %}">
 {% endblock %}
 
 {% block content %}
@@ -20,7 +23,7 @@
   </ul>
   {% if request.user.profile.authed %}
     <div class="jumbotron">
-				<div id='calendar'></div>
+				<div id='calendar' class="cal-calendar"></div>
     </div>
     {% include "_stats_list.html"%}
   {% else %}

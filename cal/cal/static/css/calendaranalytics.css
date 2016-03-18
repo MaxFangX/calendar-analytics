@@ -1,5 +1,16 @@
+/*
+$font-stack:    Helvetica, sans-serif;
+$primary-color: #333;
+
+// Example code
 body {
-  font: 100% Helvetica, sans-serif;
-  color: #334; }
+    font: 100% $font-stack;
+    color: $primary-color;
+}
+*/
+.cal-stats-list {
+  width: 25%;
+  margin-left: 1%;
+  margin-top: 1%; }
 
 /*# sourceMappingURL=calendaranalytics.css.map */
