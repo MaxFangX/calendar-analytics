@@ -5,7 +5,7 @@
   <head>
     {% block head %}
       <title>CalendarAnalytics</title>
-      <script src="{% static "js/jquery-1.11.3.min.js" %}"></script>
+      <script src="{% static "lib/js/jquery-1.11.3.min.js" %}"></script>
 
       <!-- BEGIN Google Server-Side App Sign In -->
       <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer></script>
@@ -24,8 +24,8 @@
       <!-- END Google Server-Side App Sign In -->
     {% endblock %}
     {% block head_css %}
-      <link rel="stylesheet" href="{% static "css/bootstrap.min.css" %}">
-      <link rel="stylesheet" href="{% static "css/bootstrap.min.css.map" %}">
+      <link rel="stylesheet" href="{% static "lib/css/bootstrap.min.css" %}">
+      <link rel="stylesheet" href="{% static "lib/css/bootstrap.min.css.map" %}">
     {% endblock %}
   </head>
   <body>
@@ -52,7 +52,7 @@
         // Use like this:
         // var csrftoken = getCookie('csrftoken');
 			</script>
-      <script type="text/javascript" src="{% static "js/bootstrap.min.js" %}"></script>
+      <script type="text/javascript" src="{% static "lib/js/bootstrap.min.js" %}"></script>
     {% endblock %}
   </body>
 </html>

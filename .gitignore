@@ -1,6 +1,7 @@
 *.sqlite3
 *.pyc
 *.swp
+*.scssc
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
