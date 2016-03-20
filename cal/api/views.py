@@ -1,5 +1,5 @@
-from api.serializers import GEventSerializer, StatisticSerializer
-from cal.models import GEvent, Statistic
+from api.serializers import GEventSerializer, StatisticSerializer, ColorCategorySerializer
+from cal.models import ColorCategory, GEvent, Statistic
 from rest_framework import generics
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -25,3 +25,8 @@ class StatisticList(generics.ListAPIView):
     """
     queryset = Statistic.objects.all()
     serializer_class = StatisticSerializer
+
+class ColorCategoryList(generics.ListAPIView):
+
+    queryset = ColorCategory.objects.all()
+    serializer_class = ColorCategorySerializer
