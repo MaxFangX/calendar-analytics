@@ -15,8 +15,17 @@ class GEventList(generics.ListAPIView):
     """
     API endpoint to query for Google Calendar events
     """
-    queryset = GEvent.objects.all().order_by('start_time')
     serializer_class = GEventSerializer
+
+    def get_queryset(self):
+        qs = GEvent.objects.filter(calendar=self.request.user.profile.main_calendar)
+        start = self.request.query_params.get('start')
+        end = self.request.query_params.get('end')
+        if start:
+            qs = qs.filter(start__gte=start)
+        if end:
+            qs = qs.filter(end__lte=end)
+        return qs
 
 
 class StatisticList(generics.ListAPIView):
@@ -28,5 +37,7 @@ class StatisticList(generics.ListAPIView):
 
 class ColorCategoryList(generics.ListAPIView):
 
-    queryset = ColorCategory.objects.all()
     serializer_class = ColorCategorySerializer
+
+    def get_queryset(self):
+        queryset = ColorCategory.objects.filter(user=self.request.user)
