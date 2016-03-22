@@ -6,12 +6,8 @@
   <!-- ^ Google Server-Side App Sign In-->
 {% endblock %}
 
-{% block head %}
-  {{ block.super }}
-  <link rel="stylesheet" href="{% static "css/home_logged_out.css" %}">
-{% endblock %}
-
 {% block content %}
+<div class="cal-home-logged-out">
   <div class="jumbotron main-display">
     <h1>CalendarAnalytics</h1>
     <h3>If you use your calendar often, then you must have a decent timeline of how you spend your time.<br>Why not analyze it?</h3>
@@ -31,7 +27,7 @@
   </form>
   <div id="google-plus-button">Google+ Sign In</div>
   <!--END PSA -->
-  
+</div>
 {% endblock %}
 
 {% block bottom_js %}

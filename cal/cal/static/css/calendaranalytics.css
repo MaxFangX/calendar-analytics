@@ -13,4 +13,8 @@ body {
   margin-left: 1%;
   margin-top: 1%; }
 
+.cal-home-logged-in .cal-calendar {
+  padding-left: 10%;
+  padding-right: 10%; }
+
 /*# sourceMappingURL=calendaranalytics.css.map */

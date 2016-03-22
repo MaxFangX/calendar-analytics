@@ -9,10 +9,10 @@
   <script src='//cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.js'></script>
 	<!-- END FullCalendar -->
 
-  <link rel='stylesheet' href="{% static "css/home_logged_in.css" %}">
 {% endblock %}
 
 {% block content %}
+<div class="cal-home-logged-in">
   <ul class="nav nav-tabs">
     <li>
       <a href="/">CalendarAnalytics</a>
@@ -34,9 +34,8 @@
   {% if request.user.profile.authed %}
     <button class="btn btn-primary pull-right"><a href="/auth/clear">Reset credentials</a></button>
   {% endif %}
-
   <br>
-
+</div>
 {% endblock %}
 
 {% block bottom_js %}
