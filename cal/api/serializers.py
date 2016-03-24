@@ -1,4 +1,4 @@
-from cal.models import ColorCategory, GEvent, Statistic
+from cal.models import ColorCategory, GCalendar, GEvent, Statistic
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
@@ -15,9 +15,10 @@ class GEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = GEvent
         fields = ('name', 'start', 'end', 'location', 'created', 'updated',
-                'calendar', 'id_event', 'i_cal_uid', 'color', 'description',
+                'calendar', 'id_event', 'i_cal_uid', 'color_index', 'description',
                 'status', 'transparency', 'all_day_event', 'end_timezone',
                 'end_time_unspecified', 'recurring_event_id')
+        # color = serializers.SerializerMethodField()
 
     class GCalendarField(serializers.Field):
         def to_representation(self, obj):

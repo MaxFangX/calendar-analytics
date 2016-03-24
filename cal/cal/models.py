@@ -64,7 +64,7 @@ class ColorCategory(models.Model):
         if not calendar:
             calendar = self.user.profile.main_calendar
 
-        qs = GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color=self.color)
+        qs = GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color_index=self.color)
         now = date.today()
         one_week_ago = now - timedelta(days=7)
         qs = qs.filter(start__range=(one_week_ago, now), end__range=(one_week_ago, now))
@@ -75,7 +75,7 @@ class ColorCategory(models.Model):
         if not calendar:
             calendar = self.user.profile.main_calendar
 
-        qs = GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color=self.color)
+        qs = GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color_index=self.color)
         now = date.today()
         one_month_ago = now - timedelta(days=28)  # 28 days to maintain consistency between weeks
         qs = qs.filter(start__range=(one_month_ago, now), end__range=(one_month_ago, now))
@@ -272,7 +272,7 @@ class GEvent(Event):
     calendar = models.ForeignKey(GCalendar, related_name='gevents')
     id_event = models.CharField(max_length=1024, help_text="Unique id per calendar")
     i_cal_uid = models.CharField(max_length=1024, help_text="Unique id across calendaring systems. Only 1 per recurring event")
-    color = models.CharField(max_length=10, blank=True, choices=EVENT_COLORS)
+    color_index = models.CharField(max_length=10, blank=True, choices=EVENT_COLORS)
     description = models.TextField(max_length=20000, blank=True)
     status = models.CharField(max_length=50, default='confirmed', blank=True, choices=STATUS_CHOICES)
     transparency = models.CharField(max_length=50, default='opaque', blank=True, choices=TRANSPARENCY_CHOICES, help_text="Whether the event blocks time on the calendar.")
@@ -287,6 +287,10 @@ class GEvent(Event):
 
     def __str__(self):
         return "{} | {}".format(self.id, self.name)
+
+    @property
+    def color(self):
+        return GOOGLE_CALENDAR_COLORS['event'][self.color]
 
     def save(self, *args, **kwargs):
         if self.name is None:
