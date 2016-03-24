@@ -42,11 +42,25 @@
   {{ block.super }}
 	<!-- BEGIN FullCalendar -->
 	<script>
-		$(document).ready(function() {
-				$('#calendar').fullCalendar({
-            defaultView: 'agendaWeek',
-				})
-		});
+      calendar_next_url = "haha";
+      $(document).ready(function() {
+          $('#calendar').fullCalendar({
+              defaultView: 'agendaWeek',
+              events: function(start, end, timezone, callback) {
+                  $.ajax({
+                      url: "/v1/gevents.json",
+                      dataType: 'json',
+                      data: {
+                          start: start.toISOString() + "T00:00:00Z",
+                          end: end.toISOString() + "T00:00:00Z",
+                      },
+                      success: function(data) {
+                          callback(data.results);
+                      }
+                  });
+              }
+          })
+      });
 	</script>
 	<!-- END FullCalendar -->
   <script>

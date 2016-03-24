@@ -35,9 +35,10 @@ class StatisticList(generics.ListAPIView):
     queryset = Statistic.objects.all()
     serializer_class = StatisticSerializer
 
+
 class ColorCategoryList(generics.ListAPIView):
 
     serializer_class = ColorCategorySerializer
 
     def get_queryset(self):
-        queryset = ColorCategory.objects.filter(user=self.request.user)
+        return ColorCategory.objects.filter(user=self.request.user)
