@@ -290,7 +290,14 @@ class GEvent(Event):
 
     @property
     def color(self):
-        return GOOGLE_CALENDAR_COLORS['event'][self.color]
+        color = GOOGLE_CALENDAR_COLORS['event'].get(self.color_index)
+        if color:
+            return color
+        else:
+            # This handles when data isn't consistent for some reason.
+            # TODO migration for blank=False in color_index attribute, then remove this
+            print "Warning: GEvent '{}' with id {} has an incorrect color_index value of '{}'".format(self.name, self.id, self.color_index)
+            return GOOGLE_CALENDAR_COLORS['event']['1']
 
     def save(self, *args, **kwargs):
         if self.name is None:

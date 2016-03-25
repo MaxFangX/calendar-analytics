@@ -19,6 +19,7 @@ class GEventList(generics.ListAPIView):
 
     def get_queryset(self):
         qs = GEvent.objects.filter(calendar=self.request.user.profile.main_calendar)
+        qs = qs.exclude(status__in=['tentative', 'cancelled'])
         start = self.request.query_params.get('start')
         end = self.request.query_params.get('end')
         if start:

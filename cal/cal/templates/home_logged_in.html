@@ -54,7 +54,18 @@
                           end: end.toISOString() + "T00:00:00Z",
                       },
                       success: function(data) {
-                          callback(data.results);
+                          var events = [];
+                          $.each(data.results, function(index, gevent) {
+                              events.push({
+                                  title: gevent.id + " " + gevent.name,
+                                  start: gevent.start,
+                                  end: gevent.end,
+                                  backgroundColor: gevent.color.background,
+                                  textColor: gevent.color.foreground,
+                                  borderColor: gevent.color.foreground,
+                              })
+                          });
+                          callback(events);
                       }
                   });
               }
@@ -66,7 +77,7 @@
     function signOut() {
       var auth2 = gapi.auth2.getAuthInstance();
       auth2.signOut().then(function () {
-          console.log('User signed out.');
+          // console.log('User signed out.');
         });
       }
   </script>
