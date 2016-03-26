@@ -17,4 +17,19 @@ body {
   padding-left: 10%;
   padding-right: 10%; }
 
+.cal-home-logged-out .main-display {
+  padding: 50px;
+  min-height: 400px; }
+.cal-home-logged-out .call-to-action-text {
+  text-align: center; }
+.cal-home-logged-out .signin-button {
+  position: relative;
+  height: 50px;
+  left: 50%;
+  bottom: 0;
+  width: 200px;
+  margin-left: -100px;
+  font-size: 16px;
+  font-weight: 500; }
+
 /*# sourceMappingURL=calendaranalytics.css.map */
