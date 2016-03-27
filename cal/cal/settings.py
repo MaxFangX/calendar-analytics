@@ -88,7 +88,7 @@ MIDDLEWARE_CLASSES = (
 )
 # Django REST Framework
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAdminUser',),
+    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticatedOrReadOnly',),
     'PAGE_SIZE': 100,
 }
 
@@ -101,7 +101,9 @@ SOCIAL_AUTH_RAISE_EXCEPTIONS = True
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = GOOGLE_CALENDAR_API_CLIENT_ID
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = GOOGLE_CALENDAR_API_CLIENT_SECRET
-SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['profile', 'email', 'https://www.googleapis.com/auth/calendar']
+SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = ['https://www.googleapis.com/auth/plus.login',
+                                   'https://www.googleapis.com/auth/plus.me',
+                                   'profile', 'email', 'https://www.googleapis.com/auth/calendar']
 
 SOCIAL_AUTH_GOOGLE_PLUS_KEY = GOOGLE_CALENDAR_API_CLIENT_ID
 SOCIAL_AUTH_GOOGLE_PLUS_SECRET = GOOGLE_CALENDAR_API_CLIENT_ID
@@ -109,8 +111,6 @@ SOCIAL_AUTH_GOOGLE_PLUS_SECRET = GOOGLE_CALENDAR_API_CLIENT_ID
 # TODO disambiguate between these two
 SOCIAL_AUTH_GOOGLE_AUTH_EXTRA_ARGUMENTS = {'access_type': 'offline'}
 SOCIAL_AUTH_GOOGLE_REQUEST_TOKEN_EXTRA_ARGUMENTS = {'access_type': 'offline'}
-
-
 
 TEMPLATE_CONTEXT_PROCESSORS = [
     'django.template.context_processors.debug',

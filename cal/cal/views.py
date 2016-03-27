@@ -29,9 +29,14 @@ def home(request):
 
         return render_to_response(template_name='home_logged_in.html',
                                   context=context)
+    else:
+        context['social_auth_google_plus_key'] = settings.SOCIAL_AUTH_GOOGLE_PLUS_KEY
+        # Space separated string of scopes
+        context['social_auth_google_plus_scope'] = " ".join(map(str, settings.SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE))
+        
 
-    return render_to_response(template_name='home_logged_out.html',
-                              context=context)
+        return render_to_response(template_name='home_logged_out.html',
+                                  context=context)
 
 
 def logout_view(request):
@@ -82,7 +87,7 @@ def google_auth(request):
         # Save the credentials
         storage = Storage(GoogleCredentials, 'user', request.user, 'credential')
         storage.put(credential)
-        profile = request.user.profile
+        profile, _ = Profile.get_or_create(user=request.user)
         profile.authed = True
         profile.save()
         # TODO improve the latency over here
