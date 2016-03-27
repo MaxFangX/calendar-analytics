@@ -8,25 +8,20 @@
 
 {% block content %}
 <div class="cal-home-logged-out">
-  <div class="jumbotron main-display">
+  <div class="jumbotron cal-main-display">
     <h1>CalendarAnalytics</h1>
     <h3>If you use your calendar often, then you must have a decent timeline of how you spend your time.<br>Why not analyze it?</h3>
     <br><br>
-    <h4 class="call-to-action-text">Log in to see stats on how you've been spending your time:</h4>
-    <button id="signinButton" class="signin-button">Sign in with Google</button>
+    <h4 class="cal-call-to-action-text">Log in to see stats on how you've been spending your time:</h4>
+    <!--<button id="signinButton" class="signin-button">Sign in with Google</button>-->
+    <!--BEGIN PSA -->
+    <button id="google-plus-button" class="cal-signin-button">Google+ Sign In</button>
+    <!--END PSA -->
     <div id="result"></div>
     <!-- TODO Find a place to put this-->
     <!--<p>Tip: If you fill in the gaps, your stats will be even more meaningful!</p>-->
   </div>
 
-  <!--BEGIN PSA -->
-  <a href="{% url 'social:begin' 'google-auth2' %}">login</a>
-
-  <form action="{% url 'social:begin' 'google-oauth2' %}" method="POST">
-    <button type="submit">Second login</button>
-  </form>
-  <div id="google-plus-button">Google+ Sign In</div>
-  <!--END PSA -->
 </div>
 {% endblock %}
 
@@ -40,7 +35,7 @@
 
 			auth2 = gapi.auth2.init({
         client_id: "{{ social_auth_google_plus_key }}",
-        scope: "{{ social_auth_google_plus_scope | safe }}",
+        scope: "{{ social_auth_google_oauth2_scope | safe }}",
 			});
 
 

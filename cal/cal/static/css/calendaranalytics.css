@@ -17,12 +17,12 @@ body {
   padding-left: 10%;
   padding-right: 10%; }
 
-.cal-home-logged-out .main-display {
+.cal-home-logged-out .cal-main-display {
   padding: 50px;
   min-height: 400px; }
-.cal-home-logged-out .call-to-action-text {
+.cal-home-logged-out .cal-call-to-action-text {
   text-align: center; }
-.cal-home-logged-out .signin-button {
+.cal-home-logged-out .cal-signin-button {
   position: relative;
   height: 50px;
   left: 50%;

@@ -14,7 +14,7 @@
 
 					auth2 = gapi.auth2.init({
 						client_id: "{{ social_auth_google_plus_key }}",
-						scope: "{{ social_auth_google_plus_scope }}"
+						scope: "{{ social_auth_google_oauth2_scope }}"
 					});
 
 					auth2.then(function () {
