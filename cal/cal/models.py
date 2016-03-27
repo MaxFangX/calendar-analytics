@@ -130,7 +130,7 @@ class GCalendar(models.Model):
                 g.calendar = self
                 g.id_event = event['id']
                 g.i_cal_uid = event['iCalUID']
-                g.color = event.get('colorId', '')
+                g.color_index = event.get('colorId', '')
                 g.description = event.get('description', '')
                 g.status = event.get('status', 'confirmed')
                 g.transparency = event.get('transparency', 'opaque')
