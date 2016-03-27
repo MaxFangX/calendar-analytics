@@ -119,7 +119,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     'django.contrib.messages.context_processors.messages',
 
     # Custom processors
-    'cal.context_processors.google_client_id_processor',
+    'cal.context_processors.google_client_information_processor',
 
     # Vendor processors
     'social.apps.django_app.context_processors.backends',
