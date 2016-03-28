@@ -1,13 +1,23 @@
-/*
+/* Example code
 $font-stack:    Helvetica, sans-serif;
 $primary-color: #333;
-
-// Example code
 body {
     font: 100% $font-stack;
     color: $primary-color;
 }
 */
+
+// Bootstrap overrides and defaults
+
+h1, h2, h3, h4, h5, h6, a, p {
+    color: #000;
+}
+
+.jumbotron h1, .jumbotron .h1 {
+    color: #000
+}
+
+// CalendarAnalytics pages css
 
 .cal-stats-list {
     width: 25%;
@@ -21,9 +31,18 @@ body {
 }
 
 .cal-home-logged-out {
+    height: 100%;
+    background-image: url('https://blogpfeifferlab.files.wordpress.com/2012/01/cf_desk_0937.jpg');  
+    background-size: 120%;
+
     .cal-main-display {		
+        background-color: transparent;
         padding: 50px;		
         min-height: 400px;		
+
+        .cal-description {
+            max-width: 50%;
+        }
     }		
         
     .cal-call-to-action-text {		
