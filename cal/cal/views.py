@@ -49,6 +49,15 @@ def clear_auth(request):
     return HttpResponseRedirect("/")
 
 @login_required
+def accounts_profile(request):
+    """
+    Shows the account information for a user
+    For now, redirects to homepage.
+    """
+    # TODO either remove this view or change Python Social Auth after login
+    return HttpResponseRedirect("/")
+
+@login_required
 def google_auth(request):
     """
     Handles Google oauth flow. For details, visit
