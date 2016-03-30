@@ -57,7 +57,11 @@
                           var events = [];
                           $.each(data.results, function(index, gevent) {
                               events.push({
+                                  {% if request.user.is_admin %}
                                   title: gevent.id + " " + gevent.name,
+                                  {% else %}
+                                  title: gevent.name,
+                                  {% endif %}
                                   start: gevent.start,
                                   end: gevent.end,
                                   backgroundColor: gevent.color.background,
