@@ -137,7 +137,7 @@ class GCalendar(models.Model):
                 g.all_day_event = True if event['start'].get('date', None) else False
                 if not g.all_day_event:
                     # Some events don't have timezones
-                    g.end_timezone = event['start'].get('timeZone')
+                    g.timezone = event['start'].get('timeZone')
                 g.end_time_unspecified = event.get('endTimeUnspecified', False)
                 g.recurring_event_id = event.get('recurringEventId', '')
                 g.save()
@@ -278,7 +278,7 @@ class GEvent(Event):
     transparency = models.CharField(max_length=50, default='opaque', blank=True, choices=TRANSPARENCY_CHOICES, help_text="Whether the event blocks time on the calendar.")
 
     all_day_event = models.BooleanField(default=False, blank=True)
-    end_timezone = models.CharField(max_length=200, null=True, blank=True, help_text="IANA Time Zone Database Name")
+    timezone = models.CharField(max_length=200, null=True, blank=True, help_text="IANA Time Zone Database Name")
     end_time_unspecified = models.BooleanField(default=False, help_text="If an end time is actually unspecified, since an end time is always specified for compatibility reasons")
     recurring_event_id = models.CharField(max_length=1024, blank=True, help_text="For an instance of a recurring event, the id of the recurring event to which this instance belongs")
 
