@@ -47,7 +47,6 @@ AUTHENTICATION_BACKENDS = (
     'social.backends.google.GoogleOAuth2',
     'social.backends.google.GooglePlusAuth',
 
-    'cal.auth_backend.PasswordlessAuthBackend',  # TODO remove
     'django.contrib.auth.backends.ModelBackend',
 )
 
