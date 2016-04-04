@@ -6,31 +6,9 @@
     {% block head %}
       <title>CalendarAnalytics</title>
       <script src="{% static "lib/js/jquery-1.11.3.min.js" %}"></script>
+      <!-- Google Auth -->
+      <script src="https://apis.google.com/js/api:client.js"></script>
 
-			<!-- START Python Social Auth Logout -->
-			<script type="text/javascript">
-				gapi.load('auth2', function () {
-					var auth2;
-
-					auth2 = gapi.auth2.init({
-						client_id: "{{ social_auth_google_plus_key }}",
-						scope: "{{ social_auth_google_oauth2_scope }}"
-					});
-
-					auth2.then(function () {
-						if (auth2.isSignedIn.get()) {
-							$('#logout').on('click', function (event) {
-								event.preventDefault();
-								auth2.signOut().then(function () {
-									console.log("Logged out from Google+ platform");
-									document.location = "/logout";
-								});
-							});
-						}
-					});
-				});
-			</script>
-			<!-- END Python Social Auth Logout -->
     {% endblock %}
     {% block head_css %}
       <link rel="stylesheet" href="{% static "lib/css/bootstrap.min.css" %}">
