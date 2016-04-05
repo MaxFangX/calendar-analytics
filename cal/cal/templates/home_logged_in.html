@@ -57,7 +57,9 @@
         <h3><a href="/auth/google">Connect Google Calendar</a></h3>
     </div>
   {% endif %}
-  {% if request.user.profile.authed %}
+  {% if request.user.is_staff %}
+    <button class="btn btn-primary pull-right"><a href="/v1/sync?full_sync=True">Full sync</a></button>
+    <button class="btn btn-primary pull-right"><a href="/v1/sync">Sync</a></button>
     <button class="btn btn-primary pull-right"><a href="/auth/clear">Reset credentials</a></button>
   {% endif %}
   <br>

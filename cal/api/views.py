@@ -15,7 +15,10 @@ def sync(request, format=None):
     if request.user:
         main_calendar = Profile.get_or_create(request.user)[0].main_calendar
         if main_calendar:
-            main_calendar.sync()
+            if request.query_params.get('full_sync'):
+                main_calendar.sync(full_sync=True)
+            else:
+                main_calendar.sync()
             return Response("Successfully synced Calendar.")
 
     return Response("Failed to sync calendar")
