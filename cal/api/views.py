@@ -1,5 +1,5 @@
 from api.serializers import GEventSerializer, StatisticSerializer, ColorCategorySerializer
-from cal.models import ColorCategory, GEvent, Statistic
+from cal.models import ColorCategory, GEvent, Statistic, Profile
 from rest_framework import generics
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -10,10 +10,20 @@ def api_root(request, format=None):
     # TODO
     return Response({})
 
+@api_view(('GET',))
+def sync(request, format=None):
+    if request.user:
+        main_calendar = Profile.get_or_create(request.user)[0].main_calendar
+        if main_calendar:
+            main_calendar.sync()
+            return Response("Successfully synced Calendar.")
+
+    return Response("Failed to sync calendar")
+
 
 class GEventList(generics.ListAPIView):
     """
-    API endpoint to query for Google Calendar events
+    API endpoint to query for Google Calendar events, without pruning for duplicates
     """
     serializer_class = GEventSerializer
 

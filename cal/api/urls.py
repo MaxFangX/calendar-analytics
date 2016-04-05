@@ -6,6 +6,8 @@ from rest_framework.urlpatterns import format_suffix_patterns
 urlpatterns = patterns(
 
     url(r'^v1/$', views.api_root),
+    url(r'^v1/sync/$', views.sync),
+
     url(r'^v1/gevents/$', views.GEventList.as_view()),
     url(r'^v1/colorcategories/$', views.ColorCategoryList.as_view()),
     url(r'^v1/stats/$', views.StatisticList.as_view()),

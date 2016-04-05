@@ -57,6 +57,9 @@ class ColorCategory(models.Model):
     # Consider adding a ForeignKey(null=True) to this model to allow for
     # categorizing on multiple calendars
 
+    def __str__(self):
+        return "{} by {}".format(self.label, self.user.username)
+
     def get_last_week(self, calendar=None):
         """
         Returns the last week's worth of GEvents in a calendar

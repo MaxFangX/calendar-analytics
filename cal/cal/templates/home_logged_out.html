@@ -30,8 +30,6 @@
   {{ block.super }}
   <!-- BEGIN PSA G+ signin-->
 	<script type="text/javascript">
-  $(document).ready(function() {
-
 		gapi.load('auth2', function () {
 			var auth2;
 			auth2 = gapi.auth2.init({
@@ -63,8 +61,6 @@
 				});
 			});
 		});
-
-  });
 	</script>
   <!-- END PSA G+ signin-->
 {% endblock %}
