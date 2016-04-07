@@ -157,6 +157,9 @@ class GCalendar(models.Model):
         if full_sync:
             # Full sync - initial request without sync token or page token
             result = service.events().list(calendarId=self.calendar_id).execute()
+            old_events = GEvent.objects.filter(calendar=self)
+            for event in old_events:
+                event.delete()
         else:
             # Incremental sync, initial request needs syncToken
             try:

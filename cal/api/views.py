@@ -1,5 +1,6 @@
 from api.serializers import GEventSerializer, StatisticSerializer, ColorCategorySerializer
 from cal.models import ColorCategory, GEvent, Statistic, Profile
+from django.http import HttpResponseRedirect
 from rest_framework import generics
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -19,7 +20,7 @@ def sync(request, format=None):
                 main_calendar.sync(full_sync=True)
             else:
                 main_calendar.sync()
-            return Response("Successfully synced Calendar.")
+            return HttpResponseRedirect("/")
 
     return Response("Failed to sync calendar")
 
