@@ -91,6 +91,37 @@ class Tag(models.Model):
     label = models.CharField(max_length=100, help_text="The name of this tag")
     keywords = models.CharField(max_length=100, help_text="Comma-separated list of strings to search for")
 
+    def get_events(self, calendar=None):
+        """
+        Returns a QuerySet of events matching this Tag
+        """
+        if calendar:
+            # Check that this calendar belongs to the User
+            if calendar.user != self.user:
+                # TODO replace this with appropriate exception
+                return []
+        else:
+            # Try to use the main calendar
+            calendar = self.user.profile.main_calendar
+            if not calendar:
+                # TODO replace this with appropriate exception
+                return []
+
+        keywords = self.keywords.split(',')
+        if not keywords:
+            return []
+
+        querysets = set()
+        for kw in keywords:
+            # TODO extend this be able to search in note as well
+            qs = GEvent.objects.filter(calendar=calendar, name__contains=kw)
+            querysets.add(qs)
+
+        # Union over the querysets
+        events_qs = reduce(lambda qs1, qs2: qs1 | qs2, querysets)
+
+        return events_qs.order_by('start')
+        
 
 class GCalendar(models.Model):
     
