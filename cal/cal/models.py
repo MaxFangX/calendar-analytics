@@ -85,6 +85,12 @@ class ColorCategory(models.Model):
         qs = qs.order_by('updated')
         return qs
 
+class Tag(models.Model):
+
+    user = models.ForeignKey(User, related_name='tags')
+    label = models.CharField(max_length=100, help_text="The name of this tag")
+    keywords = models.CharField(max_length=100, help_text="Comma-separated list of strings to search for")
+
 
 class GCalendar(models.Model):
     
