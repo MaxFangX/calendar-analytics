@@ -1,7 +1,7 @@
-from api.serializers import GEventSerializer, StatisticSerializer, ColorCategorySerializer
-from cal.models import ColorCategory, GEvent, Statistic, Profile
+from api.serializers import GEventSerializer, StatisticSerializer, ColorCategorySerializer, TagSerializer
+from cal.models import ColorCategory, GEvent, Statistic, Profile, Tag
 from django.http import HttpResponseRedirect
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -57,3 +57,26 @@ class ColorCategoryList(generics.ListAPIView):
 
     def get_queryset(self):
         return ColorCategory.objects.filter(user=self.request.user)
+
+
+class TagList(generics.ListCreateAPIView):
+    
+    serializer_class = TagSerializer
+
+    def get_queryset(self):
+        return Tag.objects.filter(user=self.request.user)
+
+    def post(self, request, *args, **kwargs): 
+        keywords = self.request.data.get('keywords')
+        label = self.request.data.get('label')
+        if not keywords or not label:
+            return Response({'Missing field label or keywords'}, status=status.HTTP_400_BAD_REQUEST)
+
+        tag = Tag()
+        tag.user = self.request.user
+        tag.keywords = keywords
+        tag.label = label
+        tag.save()
+
+        # TODO return serialized object
+        return Response({'Successfully created tag!'}, status=status.HTTP_201_CREATED)

@@ -1,4 +1,4 @@
-from cal.models import ColorCategory, GCalendar, GEvent, Statistic
+from cal.models import ColorCategory, GCalendar, GEvent, Statistic, Tag
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
@@ -46,3 +46,13 @@ class ColorCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ColorCategory
         fields = ('color', 'label')
+
+
+class TagSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Tag
+        fields = ('id', 'user', 'label', 'keywords')
+
+    user = UserSerializer(read_only=True)
+
