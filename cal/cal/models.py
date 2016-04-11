@@ -91,6 +91,12 @@ class Tag(models.Model):
     label = models.CharField(max_length=100, help_text="The name of this tag")
     keywords = models.CharField(max_length=100, help_text="Comma-separated list of strings to search for")
 
+    def save(self, *args, **kwargs):
+        # Remove beginning and ending spaces
+        self.keywords = ",".join([k.strip() for k in self.keywords.split(',')])
+
+        return super(Tag, self).save(*args, **kwargs)
+
     def get_events(self, calendar=None):
         """
         Returns a QuerySet of events matching this Tag
