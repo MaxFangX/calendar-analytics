@@ -127,6 +127,17 @@ class Tag(models.Model):
         events_qs = reduce(lambda qs1, qs2: qs1 | qs2, querysets)
 
         return events_qs.order_by('start')
+
+    def total_time(self, calendar=None):
+
+        events = self.get_events(calendar)
+
+        total = timedelta()
+        for e in events:
+            total += e.end - e.start
+
+        # TODO convert to int?
+        return total.total_seconds()
         
 
 class GCalendar(models.Model):
