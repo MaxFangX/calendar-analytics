@@ -80,3 +80,11 @@ class TagList(generics.ListCreateAPIView):
 
         # TODO return serialized object
         return Response({'Successfully created tag!'}, status=status.HTTP_201_CREATED)
+
+
+class TagDetail(generics.RetrieveUpdateDestroyAPIView):
+    
+    serializer_class = TagSerializer
+
+    def get_queryset(self):
+        return Tag.objects.filter(user=self.request.user)
