@@ -12,7 +12,7 @@ h1, h2, h3, h4, h5, h6, a, p {
 .jumbotron h1, .jumbotron .h1 {
   color: #000; }
 
-.cal-stats-list {
+.cal-category-list {
   width: 25%;
   margin-left: 1%;
   margin-top: 1%; }
