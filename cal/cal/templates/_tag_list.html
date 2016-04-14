@@ -1,0 +1,8 @@
+<div class="cal-tag-list">
+  <h4 class="well">Tags - Cumulative</h4>
+  <ul class="list-group">
+    {% for tag in tags %}
+    <li class="list-group-item">{{tag.label}}: {{tag.hours}} hours</li>
+    {% endfor %}
+  </ul>
+</div>

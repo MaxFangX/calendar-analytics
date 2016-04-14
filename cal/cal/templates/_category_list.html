@@ -1,10 +1,8 @@
-<div class="panel panel-default">
-  <h4 class="panel-title">Category List</h4>
-  <div class="panel-body">
-    <ul class="list-group cal-category-list">
-      {% for category in color_categories %}
-      <li class="list-group-item">{{category.label}}: {{category.hours}} hours</li>
-      {% endfor %}
-    </ul>
-  </div>
+<div class="cal-category-list">
+  <h4 class="well">Categories - Last Week</h4>
+  <ul class="list-group">
+    {% for category in color_categories %}
+    <li class="list-group-item">{{category.label}}: {{category.hours}} hours</li>
+    {% endfor %}
+  </ul>
 </div>
