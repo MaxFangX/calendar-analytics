@@ -91,6 +91,9 @@ class Tag(models.Model):
     label = models.CharField(max_length=100, help_text="The name of this tag")
     keywords = models.CharField(max_length=100, help_text="Comma-separated list of strings to search for")
 
+    def __str__(self):
+        return "'{}': '{}'".format(self.label, self.keywords)
+
     def save(self, *args, **kwargs):
         # Remove beginning and ending spaces
         self.keywords = ",".join([k.strip() for k in self.keywords.split(',')])
@@ -120,7 +123,7 @@ class Tag(models.Model):
         querysets = set()
         for kw in keywords:
             # TODO extend this be able to search in note as well
-            qs = GEvent.objects.filter(calendar=calendar, name__contains=kw)
+            qs = GEvent.objects.filter(calendar=calendar, name__icontains=kw)
             querysets.add(qs)
 
         # Union over the querysets
