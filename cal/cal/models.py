@@ -199,6 +199,7 @@ class GCalendar(models.Model):
                     # Some events don't have timezones
                     g.timezone = event['start'].get('timeZone')
                 g.end_time_unspecified = event.get('endTimeUnspecified', False)
+                g.recurrence = str(event.get('recurrence', ''))
                 g.recurring_event_id = event.get('recurringEventId', '')
                 g.save()
 
@@ -224,7 +225,7 @@ class GCalendar(models.Model):
             except Exception as e:
                 t, v, tb = sys.exc_info()
                 if hasattr(e, 'resp') and e.resp.status == 410:
-                    # Sync token is no longer value, perform full sync
+                    # Sync token is no longer valid, perform full sync
                     result = service.events().list(calendarId=self.calendar_id).execute()
                 else:
                     raise t, v, tb
@@ -343,6 +344,8 @@ class GEvent(Event):
     all_day_event = models.BooleanField(default=False, blank=True)
     timezone = models.CharField(max_length=200, null=True, blank=True, help_text="IANA Time Zone Database Name")
     end_time_unspecified = models.BooleanField(default=False, help_text="If an end time is actually unspecified, since an end time is always specified for compatibility reasons")
+    # Use ast.literal_eval(event.recurrence) to retrieve the list
+    recurrence = models.CharField(max_length=1000, blank=True, help_text="string representation of list of RRULE, EXRULE, RDATE and EXDATE lines for a recurring event, as specified in RFC5545")
     recurring_event_id = models.CharField(max_length=1024, blank=True, help_text="For an instance of a recurring event, the id of the recurring event to which this instance belongs")
 
     # TODO handle all_day_event not being counted in time
