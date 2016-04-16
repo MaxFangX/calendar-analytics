@@ -24,13 +24,13 @@ def home(request):
         color_categories = [{
             'label': c.label,
             'hours': TimeNodeChain(c.get_last_week()).total_time / 3600 }
-            for c in ColorCategory.objects.filter(user=request.user)]
+            for c in ColorCategory.objects.filter(user=request.user).order_by('label')]
         context['color_categories'] = color_categories
         tags = [{
             'label': t.label,
             'hours': t.total_time() / 3600,
             }
-            for t in Tag.objects.filter(user=request.user)]
+            for t in Tag.objects.filter(user=request.user).order_by('label')]
         context['tags'] = tags
 
         return render_to_response(template_name='home_logged_in.html',
