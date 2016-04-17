@@ -166,7 +166,7 @@ class GCalendar(models.Model):
             """
             Helper function to take care of duplicate code
             """
-            if event.get('status', 'confirmed') in ['confirmed', 'tentative']:
+            if event.get('status', 'confirmed') in set(['confirmed', 'tentative']):
                 # Create or update the event
                 try:
                     g = GEvent.objects.get(id_event=event['id'])
@@ -308,7 +308,6 @@ class Event(models.Model, TimeNode):
         super(Event, self).__init__(*args, **kwargs)
 
 
-
 class GEvent(Event):
 
     """
@@ -383,6 +382,13 @@ class GEvent(Event):
         """
         # TODO incorporate this
         return False if self.end <= gevent.start or self.start >= gevent.end else True
+
+
+class GRecurrence(models.Model):
+
+    parent = models.ForeignKey(GEvent, related_name='recurrences')
+    start = models.DateTimeField()
+    end = models.DateTimeField()
 
 
 class Statistic(models.Model):
