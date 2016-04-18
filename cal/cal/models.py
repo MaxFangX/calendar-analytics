@@ -252,6 +252,21 @@ class GCalendar(models.Model):
 
         print "Successfully synced calendar."
 
+    def update_recurring(self, end=None):
+        """
+        Fill in recurring events up to the end time
+        """
+        # TODO consider adding a field to GCalendar that models how far forward
+        # recurring events has been updated
+        # TODO in incremental sync, if future exceptions have been made, sync up to at least that point
+        # TODO sanity checks - don't fill for more than a year in advance
+        if not end:
+            end = datetime.datetime.now()
+        unique_events = GEvent.objects.filter(calendar=self).exclude(recurrency__exact='')
+        for gevent in unique_events:
+            gevent.fill_recurrences(end=end)
+
+
     def find_gaps(self, start=None, end=None):
         qs = GEvent.objects.filter(calendar=self)
         if start:
@@ -374,6 +389,10 @@ class GEvent(Event):
         self.description = self.description[:20000]
 
         super(GEvent, self).save(*args, **kwargs)
+
+    def fill_recurrences(self, end=None):
+        # TODO implement
+        pass
 
 
     def conflicts_with(self, gevent):
