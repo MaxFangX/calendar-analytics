@@ -9,7 +9,15 @@ def json_response(data, status=200):
     return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), status=status, content_type="application/json")
 
 
-class TimeNodeChain:
+class EventCollection:
+
+    def __init__(self):
+        self.events = []
+
+    def get_events(self):
+        raise NotImplementedError()
+
+class TimeNodeChain(EventCollection):
 
     """
     A data structure that functions as a wrapper around a linked list of TimeNodes.
@@ -28,6 +36,7 @@ class TimeNodeChain:
         if timenodes:
             self.insert_all(timenodes)
         self.length
+        super(TimeNodeChain, self).__init__()
 
     def get_head(self):
         return self.head

@@ -1,6 +1,6 @@
 from apiclient.discovery import build
 from cal.constants import GOOGLE_CALENDAR_COLORS
-from cal.helpers import TimeNode, TimeNodeChain
+from cal.helpers import EventCollection, TimeNode, TimeNodeChain
 from datetime import date, datetime, timedelta
 from django.contrib.auth.models import User
 from django.db import models
@@ -49,7 +49,7 @@ class Profile(models.Model):
         self.save()
 
 
-class ColorCategory(models.Model):
+class ColorCategory(models.Model, EventCollection):
 
     user = models.ForeignKey(User, related_name='colorcategories')
     color = models.CharField(max_length=100, help_text="str of the number of the event color in constants.py")
@@ -59,6 +59,10 @@ class ColorCategory(models.Model):
 
     def __str__(self):
         return "{} by {}".format(self.label, self.user.username)
+
+    def get_events(self):
+        # TODO implement
+        return []
 
     def get_last_week(self, calendar=None):
         """
@@ -85,7 +89,7 @@ class ColorCategory(models.Model):
         qs = qs.order_by('updated')
         return qs
 
-class Tag(models.Model):
+class Tag(models.Model, EventCollection):
 
     user = models.ForeignKey(User, related_name='tags')
     label = models.CharField(max_length=100, help_text="The name of this tag")
