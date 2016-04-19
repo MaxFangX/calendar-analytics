@@ -11,9 +11,6 @@ def json_response(data, status=200):
 
 class EventCollection:
 
-    def __init__(self):
-        self.events = []
-
     def get_events(self):
         raise NotImplementedError()
 
@@ -36,7 +33,15 @@ class TimeNodeChain(EventCollection):
         if timenodes:
             self.insert_all(timenodes)
         self.length
-        super(TimeNodeChain, self).__init__()
+
+    def get_events(self):
+        events = []
+        current = self.get_head()
+        while current:
+            events.append(current)
+            current = current.next
+
+        return []
 
     def get_head(self):
         return self.head
