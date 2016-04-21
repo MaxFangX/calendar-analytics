@@ -60,9 +60,12 @@ class ColorCategory(models.Model, EventCollection):
     def __str__(self):
         return "{} by {}".format(self.label, self.user.username)
 
-    def get_events(self):
-        # TODO implement
-        return []
+    def get_events(self, calendar=None):
+        if not calendar:
+            calendar = self.user.profile.main_calendar
+
+        qs = GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color_index=self.color)
+        return qs
 
     def get_last_week(self, calendar=None):
         """
