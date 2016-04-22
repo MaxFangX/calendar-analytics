@@ -10,9 +10,22 @@ def json_response(data, status=200):
 
 
 class EventCollection:
-
+    
     def get_events(self):
         raise NotImplementedError()
+    
+    def intersection(self, other):
+
+        def lazy_get_events(self):
+            return set.intersection(self.get_events(), other.get_events())
+
+        ec = EventCollection()
+        function_type = type(EventCollection.get_events)
+
+        # replace get_events with lazy_get_events for this object only
+        ec.get_events = function_type(lazy_get_events, ec, EventCollection)
+
+        return ec
 
 class TimeNodeChain(EventCollection):
 
