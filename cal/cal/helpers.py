@@ -10,20 +10,22 @@ def json_response(data, status=200):
 
 
 class EventCollection:
+
+    def __init__(self, events_func=None):
+        if events_func:
+            self._events_func = events_func
+        else:
+            self._events_func = lambda: []
     
     def get_events(self):
-        raise NotImplementedError()
+        return self._events_func()
     
     def intersection(self, other):
 
-        def lazy_get_events(self):
+        def lazy_get_events():
             return set.intersection(self.get_events(), other.get_events())
 
-        ec = EventCollection()
-        function_type = type(EventCollection.get_events)
-
-        # replace get_events with lazy_get_events for this object only
-        ec.get_events = function_type(lazy_get_events, ec, EventCollection)
+        ec = EventCollection(events_func=lazy_get_events)
 
         return ec
 
@@ -48,13 +50,13 @@ class TimeNodeChain(EventCollection):
         self.length
 
     def get_events(self):
-        events = []
+        events = set()
         current = self.get_head()
         while current:
-            events.append(current)
+            events.add(current)
             current = current.next
 
-        return []
+        return events
 
     def get_head(self):
         return self.head

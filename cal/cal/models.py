@@ -65,7 +65,7 @@ class ColorCategory(models.Model, EventCollection):
             calendar = self.user.profile.main_calendar
 
         qs = GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color_index=self.color)
-        return qs
+        return set(qs)
 
     def get_last_week(self, calendar=None):
         """
@@ -108,6 +108,9 @@ class Tag(models.Model, EventCollection):
         return super(Tag, self).save(*args, **kwargs)
 
     def get_events(self, calendar=None):
+        return set(self.query(calendar))
+
+    def query(self, calendar=None):
         """
         Returns a QuerySet of events matching this Tag
         """
