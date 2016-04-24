@@ -29,6 +29,15 @@ class EventCollection:
 
         return ec
 
+    def union(self, other):
+
+        def lazy_get_events():
+            return set.union(self.get_events(), other.get_events())
+
+        ec = EventCollection(events_func=lazy_get_events)
+
+        return ec
+
 class TimeNodeChain(EventCollection):
 
     """
