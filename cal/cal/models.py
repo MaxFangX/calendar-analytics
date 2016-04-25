@@ -141,17 +141,6 @@ class Tag(models.Model, EventCollection):
 
         return events_qs.order_by('start')
 
-    def total_time(self, calendar=None):
-
-        events = self.get_events(calendar)
-
-        total = timedelta()
-        for e in events:
-            total += e.end - e.start
-
-        # TODO convert to int?
-        return total.total_seconds()
-        
 
 class GCalendar(models.Model):
     

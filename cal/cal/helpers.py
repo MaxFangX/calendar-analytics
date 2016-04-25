@@ -38,6 +38,18 @@ class EventCollection:
 
         return ec
 
+    def total_time(self, calendar=None):
+
+        events = self.get_events(calendar)
+
+        total = datetime.timedelta()
+        for e in events:
+            total += e.end - e.start
+
+        # TODO convert to int?
+        return total.total_seconds()
+        
+
 class TimeNodeChain(EventCollection):
 
     """
@@ -83,7 +95,8 @@ class TimeNodeChain(EventCollection):
     @property
     def total_time(self):
         """
-        Returns the total time in seconds in this TimeNodeChain
+        Returns the total time in seconds in this TimeNodeChain.
+        Overrides EventCollection.total_time with memoized version
         """
         if not self._total_time:
             total = datetime.timedelta()
