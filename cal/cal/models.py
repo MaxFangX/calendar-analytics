@@ -99,7 +99,7 @@ class Tag(models.Model, EventCollection):
     keywords = models.CharField(max_length=100, help_text="Comma-separated list of strings to search for")
 
     def __str__(self):
-        return "'{}': '{}'".format(self.label, self.keywords)
+        return "<Tag '{}'>".format(self.label, self.keywords)
 
     def save(self, *args, **kwargs):
         # Remove beginning and ending spaces

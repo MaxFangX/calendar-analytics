@@ -11,12 +11,17 @@ def json_response(data, status=200):
 
 class EventCollection:
 
-    def __init__(self, events_func=None):
+    def __init__(self, events_func=None, name=None):
         if events_func:
             self._events_func = events_func
         else:
             self._events_func = lambda: []
-    
+
+        self._name = name if name else "EventCollection"
+
+    def __repr__(self):
+        return self._name
+
     def get_events(self):
         return self._events_func()
     
@@ -25,7 +30,7 @@ class EventCollection:
         def lazy_get_events():
             return set.intersection(self.get_events(), other.get_events())
 
-        ec = EventCollection(events_func=lazy_get_events)
+        ec = EventCollection(events_func=lazy_get_events, name="({} intersection {})".format(self, other))
 
         return ec
 
@@ -34,7 +39,7 @@ class EventCollection:
         def lazy_get_events():
             return set.union(self.get_events(), other.get_events())
 
-        ec = EventCollection(events_func=lazy_get_events)
+        ec = EventCollection(events_func=lazy_get_events, name="({} union {})".format(self, other))
 
         return ec
 
