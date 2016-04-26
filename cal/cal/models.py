@@ -92,6 +92,12 @@ class ColorCategory(models.Model, EventCollection):
         qs = qs.order_by('updated')
         return qs
 
+
+class TagGroup(models.Model):
+
+    user = models.ForeignKey(User, related_name='taggroups')
+    label = models.CharField(max_length=100, help_text="The name of this tag family")
+
 class Tag(models.Model, EventCollection):
 
     user = models.ForeignKey(User, related_name='tags')
