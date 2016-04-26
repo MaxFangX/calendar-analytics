@@ -45,7 +45,7 @@ class EventCollection:
 
     def total_time(self, calendar=None):
 
-        events = self.get_events(calendar)
+        events = self.get_events()
 
         total = datetime.timedelta()
         for e in events:
