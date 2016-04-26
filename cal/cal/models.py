@@ -103,6 +103,7 @@ class Tag(models.Model, EventCollection):
     user = models.ForeignKey(User, related_name='tags')
     label = models.CharField(max_length=100, help_text="The name of this tag")
     keywords = models.CharField(max_length=100, help_text="Comma-separated list of strings to search for")
+    group = models.ForeignKey(TagGroup, null=True, default=None, related_name='tags')
 
     def __str__(self):
         return "<Tag '{}'>".format(self.label, self.keywords)
