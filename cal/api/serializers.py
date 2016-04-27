@@ -52,7 +52,4 @@ class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tag
-        fields = ('id', 'user', 'label', 'keywords')
-
-    user = UserSerializer(read_only=True)
-
+        fields = ('id', 'label', 'keywords')

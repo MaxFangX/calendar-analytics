@@ -19,6 +19,7 @@
     {% block content %}{% endblock %}
 
     {% block bottom_js %}
+      <script type="text/javascript" src="{% static "lib/js/bootstrap.min.js" %}"></script>
       <!-- Helper function to grab cookies, mostly for csrf -->
 			<script>
         function getCookie(name) {
@@ -40,7 +41,8 @@
         // var csrftoken = getCookie('csrftoken');
 			</script>
 
-      <script type="text/javascript" src="{% static "lib/js/bootstrap.min.js" %}"></script>
+      <script type="text/javascript" src="{% static "js/calendaranalytics.js" %}"></script>
+
     {% endblock %}
   </body>
 </html>
