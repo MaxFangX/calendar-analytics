@@ -2,13 +2,16 @@ from apiclient.discovery import build
 from cal.constants import GOOGLE_CALENDAR_COLORS
 from cal.helpers import EventCollection, TimeNode, TimeNodeChain
 from datetime import date, datetime, timedelta
+from dateutil.rrule import rrulestr
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_datetime
 from jsonfield import JSONField
 from oauth2client.django_orm import CredentialsField, FlowField
 from oauth2client.client import AccessTokenRefreshError
 
+import ast
 import httplib2
 import sys
 
@@ -267,8 +270,9 @@ class GCalendar(models.Model):
         # TODO in incremental sync, if future exceptions have been made, sync up to at least that point
         # TODO sanity checks - don't fill for more than a year in advance
         if not end:
-            end = datetime.datetime.now()
-        unique_events = GEvent.objects.filter(calendar=self).exclude(recurrency__exact='')
+            # By default, fill in two months past the present time
+            end = datetime.now() + timedelta(days=60)
+        unique_events = GEvent.objects.filter(calendar=self).exclude(recurrence__exact='')
         for gevent in unique_events:
             gevent.fill_recurrences(end=end)
 
@@ -397,9 +401,37 @@ class GEvent(Event):
         super(GEvent, self).save(*args, **kwargs)
 
     def fill_recurrences(self, end=None):
-        # TODO implement
-        pass
 
+        if not self.recurrence:
+            return
+
+        if end:
+            assert self.start <= end, "Can't fill in recurrences for a negative time window"
+        else:
+            # By default, fill in two months past the present time
+            end = datetime.now() + timedelta(days=60)
+
+        # For some reason, times have to be timezone-naive for rrule parsing
+        start = self.start.astimezone(timezone.utc).replace(tzinfo=None)
+        end = end.astimezone(timezone.utc).replace(tzinfo=None)
+
+        # self.recurrence looks like this:
+        u"[u'RRULE:FREQ=WEEKLY;WKST=MO;UNTIL=20160502T155959Z;BYDAY=MO,WE']"
+        # Convert to string
+        rules = ast.literal_eval(self.recurrence)
+        duration = self.end - self.start
+        for rule_string in rules:
+            rule = rrulestr(rule_string)
+            recurrences = rule.between(after=start, before=end)
+            assert len(recurrences) < 1000, "Let's not pollute our database"
+            for instance_of_start_time in recurrences:
+                # Make times timezone aware again for saving into the database
+                tz_aware_start_time = timezone.make_aware(instance_of_start_time, timezone.get_default_timezone())
+                GRecurrence.objects.get_or_create(parent=self,
+                                                  start=instance_of_start_time,
+                                                  end=instance_of_start_time + duration)
+
+        # TODO check for offset events and delete them. probably just delete all recurrences once there has been a change
 
     def conflicts_with(self, gevent):
         """
