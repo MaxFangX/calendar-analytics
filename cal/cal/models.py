@@ -398,6 +398,9 @@ class GEvent(Event):
             self.description = ""
         self.description = self.description[:20000]
 
+        # TODO fix naive timezone bug
+        # if timezone.is_naive(self.start):
+
         super(GEvent, self).save(*args, **kwargs)
 
     def fill_recurrences(self, end=None):
@@ -427,9 +430,9 @@ class GEvent(Event):
             for instance_of_start_time in recurrences:
                 # Make times timezone aware again for saving into the database
                 tz_aware_start_time = timezone.make_aware(instance_of_start_time, timezone.get_default_timezone())
-                GRecurrence.objects.get_or_create(parent=self,
-                                                  start=instance_of_start_time,
-                                                  end=instance_of_start_time + duration)
+                # GRecurrence.objects.get_or_create(parent=self,
+                #                                   start=instance_of_start_time,
+                #                                   end=instance_of_start_time + duration)
 
         # TODO check for offset events and delete them. probably just delete all recurrences once there has been a change
 
@@ -441,11 +444,11 @@ class GEvent(Event):
         return False if self.end <= gevent.start or self.start >= gevent.end else True
 
 
-class GRecurrence(models.Model):
-
-    parent = models.ForeignKey(GEvent, related_name='recurrences')
-    start = models.DateTimeField()
-    end = models.DateTimeField()
+# class GRecurrence(models.Model):
+# 
+#     parent = models.ForeignKey(GEvent, related_name='recurrences')
+#     start = models.DateTimeField()
+#     end = models.DateTimeField()
 
 
 class Statistic(models.Model):
