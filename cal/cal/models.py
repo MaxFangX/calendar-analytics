@@ -430,9 +430,9 @@ class GEvent(Event):
             for instance_of_start_time in recurrences:
                 # Make times timezone aware again for saving into the database
                 tz_aware_start_time = timezone.make_aware(instance_of_start_time, timezone.get_default_timezone())
-                # GRecurrence.objects.get_or_create(parent=self,
-                #                                   start=instance_of_start_time,
-                #                                   end=instance_of_start_time + duration)
+                GRecurrence.objects.get_or_create(calendar=self.calendar,
+                                                  start=instance_of_start_time,
+                                                  end=instance_of_start_time + duration)
 
         # TODO check for offset events and delete them. probably just delete all recurrences once there has been a change
 
@@ -444,11 +444,12 @@ class GEvent(Event):
         return False if self.end <= gevent.start or self.start >= gevent.end else True
 
 
-# class GRecurrence(models.Model):
-# 
-#     parent = models.ForeignKey(GEvent, related_name='recurrences')
-#     start = models.DateTimeField()
-#     end = models.DateTimeField()
+class GRecurrence(models.Model):
+
+    calendar = models.ForeignKey(GCalendar, related_name='recurrences')
+    start = models.DateTimeField()
+    end = models.DateTimeField()
+    recurring_event_id = models.CharField(max_length=1024, blank=True, help_text="For an instance of a recurring event, the id of the recurring event to which this instance belongs")
 
 
 class Statistic(models.Model):
