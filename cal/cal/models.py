@@ -212,6 +212,9 @@ class GCalendar(models.Model):
                 g.recurring_event_id = event.get('recurringEventId', '')
                 g.save()
 
+                if g.recurrence != '':
+                    g.fill_recurrences()
+
             else:  # Status is cancelled, delete the event
                 try:
                     query = GEvent.objects.get(calendar=self, id_event=event['id'])
@@ -431,7 +434,7 @@ class GEvent(Event):
                 # Make times timezone aware again for saving into the database
                 tz_aware_start_time = timezone.make_aware(instance_of_start_time, timezone.get_default_timezone())
                 GRecurrence.objects.get_or_create(calendar=self.calendar,
-                                                  start=instance_of_start_time,
+                                                  start=tz_aware_start_time,
                                                   end=instance_of_start_time + duration)
 
         # TODO check for offset events and delete them. probably just delete all recurrences once there has been a change
