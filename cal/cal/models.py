@@ -418,8 +418,21 @@ class GEvent(Event):
             end = datetime.now() + timedelta(days=60)
 
         # For some reason, times have to be timezone-naive for rrule parsing
-        start = self.start.astimezone(timezone.utc).replace(tzinfo=None)
-        end = end.astimezone(timezone.utc).replace(tzinfo=None)
+        start_range = self.start
+        if timezone.is_naive(start_range):
+            start_range = timezone.make_aware(start_range, timezone.get_default_timezone())
+        start_range = start_range.astimezone(timezone.utc)
+        # Remove seconds and microseconds
+        start_range = start_range.replace(second=0, microsecond=0)
+        # start_range = timezone.make_naive(start_range)
+
+        end_range = end
+        if timezone.is_naive(end_range):
+            end_range = timezone.make_aware(end_range, timezone.get_default_timezone())
+        end_range = end_range.astimezone(timezone.utc)
+        # Remove seconds and microseconds
+        end_range = end_range.replace(second=0, microsecond=0)
+        # end_range = timezone.make_naive(end_range)
 
         # self.recurrence looks like this:
         u"[u'RRULE:FREQ=WEEKLY;WKST=MO;UNTIL=20160502T155959Z;BYDAY=MO,WE']"
@@ -427,8 +440,8 @@ class GEvent(Event):
         rules = ast.literal_eval(self.recurrence)
         duration = self.end - self.start
         for rule_string in rules:
-            rule = rrulestr(rule_string)
-            recurrences = rule.between(after=start, before=end)
+            rule = rrulestr(rule_string, ignoretz=True)
+            recurrences = rule.between(after=start_range, before=end_range)
             assert len(recurrences) < 1000, "Let's not pollute our database"
             for instance_of_start_time in recurrences:
                 # Make times timezone aware again for saving into the database
