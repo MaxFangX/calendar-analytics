@@ -417,7 +417,6 @@ class GEvent(Event):
             # By default, fill in two months past the present time
             end = datetime.now() + timedelta(days=60)
 
-        # For some reason, times have to be timezone-naive for rrule parsing
         start_range = self.start
         if timezone.is_naive(start_range):
             start_range = timezone.make_aware(start_range, timezone.get_default_timezone())
@@ -448,7 +447,8 @@ class GEvent(Event):
                 tz_aware_start_time = timezone.make_aware(instance_of_start_time, timezone.get_default_timezone())
                 GRecurrence.objects.get_or_create(calendar=self.calendar,
                                                   start=tz_aware_start_time,
-                                                  end=instance_of_start_time + duration)
+                                                  end=instance_of_start_time + duration,
+                                                  recurring_event_id=self.id_event)
 
         # TODO check for offset events and delete them. probably just delete all recurrences once there has been a change
 
@@ -465,7 +465,20 @@ class GRecurrence(models.Model):
     calendar = models.ForeignKey(GCalendar, related_name='recurrences')
     start = models.DateTimeField()
     end = models.DateTimeField()
-    recurring_event_id = models.CharField(max_length=1024, blank=True, help_text="For an instance of a recurring event, the id of the recurring event to which this instance belongs")
+    recurring_event_id = models.CharField(max_length=1024, help_text="For an instance of a recurring event, the id of the recurring event to which this instance belongs")
+
+    def __getattr__(self, name):
+        if name in set(['created', 'updated']):
+            event = GEvent.objects.get(id_event=self.recurring_event_id)
+            return getattr(event, 'name')
+        else:
+            return object.__dict__[name]
+
+    @property
+    def created(self):
+        event = GEvent.objects.get(id_event=self.recurring_event_id)
+
+        return event.created
 
 
 class Statistic(models.Model):
