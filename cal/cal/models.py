@@ -401,8 +401,10 @@ class GEvent(Event):
             self.description = ""
         self.description = self.description[:20000]
 
-        # TODO fix naive timezone bug
-        # if timezone.is_naive(self.start):
+        if timezone.is_naive(self.start):
+            self.start = timezone.make_aware(self.start, timezone.get_default_timezone())
+        if timezone.is_naive(self.end):
+            self.end = timezone.make_aware(self.end, timezone.get_default_timezone())
 
         super(GEvent, self).save(*args, **kwargs)
 
@@ -479,6 +481,15 @@ class GRecurrence(models.Model):
         event = GEvent.objects.get(id_event=self.recurring_event_id)
 
         return event.created
+
+    def save(self, *args, **kwargs):
+
+        if timezone.is_naive(self.start):
+            self.start = timezone.make_aware(self.start, timezone.get_default_timezone())
+        if timezone.is_naive(self.end):
+            self.end = timezone.make_aware(self.end, timezone.get_default_timezone())
+
+        return super(GRecurrence, self).save(args, kwargs)
 
 
 class Statistic(models.Model):
