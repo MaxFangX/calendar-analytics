@@ -14,6 +14,7 @@ from oauth2client.client import AccessTokenRefreshError
 import ast
 import httplib2
 import sys
+import uuid
 
 
 class Profile(models.Model):
@@ -440,6 +441,7 @@ class GEvent(Event):
         # Convert to string
         rules = ast.literal_eval(self.recurrence)
         duration = self.end - self.start
+        created_recurrences = []
         for rule_string in rules:
             rule = rrulestr(rule_string, ignoretz=True)
             recurrences = rule.between(after=start_range, before=end_range)
@@ -447,12 +449,39 @@ class GEvent(Event):
             for instance_of_start_time in recurrences:
                 # Make times timezone aware again for saving into the database
                 tz_aware_start_time = timezone.make_aware(instance_of_start_time, timezone.get_default_timezone())
-                GRecurrence.objects.get_or_create(calendar=self.calendar,
+                new_recurrence, created = GRecurrence.objects.get_or_create(calendar=self.calendar,
                                                   start=tz_aware_start_time,
                                                   end=instance_of_start_time + duration,
                                                   recurring_event_id=self.id_event)
+                if created:
+                    created_recurrences.append(new_recurrence)
+
+                # Alternative solution: 
+                new_recurrence, created = GEvent.objects.get_or_create(name=self.name,
+                                                          start=self.start,
+                                                          end=self.end,
+                                                          location=self.location,
+                                                          created=self.created,
+                                                          updated=self.updated,
+                                                          calendar=self.calendar,
+                                                          id_event=uuid.uuid1().get_hex(),
+                                                          i_cal_uid=self.i_cal_uid,
+                                                          color_index=self.color_index,
+                                                          description=self.description,
+                                                          status=self.status,
+                                                          transparency=self.transparency,
+                                                          all_day_event=self.all_day_event,
+                                                          timezone=self.timezone,
+                                                          end_time_unspecified=self.end_time_unspecified,
+                                                          recurrence='',
+                                                          recurring_event_id=self.id_event,
+                                                          )
+                if created:
+                    created_recurrences.append(new_recurrence)
 
         # TODO check for offset events and delete them. probably just delete all recurrences once there has been a change
+
+        return created_recurrences
 
     def conflicts_with(self, gevent):
         """
