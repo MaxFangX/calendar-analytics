@@ -426,7 +426,7 @@ class GEvent(Event):
         start_range = start_range.astimezone(timezone.utc)
         # Remove seconds and microseconds
         start_range = start_range.replace(second=0, microsecond=0)
-        # start_range = timezone.make_naive(start_range)
+        start_range = timezone.make_naive(start_range)
 
         end_range = end
         if timezone.is_naive(end_range):
@@ -434,7 +434,7 @@ class GEvent(Event):
         end_range = end_range.astimezone(timezone.utc)
         # Remove seconds and microseconds
         end_range = end_range.replace(second=0, microsecond=0)
-        # end_range = timezone.make_naive(end_range)
+        end_range = timezone.make_naive(end_range)
 
         # self.recurrence looks like this:
         u"[u'RRULE:FREQ=WEEKLY;WKST=MO;UNTIL=20160502T155959Z;BYDAY=MO,WE']"
@@ -443,40 +443,50 @@ class GEvent(Event):
         duration = self.end - self.start
         created_recurrences = []
         for rule_string in rules:
-            rule = rrulestr(rule_string, ignoretz=True)
+            # Convert self.start to naive datetime (but actually in UTC) to work with rrulestr
+            dtstart = self.start
+            dtstart = dtstart.astimezone(timezone.utc)
+            dtstart = dtstart.replace(second=0, microsecond=0)
+            dtstart = timezone.make_naive(dtstart)
+            rule = rrulestr(rule_string, ignoretz=True, dtstart=dtstart)
             recurrences = rule.between(after=start_range, before=end_range)
+
             assert len(recurrences) < 1000, "Let's not pollute our database"
             for instance_of_start_time in recurrences:
                 # Make times timezone aware again for saving into the database
                 tz_aware_start_time = timezone.make_aware(instance_of_start_time, timezone.get_default_timezone())
                 new_recurrence, created = GRecurrence.objects.get_or_create(calendar=self.calendar,
                                                   start=tz_aware_start_time,
-                                                  end=instance_of_start_time + duration,
+                                                  end=tz_aware_start_time + duration,
                                                   recurring_event_id=self.id_event)
                 if created:
                     created_recurrences.append(new_recurrence)
 
-                # Alternative solution: 
-                new_recurrence, created = GEvent.objects.get_or_create(name=self.name,
-                                                          start=self.start,
-                                                          end=self.end,
-                                                          location=self.location,
-                                                          created=self.created,
-                                                          updated=self.updated,
-                                                          calendar=self.calendar,
-                                                          id_event=uuid.uuid1().get_hex(),
-                                                          i_cal_uid=self.i_cal_uid,
-                                                          color_index=self.color_index,
-                                                          description=self.description,
-                                                          status=self.status,
-                                                          transparency=self.transparency,
-                                                          all_day_event=self.all_day_event,
-                                                          timezone=self.timezone,
-                                                          end_time_unspecified=self.end_time_unspecified,
-                                                          recurrence='',
-                                                          recurring_event_id=self.id_event,
-                                                          )
-                if created:
+                # Alternative solution
+                try:
+                    GEvent.objects.get(start=tz_aware_start_time, recurring_event_id=self.id_event)
+                except GEvent.DoesNotExist:
+                    new_recurrence = GEvent(name=self.name,
+                                            start=tz_aware_start_time,
+                                            end=tz_aware_start_time + duration,
+                                            location=self.location,
+                                            created=self.created,
+                                            updated=self.updated,
+                                            calendar=self.calendar,
+                                            i_cal_uid=self.i_cal_uid,
+                                            color_index=self.color_index,
+                                            description=self.description,
+                                            status=self.status,
+                                            transparency=self.transparency,
+                                            all_day_event=self.all_day_event,
+                                            timezone=self.timezone,
+                                            end_time_unspecified=self.end_time_unspecified,
+                                            recurrence='',
+                                            recurring_event_id=self.id_event,
+                                            )
+                    # Generate a new id_event
+                    new_recurrence.id_event = uuid.uuid1().get_hex()
+                    new_recurrence.save()
                     created_recurrences.append(new_recurrence)
 
         # TODO check for offset events and delete them. probably just delete all recurrences once there has been a change
@@ -518,7 +528,7 @@ class GRecurrence(models.Model):
         if timezone.is_naive(self.end):
             self.end = timezone.make_aware(self.end, timezone.get_default_timezone())
 
-        return super(GRecurrence, self).save(args, kwargs)
+        return super(GRecurrence, self).save(*args, **kwargs)
 
 
 class Statistic(models.Model):
