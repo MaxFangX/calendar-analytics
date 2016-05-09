@@ -13,6 +13,7 @@ from oauth2client.client import AccessTokenRefreshError
 
 import ast
 import httplib2
+import pytz
 import sys
 import uuid
 
@@ -403,9 +404,15 @@ class GEvent(Event):
         self.description = self.description[:20000]
 
         if timezone.is_naive(self.start):
-            self.start = timezone.make_aware(self.start, timezone.get_default_timezone())
+            if self.timezone:
+                self.start = timezone.make_aware(self.start, pytz.timezone(self.timezone))
+            else:
+                self.start = timezone.make_aware(self.start, timezone.get_default_timezone())
         if timezone.is_naive(self.end):
-            self.end = timezone.make_aware(self.end, timezone.get_default_timezone())
+            if self.timezone:
+                self.end = timezone.make_aware(self.end, pytz.timezone(self.timezone))
+            else:
+                self.end = timezone.make_aware(self.end, timezone.get_default_timezone())
 
         super(GEvent, self).save(*args, **kwargs)
 
