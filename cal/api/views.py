@@ -36,14 +36,11 @@ class GEventList(generics.ListAPIView):
         qs = qs.exclude(status__in=['tentative', 'cancelled'])
         start = self.request.query_params.get('start')
         end = self.request.query_params.get('end')
-        recurrences = self.request.user.profile.main_calendar.recurrences.all()
         if start:
             qs = qs.filter(start__gte=start)
-            recurrences = recurrences.filter(start__gte=start)
         if end:
             qs = qs.filter(end__lte=end)
-            recurrences = recurrences.filter(end__lte=end)
-        return list(qs) + list(recurrences)
+        return qs
 
 
 class StatisticList(generics.ListAPIView):
