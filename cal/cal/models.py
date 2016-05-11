@@ -219,6 +219,15 @@ class GCalendar(models.Model):
 
             else:  # Status is cancelled, delete the event
                 try:
+                    # Data looks like this:
+                    # {
+                    #     u'status': u'cancelled',
+                    #     u'kind': u'calendar#event',
+                    #     u'originalStartTime': {u'dateTime': u'2014-10-23T11:00:00-07:00'},
+                    #     u'etag': u'"2827884681552000"',
+                    #     u'recurringEventId': u'bpbt1o1k55c4hnv9ig9uet69ns',
+                    #     u'id': u'bpbt1o1k55c4hnv9ig9uet69ns_20141023T180000Z'
+                    # }
                     query = GEvent.objects.get(calendar=self, id_event=event['id'])
                     query.delete()
                 except GEvent.DoesNotExist:
@@ -536,6 +545,14 @@ class GRecurrence(models.Model):
             self.end = timezone.make_aware(self.end, timezone.get_default_timezone())
 
         return super(GRecurrence, self).save(*args, **kwargs)
+
+
+class DeletedEvent(models.Model):
+
+    calendar = models.ForeignKey(GCalendar, related_name='deletedevents')
+    start = models.DateTimeField()
+    id_event = models.CharField(max_length=1024, blank=True, help_text="Unique id per calendar")
+    recurring_event_id = models.CharField(max_length=1024, blank=True, help_text="For an instance of a recurring event, the id of the recurring event to which this instance belongs")
 
 
 class Statistic(models.Model):
