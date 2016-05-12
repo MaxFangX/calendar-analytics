@@ -217,21 +217,30 @@ class GCalendar(models.Model):
                 if g.recurrence != '':
                     g.fill_recurrences()
 
-            else:  # Status is cancelled, delete the event
-                try:
-                    # Data looks like this:
-                    # {
-                    #     u'status': u'cancelled',
-                    #     u'kind': u'calendar#event',
-                    #     u'originalStartTime': {u'dateTime': u'2014-10-23T11:00:00-07:00'},
-                    #     u'etag': u'"2827884681552000"',
-                    #     u'recurringEventId': u'bpbt1o1k55c4hnv9ig9uet69ns',
-                    #     u'id': u'bpbt1o1k55c4hnv9ig9uet69ns_20141023T180000Z'
-                    # }
-                    query = GEvent.objects.get(calendar=self, id_event=event['id'])
-                    query.delete()
-                except GEvent.DoesNotExist:
-                    pass
+            else:
+                # Status is cancelled, create a DeletedEvent
+
+                # 'event' looks like this:
+                # {
+                #     u'status': u'cancelled',
+                #     u'kind': u'calendar#event',
+                #     u'originalStartTime': {u'dateTime': u'2014-10-23T11:00:00-07:00'},
+                #     u'etag': u'"2827884681552000"',
+                #     u'recurringEventId': u'bpbt1o1k55c4hnv9ig9uet69ns',
+                #     u'id': u'bpbt1o1k55c4hnv9ig9uet69ns_20141023T180000Z'
+                # }
+                if event['originalStartTime'].get('dateTime'):
+                    # This is a date time
+                    original_start_time = parse_datetime(event['originalStartTime']['dateTime'])
+                else:
+                    # This is a date, convert it to a datetime
+                    original_start_time = datetime.combine(parse_date(event['originalStartTime']['date']), datetime.min.time())
+
+                DeletedEvent.objects.get_or_create(
+                    calendar=self,
+                    id_event=event['id'],
+                    start=original_start_time,
+                    recurring_event_id=event.get('recurringEventId', None))
 
         next_page_token = None
 
@@ -240,6 +249,9 @@ class GCalendar(models.Model):
             result = service.events().list(calendarId=self.calendar_id).execute()
             old_events = GEvent.objects.filter(calendar=self)
             for event in old_events:
+                event.delete()
+            deleted_events = DeletedEvent.objects.filter(calendar=self)
+            for event in deleted_events:
                 event.delete()
         else:
             # Incremental sync, initial request needs syncToken
