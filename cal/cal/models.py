@@ -229,12 +229,15 @@ class GCalendar(models.Model):
                 #     u'recurringEventId': u'bpbt1o1k55c4hnv9ig9uet69ns',
                 #     u'id': u'bpbt1o1k55c4hnv9ig9uet69ns_20141023T180000Z'
                 # }
-                if event['originalStartTime'].get('dateTime'):
-                    # This is a date time
-                    original_start_time = parse_datetime(event['originalStartTime']['dateTime'])
+                if event.get('originalStartTime'):
+                    if event['originalStartTime'].get('dateTime'):
+                        # This is a date time
+                        original_start_time = parse_datetime(event['originalStartTime']['dateTime'])
+                    else:
+                        # This is a date, convert it to a datetime
+                        original_start_time = datetime.combine(parse_date(event['originalStartTime']['date']), datetime.min.time())
                 else:
-                    # This is a date, convert it to a datetime
-                    original_start_time = datetime.combine(parse_date(event['originalStartTime']['date']), datetime.min.time())
+                    original_start_time = None
 
                 DeletedEvent.objects.get_or_create(
                     calendar=self,
@@ -562,7 +565,7 @@ class GRecurrence(models.Model):
 class DeletedEvent(models.Model):
 
     calendar = models.ForeignKey(GCalendar, related_name='deletedevents')
-    start = models.DateTimeField()
+    start = models.DateTimeField(null=True)
     id_event = models.CharField(max_length=1024, blank=True, help_text="Unique id per calendar")
     recurring_event_id = models.CharField(max_length=1024, blank=True, help_text="For an instance of a recurring event, the id of the recurring event to which this instance belongs")
 
