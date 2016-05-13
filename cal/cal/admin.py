@@ -15,6 +15,6 @@ admin.site.register(GCalendar, GCalendarAdmin)
 
 
 class GEventAdmin(admin.ModelAdmin):
-    fields = ('calendar', 'id_event', 'i_cal_uid', 'color', 'description', 'status', 'transparency', 'all_day_event', ('timezone', 'end_time_unspecified'), 'recurring_event_id')
+    fields = ('calendar', 'google_id', 'i_cal_uid', 'color', 'description', 'status', 'transparency', 'all_day_event', ('timezone', 'end_time_unspecified'), 'recurring_event_id')
 
 admin.site.register(GEvent, GEventAdmin)

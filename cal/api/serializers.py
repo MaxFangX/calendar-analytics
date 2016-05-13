@@ -15,7 +15,7 @@ class GEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = GEvent
         fields = ('id', 'name', 'start', 'end', 'location', 'created', 'updated',
-                'calendar', 'id_event', 'i_cal_uid', 'color_index', 'description',
+                'calendar', 'google_id', 'i_cal_uid', 'color_index', 'description',
                 'status', 'transparency', 'all_day_event', 'timezone',
                 'end_time_unspecified', 'recurring_event_id', 'color')
         # color = serializers.SerializerMethodField()

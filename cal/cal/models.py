@@ -180,7 +180,7 @@ class GCalendar(models.Model):
             if event.get('status', 'confirmed') in set(['confirmed', 'tentative']):
                 # Create or update the event
                 try:
-                    g = GEvent.objects.get(id_event=event['id'])
+                    g = GEvent.objects.get(google_id=event['id'])
                 except GEvent.DoesNotExist:
                     g = GEvent()
                 g.name = event.get('summary', '')
@@ -199,7 +199,7 @@ class GCalendar(models.Model):
                     g.updated = parse_datetime(event['updated'])
 
                 g.calendar = self
-                g.id_event = event['id']
+                g.google_id = event['id']
                 g.i_cal_uid = event['iCalUID']
                 g.color_index = event.get('colorId', '')
                 g.description = event.get('description', '')
@@ -241,8 +241,8 @@ class GCalendar(models.Model):
 
                 DeletedEvent.objects.get_or_create(
                     calendar=self,
-                    id_event=event['id'],
-                    start=original_start_time,
+                    google_id=event['id'],
+                    original_start_time=original_start_time,
                     recurring_event_id=event.get('recurringEventId', None))
 
         next_page_token = None
@@ -387,7 +387,7 @@ class GEvent(Event):
     # TODO support attendees for analyzing spending time with other people
 
     calendar = models.ForeignKey(GCalendar, related_name='gevents')
-    id_event = models.CharField(max_length=1024, help_text="Unique id per calendar")
+    google_id = models.CharField(max_length=1024, help_text="Unique id per calendar")
     i_cal_uid = models.CharField(max_length=1024, help_text="Unique id across calendaring systems. Only 1 per recurring event")
     color_index = models.CharField(max_length=10, blank=True, choices=EVENT_COLORS)
     description = models.TextField(max_length=20000, blank=True)
@@ -489,13 +489,13 @@ class GEvent(Event):
                 new_recurrence, created = GRecurrence.objects.get_or_create(calendar=self.calendar,
                                                   start=tz_aware_start_time,
                                                   end=tz_aware_start_time + duration,
-                                                  recurring_event_id=self.id_event)
+                                                  recurring_event_id=self.google_id)
                 if created:
                     created_recurrences.append(new_recurrence)
 
                 # Alternative solution
                 try:
-                    GEvent.objects.get(start=tz_aware_start_time, recurring_event_id=self.id_event)
+                    GEvent.objects.get(start=tz_aware_start_time, recurring_event_id=self.google_id)
                 except GEvent.DoesNotExist:
                     new_recurrence = GEvent(name=self.name,
                                             start=tz_aware_start_time,
@@ -513,10 +513,10 @@ class GEvent(Event):
                                             timezone=self.timezone,
                                             end_time_unspecified=self.end_time_unspecified,
                                             recurrence='',
-                                            recurring_event_id=self.id_event,
+                                            recurring_event_id=self.google_id,
                                             )
-                    # Generate a new id_event
-                    new_recurrence.id_event = uuid.uuid1().get_hex()
+                    # Generate a new google_id
+                    new_recurrence.google_id = uuid.uuid1().get_hex()
                     new_recurrence.save()
                     created_recurrences.append(new_recurrence)
 
@@ -541,14 +541,14 @@ class GRecurrence(models.Model):
 
     def __getattr__(self, name):
         if name in set(['created', 'updated']):
-            event = GEvent.objects.get(id_event=self.recurring_event_id)
+            event = GEvent.objects.get(google_id=self.recurring_event_id)
             return getattr(event, 'name')
         else:
             return object.__dict__[name]
 
     @property
     def created(self):
-        event = GEvent.objects.get(id_event=self.recurring_event_id)
+        event = GEvent.objects.get(google_id=self.recurring_event_id)
 
         return event.created
 
@@ -565,8 +565,8 @@ class GRecurrence(models.Model):
 class DeletedEvent(models.Model):
 
     calendar = models.ForeignKey(GCalendar, related_name='deletedevents')
-    start = models.DateTimeField(null=True)
-    id_event = models.CharField(max_length=1024, blank=True, help_text="Unique id per calendar")
+    original_start_time = models.DateTimeField(null=True)
+    google_id = models.CharField(max_length=1024, blank=True, help_text="Unique id per calendar")
     recurring_event_id = models.CharField(max_length=1024, blank=True, help_text="For an instance of a recurring event, the id of the recurring event to which this instance belongs")
 
 
