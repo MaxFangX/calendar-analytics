@@ -175,7 +175,7 @@ class GCalendar(models.Model):
 
         def update_event(event):
             """
-            Helper function to take care of duplicate code
+            Helper function
             """
             if event.get('status', 'confirmed') in set(['confirmed', 'tentative']):
                 # Create or update the event
@@ -243,7 +243,8 @@ class GCalendar(models.Model):
                     calendar=self,
                     google_id=event['id'],
                     original_start_time=original_start_time,
-                    recurring_event_id=event.get('recurringEventId', None))
+                    recurring_event_id=event.get('recurringEventId', ''))
+        # END Helper Function #
 
         next_page_token = None
 
@@ -568,6 +569,33 @@ class DeletedEvent(models.Model):
     original_start_time = models.DateTimeField(null=True)
     google_id = models.CharField(max_length=1024, blank=True, help_text="Unique id per calendar")
     recurring_event_id = models.CharField(max_length=1024, blank=True, help_text="For an instance of a recurring event, the id of the recurring event to which this instance belongs")
+
+    def __str__(self):
+
+        components = []
+        if self.google_id:
+            components.append("ID {}".format(self.google_id))
+        if self.original_start_time:
+            components.append("Start {}".format(self.original_start_time))
+        if self.recurring_event_id:
+            components.append("Recurring id {} ".format(self.recurring_event_id))
+
+        return ", ".join(components)
+
+    def apply(self):
+        """
+        Ensure that self.calendar is consistent with this DeletedEvent
+        """
+
+        if self.original_start_time:
+            assert self.recurring_event_id, "If a DeletedEvent has an original_start_time, it must also have a recurring_event_id"
+            qs = GEvent.objects.filter(calendar=self.calendar, start=self.original_start_time, recurring_event_id=self.recurring_event_id)
+            for event in qs:
+                event.delete()
+
+        qs2 = GEvent.objects.filter(calendar=self.calendar, google_id=self.google_id)
+        for event in qs2:
+            event.delete()
 
 
 class Statistic(models.Model):
