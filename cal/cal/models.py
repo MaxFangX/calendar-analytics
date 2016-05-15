@@ -254,6 +254,7 @@ class GCalendar(models.Model):
             old_events = GEvent.objects.filter(calendar=self)
             for event in old_events:
                 event.delete()
+            # Delete the DeletedEvents and get a fresh copy from Google
             deleted_events = DeletedEvent.objects.filter(calendar=self)
             for event in deleted_events:
                 event.delete()
@@ -288,6 +289,11 @@ class GCalendar(models.Model):
             # Assume at this point it's a correctly formatted event
             for item in result['items']:
                 update_event(item)
+
+        # Make this calendar consistent with existing DeletedEvents
+        deleted_events = DeletedEvent.objects.filter(calendar=self)
+        for d_event in deleted_events:
+            d_event.apply()
 
         print "Successfully synced calendar."
 
