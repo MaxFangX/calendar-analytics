@@ -440,6 +440,7 @@ class GEvent(Event):
             self.color_index = self.EVENT_COLORS[0]
 
         if timezone.is_naive(self.start):
+            print "Making datetime timezone aware for GEvent {} with id {}".format(self, self.id)
             if self.timezone:
                 self.start = timezone.make_aware(self.start, pytz.timezone(self.timezone))
             else:
@@ -531,6 +532,9 @@ class GEvent(Event):
                     new_recurrence.google_id = uuid.uuid1().get_hex()
                     new_recurrence.save()
                     created_recurrences.append(new_recurrence)
+                except GEvent.MultipleObjectsReturned:
+                    # TODO fix this
+                    pass
 
         # TODO check for offset events and delete them. probably just delete all recurrences once there has been a change
 
@@ -600,7 +604,13 @@ class DeletedEvent(models.Model):
 
         if self.original_start_time:
             assert self.recurring_event_id, "If a DeletedEvent has an original_start_time, it must also have a recurring_event_id"
-            qs = GEvent.objects.filter(calendar=self.calendar, start=self.original_start_time, recurring_event_id=self.recurring_event_id)
+            # Need to add a one hour buffer for this query because this the implementation of RRULE using dateutil uses
+            # naive datetimes and therefore doesn't account for daylight savings (not verified, but most likely problem)
+            qs = GEvent.objects.filter(calendar=self.calendar,
+                                       start__gte=self.original_start_time - timedelta(hours=1),
+                                       start__lte=self.original_start_time + timedelta(hours=1),
+                                       recurring_event_id=self.recurring_event_id)
+            # qs = GEvent.objects.filter(calendar=self.calendar, start=self.original_start_time, recurring_event_id=self.recurring_event_id)
             for event in qs:
                 event.delete()
 
