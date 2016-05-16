@@ -297,6 +297,20 @@ class GCalendar(models.Model):
 
         print "Successfully synced calendar."
 
+        # Some additional sanity checks
+        # Check for non-duplicate events with the same recurring_event_id
+        start_times = {}
+        for recurrence in GEvent.objects.filter(calendar=self).exclude(recurrence=''):
+            if recurrence.start in start_times.get(recurrence.recurring_event_id, set()):
+                print "Error: Multiple GEvents found with the same start and recurring_event_id"
+                dupe_ids = [str(dupe.id) for dupe in GEvent.objects.filter(recurring_event_id=recurrence.recurring_event_id,
+                                                                start=recurrence.start)]
+                print "IDs are {} at time {}".format(", ".join(dupe_ids), recurrence.start)
+
+            if not start_times.get(recurrence.recurring_event_id, None):
+                start_times[recurrence.recurring_event_id] = set()
+            start_times[recurrence.recurring_event_id].add(recurrence.start)
+
     def update_recurring(self, end=None):
         """
         Fill in recurring events up to the end time
@@ -439,8 +453,10 @@ class GEvent(Event):
         if self.color_index is None or self.color_index == '':
             self.color_index = self.EVENT_COLORS[0]
 
+        made_aware = False
         if timezone.is_naive(self.start):
-            print "Making datetime timezone aware for GEvent {} with id {}".format(self, self.id)
+            made_aware = True
+            
             if self.timezone:
                 self.start = timezone.make_aware(self.start, pytz.timezone(self.timezone))
             else:
@@ -452,6 +468,9 @@ class GEvent(Event):
                 self.end = timezone.make_aware(self.end, timezone.get_default_timezone())
 
         super(GEvent, self).save(*args, **kwargs)
+
+        if made_aware:
+            print "Made datetime timezone aware for GEvent {} with id {}".format(self.name, self.id)
 
     def fill_recurrences(self, end=None):
 
