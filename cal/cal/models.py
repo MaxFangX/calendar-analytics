@@ -378,7 +378,8 @@ class GEvent(Event):
     https://developers.google.com/google-apps/calendar/v3/reference/events#resource-representations
     """
 
-    EVENT_COLORS = [(k, GOOGLE_CALENDAR_COLORS['event'][k]['background']) for k in GOOGLE_CALENDAR_COLORS['event'].keys()]  # '1', '2', '3', etc
+    # '1', '2', '3', etc
+    EVENT_COLORS = [(k, GOOGLE_CALENDAR_COLORS['event'][k]['background']) for k in GOOGLE_CALENDAR_COLORS['event'].keys()]
 
     STATUS_CHOICES = (
         ('confirmed', 'Confirmed'),
@@ -433,6 +434,10 @@ class GEvent(Event):
         if self.description is None:
             self.description = ""
         self.description = self.description[:20000]
+
+        # If there is no color, set the default color
+        if self.color_index is None or self.color_index == '':
+            self.color_index = self.EVENT_COLORS[0]
 
         if timezone.is_naive(self.start):
             if self.timezone:
