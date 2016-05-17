@@ -392,8 +392,8 @@ class GEvent(Event):
     https://developers.google.com/google-apps/calendar/v3/reference/events#resource-representations
     """
 
-    # '1', '2', '3', etc
-    EVENT_COLORS = [(k, GOOGLE_CALENDAR_COLORS['event'][k]['background']) for k in GOOGLE_CALENDAR_COLORS['event'].keys()]
+    EVENT_COLORS_KEYS = sorted(GOOGLE_CALENDAR_COLORS['event'].keys(), key=lambda x: int(x))
+    EVENT_COLORS_TUPLES = [(k, GOOGLE_CALENDAR_COLORS['event'][k]['background']) for k in EVENT_COLORS_KEYS]
 
     STATUS_CHOICES = (
         ('confirmed', 'Confirmed'),
@@ -411,7 +411,7 @@ class GEvent(Event):
     calendar = models.ForeignKey(GCalendar, related_name='gevents')
     google_id = models.CharField(max_length=1024, help_text="Unique id per calendar")
     i_cal_uid = models.CharField(max_length=1024, help_text="Unique id across calendaring systems. Only 1 per recurring event")
-    color_index = models.CharField(max_length=10, blank=True, choices=EVENT_COLORS)
+    color_index = models.CharField(max_length=10, blank=False, choices=EVENT_COLORS_TUPLES)
     description = models.TextField(max_length=20000, blank=True)
     status = models.CharField(max_length=50, default='confirmed', blank=True, choices=STATUS_CHOICES)
     transparency = models.CharField(max_length=50, default='opaque', blank=True, choices=TRANSPARENCY_CHOICES, help_text="Whether the event blocks time on the calendar.")
@@ -436,7 +436,6 @@ class GEvent(Event):
             return color
         else:
             # This handles when data isn't consistent for some reason.
-            # TODO migration for blank=False in color_index attribute, then remove this
             print "Warning: GEvent '{}' with id {} has an incorrect color_index value of '{}'".format(self.name, self.id, self.color_index)
             return GOOGLE_CALENDAR_COLORS['event']['1']
 
@@ -449,9 +448,13 @@ class GEvent(Event):
             self.description = ""
         self.description = self.description[:20000]
 
-        # If there is no color, set the default color
+        # Validate the color_index field, correct if necessary
         if self.color_index is None or self.color_index == '':
-            self.color_index = self.EVENT_COLORS[0]
+            self.color_index = self.EVENT_COLORS_KEYS[0]
+        try:
+            assert int(self.color_index) in range(self.EVENT_COLORS_KEYS)
+        except (ValueError, AssertionError):
+            self.color_index = self.EVENT_COLORS_KEYS[0]
 
         made_aware = False
         if timezone.is_naive(self.start):
