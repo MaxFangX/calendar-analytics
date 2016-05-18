@@ -5,8 +5,9 @@
   {{ block.super }}
 	<!-- BEGIN FullCalendar -->
   <link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.css' />
-  <script src='//cdnjs.cloudflare.com/ajax/libs/moment.js/2.12.0/moment.min.js'></script>
-  <script src='//cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.js'></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.4/moment-timezone-with-data-2010-2020.min.js"></script>
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.js"></script>
 	<!-- END FullCalendar -->
 
   <!-- START PSA G+ Logout -->
@@ -63,9 +64,9 @@
     </div>
   {% endif %}
   {% if request.user.is_staff %}
-    <button class="btn btn-primary pull-right"><a href="/v1/sync?full_sync=True">Full sync</a></button>
-    <button class="btn btn-primary pull-right"><a href="/v1/sync">Sync</a></button>
-    <button class="btn btn-primary pull-right"><a href="/auth/clear">Reset credentials</a></button>
+    <a href="/v1/sync?full_sync=True"><button class="btn btn-primary pull-right">Full sync</button></a>
+    <a href="/v1/sync"><button class="btn btn-primary pull-right">Sync</button></a>
+    <a href="/auth/clear"><button class="btn btn-primary pull-right">Reset credentials</button></a>
   {% endif %}
   <br>
 </div>
@@ -79,12 +80,21 @@
           $('#calendar').fullCalendar({
               defaultView: 'agendaWeek',
               events: function(start, end, timezone, callback) {
+                  var query_timezone = '';
+                  if (!timezone) {
+                      query_timezone = 'UTC';
+                  } else if (timezone === 'local') {
+                      query_timezone = moment.tz.guess();
+                  } else {
+                      query_timezone = timezone;
+                  }
                   $.ajax({
                       url: "/v1/gevents.json",
                       dataType: 'json',
                       data: {
-                          start: start.toISOString() + "T00:00:00Z",
-                          end: end.toISOString() + "T00:00:00Z",
+                          start: start.toISOString(),
+                          end: end.toISOString(),
+                          timezone: query_timezone,
                       },
                       success: function(data) {
                           var events = [];
@@ -103,11 +113,11 @@
                               })
                           });
                           callback(events);
+
                       }
                   });
               },
               timezone: 'local',
-
           })
       });
 	</script>

@@ -452,7 +452,7 @@ class GEvent(Event):
         if self.color_index is None or self.color_index == '':
             self.color_index = self.EVENT_COLORS_KEYS[0]
         try:
-            assert int(self.color_index) in range(self.EVENT_COLORS_KEYS)
+            assert int(self.color_index) in range(len(self.EVENT_COLORS_KEYS))
         except (ValueError, AssertionError):
             self.color_index = self.EVENT_COLORS_KEYS[0]
 
