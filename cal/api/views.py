@@ -38,8 +38,8 @@ class GEventList(generics.ListAPIView):
 
     Query Parameters
 
-    `start`:    a string representing a date or a datetime
-    `end`:      a string representing a date or a datetime
+    `start`:    (required) a string representing a date or a datetime
+    `end`:      (required) a string representing a date or a datetime
     `timezone`: a string representing a timezone
     """
     serializer_class = GEventSerializer
@@ -51,34 +51,35 @@ class GEventList(generics.ListAPIView):
         end_str = self.request.query_params.get('end')
         timezone_str = self.request.query_params.get('timezone')
 
+        if not start_str or not end_str:
+            return Response({'Missing query parameter `start` or `end`'}, status=status.HTTP_400_BAD_REQUEST)
+
         timezone = None
         if timezone_str:
             try:
                 timezone = pytz.timezone(timezone_str)
             except pytz.UnknownTimeZoneError:
-                raise pytz.UnknownTimeZoneError("{} could not be parsed into a timezone".format(timezone_str))
+                return Response({"{} could not be parsed into a timezone".format(timezone_str)}, status=status.HTTP_400_BAD_REQUEST)
 
         def handle_time_string(time_str):
-            was_date = False
             time = parse_datetime(time_str)
             if not time:
                 # Parse the date and create a datetime at the zeroth hour
                 date = parse_date(time_str)
                 if not date:
-                    raise Exception("{} couldn't be parsed as date or datetime".format(time_str))
-                was_date = True
+                    return Response({"{} couldn't be parsed as date or datetime".format(time_str)}, status=status.HTTP_400_BAD_REQUEST)
                 time = datetime.combine(date, datetime.min.time())
 
-            if was_date:
+            if timezone_util.is_naive(time):
                 if timezone:
                     time = timezone_util.make_aware(time, timezone)
                 else:
                     time = timezone_util.make_aware(time, timezone_util.get_default_timezone())
+            
+            if timezone:
+                time = time.astimezone(timezone)
             else:
-                if timezone:
-                    time = time.astimezone(pytz.timezone(timezone))
-                else:
-                    time = time.astimezone(timezone_util.utc)
+                time = time.astimezone(timezone_util.utc)
 
             return time
 
