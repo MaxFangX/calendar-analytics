@@ -40,26 +40,40 @@ class GEventList(generics.ListAPIView):
 
     `start`:    (required) a string representing a date or a datetime
     `end`:      (required) a string representing a date or a datetime
-    `timezone`: a string representing a timezone
+    `timezone`: (optional) a string representing a timezone
+    `edge`:     (optional) whether events overlapping with the start/end boundaries
+                will be included. Options are 'inclusive', 'exclusive', and 'truncated'.
+                'truncated' means that events that overlap will be included, but will be
+                modified so that they start or end exactly at the boundary they overlap
+                with.
     """
     serializer_class = GEventSerializer
 
     def get_queryset(self):
+        EDGE_OPTIONS = set(['inclusive', 'exclusive', 'truncated'])
+
         qs = GEvent.objects.filter(calendar=self.request.user.profile.main_calendar)
         qs = qs.exclude(status__in=['tentative', 'cancelled'])
         start_str = self.request.query_params.get('start')
         end_str = self.request.query_params.get('end')
         timezone_str = self.request.query_params.get('timezone')
+        edge_str = self.request.query_params.get('edge')
+
+        edge = None
+        if edge_str:
+            if edge_str not in EDGE_OPTIONS:
+                raise Exception("Edge query parameter {} is not one of {}".format(edge_str, EDGE_OPTIONS))
+            edge = edge_str
 
         if not start_str or not end_str:
-            return Response({'Missing query parameter `start` or `end`'}, status=status.HTTP_400_BAD_REQUEST)
+            raise Exception("Missing query parameter `start` or `end`")
 
         timezone = None
         if timezone_str:
             try:
                 timezone = pytz.timezone(timezone_str)
             except pytz.UnknownTimeZoneError:
-                return Response({"{} could not be parsed into a timezone".format(timezone_str)}, status=status.HTTP_400_BAD_REQUEST)
+                raise Exception("{} could not be parsed into a timezone".format(timezone_str))
 
         def handle_time_string(time_str):
             time = parse_datetime(time_str)
@@ -67,7 +81,7 @@ class GEventList(generics.ListAPIView):
                 # Parse the date and create a datetime at the zeroth hour
                 date = parse_date(time_str)
                 if not date:
-                    return Response({"{} couldn't be parsed as date or datetime".format(time_str)}, status=status.HTTP_400_BAD_REQUEST)
+                    raise Exception("{} couldn't be parsed as date or datetime".format(time_str))
                 time = datetime.combine(date, datetime.min.time())
 
             if timezone_util.is_naive(time):
@@ -83,12 +97,17 @@ class GEventList(generics.ListAPIView):
 
             return time
 
-        if start_str:
-            start = handle_time_string(start_str)
+        start = handle_time_string(start_str)
+        end = handle_time_string(end_str)
+        if edge == 'truncated':
+            # TODO implement
+            pass
+        elif edge == 'exclusive':
             qs = qs.filter(start__gte=start)
-        if end_str:
-            end = handle_time_string(end_str)
             qs = qs.filter(end__lte=end)
+        elif edge == 'inclusive' or not edge:
+            qs = qs.filter(end__gt=start)
+            qs = qs.filter(start__lt=end)
 
         return qs
 

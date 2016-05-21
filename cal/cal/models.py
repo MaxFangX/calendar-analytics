@@ -59,8 +59,6 @@ class ColorCategory(models.Model, EventCollection):
     user = models.ForeignKey(User, related_name='colorcategories')
     color = models.CharField(max_length=100, help_text="str of the number of the event color in constants.py")
     label = models.CharField(max_length=100)
-    # Consider adding a ForeignKey(null=True) to this model to allow for
-    # categorizing on multiple calendars
 
     def __str__(self):
         return "{} by {}".format(self.label, self.user.username)
