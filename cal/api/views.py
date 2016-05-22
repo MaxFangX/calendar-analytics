@@ -100,14 +100,18 @@ class GEventList(generics.ListAPIView):
         start = handle_time_string(start_str)
         end = handle_time_string(end_str)
         if edge == 'truncated':
-            # TODO implement
-            pass
+            start_edge = list(qs.filter(start__lt=start, end__gt=start).order_by('start'))
+            exclusive = list(qs.filter(start__gte=start, end__lte=end).order_by('start'))
+            end_edge = list(qs.filter(start__lt=end, end__gt=end).order_by('start'))
+            for s in start_edge:
+                s.start = start
+            for e in end_edge:
+                e.end = end
+            qs = start_edge + exclusive + end_edge
         elif edge == 'exclusive':
-            qs = qs.filter(start__gte=start)
-            qs = qs.filter(end__lte=end)
+            qs = qs.filter(start__gte=start, end__lte=end).order_by('start')
         elif edge == 'inclusive' or not edge:
-            qs = qs.filter(end__gt=start)
-            qs = qs.filter(start__lt=end)
+            qs = qs.filter(end__gt=start, start__lt=end).order_by('start')
 
         return qs
 
