@@ -8,10 +8,11 @@ $(document).ready(function() {
             },
             success: function(data) {
                 tags = [];
+                data.results.sort(function(a, b) {
+                    return a.label.localeCompare(b.label)
+                });
                 $.each(data.results, function(index, tag) {
-                    label = tag.label;
-                    keywords = tag.keywords;
-                    $('<li>' + label + ': ### hours </li>').addClass('list-group-item').appendTo('.cal-tag-list .list-group')
+                    $('<li>' + tag.label + ': ' + tag.hours + ' hours </li>').addClass('list-group-item').appendTo('.cal-tag-list .list-group');
                 });
             }
         });

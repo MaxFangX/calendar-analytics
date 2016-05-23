@@ -111,6 +111,10 @@ class Tag(models.Model, EventCollection):
     def __str__(self):
         return "<Tag '{}'>".format(self.label, self.keywords)
 
+    @property
+    def hours(self):
+        return self.total_time() / 3600
+
     def save(self, *args, **kwargs):
         # Remove beginning and ending spaces
         self.keywords = ",".join([k.strip() for k in self.keywords.split(',')])

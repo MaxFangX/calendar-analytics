@@ -144,6 +144,7 @@ class TagList(generics.ListCreateAPIView):
             qs = qs.filter(start__gte=start)
         if end:
             qs = qs.filter(end__lte=end)
+
         return qs
 
     def post(self, request, *args, **kwargs): 
