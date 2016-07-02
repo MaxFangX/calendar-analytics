@@ -64,7 +64,9 @@
     </div>
   {% endif %}
   {% if request.user.is_staff %}
-    <a href="/v1/sync?full_sync=True"><button class="btn btn-primary pull-right">Full sync</button></a>
+    <a href="/v1/sync?full_sync=true&sync_all=true"><button class="btn btn-primary pull-right">Full sync all</button></a>
+    <a href="/v1/sync?full_sync=true"><button class="btn btn-primary pull-right">Full sync</button></a>
+    <a href="/v1/sync?sync_all=true"><button class="btn btn-primary pull-right">Sync all</button></a>
     <a href="/v1/sync"><button class="btn btn-primary pull-right">Sync</button></a>
     <a href="/auth/clear"><button class="btn btn-primary pull-right">Reset credentials</button></a>
   {% endif %}

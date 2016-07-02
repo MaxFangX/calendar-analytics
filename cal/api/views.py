@@ -20,16 +20,25 @@ def api_root(request, format=None):
 @api_view(('GET',))
 def sync(request, format=None):
 
-    if request.user:
-        main_calendar = Profile.get_or_create(request.user)[0].main_calendar
-        if main_calendar:
-            if request.query_params.get('full_sync'):
-                main_calendar.sync(full_sync=True)
-            else:
-                main_calendar.sync()
-            return HttpResponseRedirect("/")
+    if not request.user:
+        return Response("Not logged in")
 
-    return Response("Failed to sync calendar")
+    profile = Profile.get_or_create(request.user)[0]
+    
+    if request.query_params.get('sync_all'):
+        profile.get_or_create_calendars(create_only_primary=False)
+        calendars = GCalendar.objects.filter(user=request.user)
+    else:
+        profile.get_or_create_calendars(create_only_primary=True)
+        calendars = [profile.main_calendar]
+
+    for calendar in calendars:
+        if request.query_params.get('full_sync'):
+            calendar.sync(full_sync=True)
+        else:
+            calendar.sync()
+
+    return HttpResponseRedirect("/")
 
 
 class GCalendarList(generics.ListAPIView):
