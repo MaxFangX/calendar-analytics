@@ -1,5 +1,5 @@
-from api.serializers import GEventSerializer, StatisticSerializer, ColorCategorySerializer, TagSerializer
-from cal.models import ColorCategory, GEvent, Statistic, Profile, Tag
+from api.serializers import GCalendarSerializer, GEventSerializer, StatisticSerializer, ColorCategorySerializer, TagSerializer
+from cal.models import ColorCategory, GCalendar, GEvent, Statistic, Profile, Tag
 from datetime import datetime
 from django.http import HttpResponseRedirect
 from django.utils import timezone as timezone_util
@@ -32,6 +32,16 @@ def sync(request, format=None):
     return Response("Failed to sync calendar")
 
 
+class GCalendarList(generics.ListAPIView):
+    """
+    API endpoint to query for Google Calendars
+    """
+    serializer_class = GCalendarSerializer
+
+    def get_queryset(self):
+        return GCalendar.objects.filter(user=self.request.user)
+
+
 class GEventList(generics.ListAPIView):
     """
     API endpoint to query for Google Calendar events, without pruning for duplicates
@@ -40,6 +50,8 @@ class GEventList(generics.ListAPIView):
 
     `start`:    (required) a string representing a date or a datetime
     `end`:      (required) a string representing a date or a datetime
+    `calendar`  (optional) the calendar id from which to pull events. If a calendar id
+                is not supplied, defaults to the user's main calendar.
     `timezone`: (optional) a string representing a timezone
     `edge`:     (optional) whether events overlapping with the start/end boundaries
                 will be included. Options are 'inclusive', 'exclusive', and 'truncated'.
@@ -52,12 +64,23 @@ class GEventList(generics.ListAPIView):
     def get_queryset(self):
         EDGE_OPTIONS = set(['inclusive', 'exclusive', 'truncated'])
 
-        qs = GEvent.objects.filter(calendar=self.request.user.profile.main_calendar)
-        qs = qs.exclude(status__in=['tentative', 'cancelled'])
+        calendar_id = self.request.query_params.get('calendarId')
         start_str = self.request.query_params.get('start')
         end_str = self.request.query_params.get('end')
         timezone_str = self.request.query_params.get('timezone')
         edge_str = self.request.query_params.get('edge')
+
+        calendar = None
+        if calendar_id:
+            try:
+                calendar = GCalendar.objects.filter(self.request.user).get(calendar_id=calendar_id)
+            except GCalendar.DoesNotExist:
+                raise Exception("{} was not a valid calendar id".format(calendar_id))
+        else:
+            calendar = self.request.user.profile.main_calendar
+
+        qs = GEvent.objects.filter(calendar=calendar)
+        qs = qs.exclude(status__in=['tentative', 'cancelled'])
 
         edge = None
         if edge_str:
