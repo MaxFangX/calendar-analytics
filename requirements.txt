@@ -7,6 +7,7 @@ colorama==0.3.7
 decorator==4.0.9
 Django==1.8.4
 django-filter==0.11.0
+django-loginas==0.2.2
 djangorestframework==3.2.4
 docker-py==1.7.2
 dockerpty==0.4.1

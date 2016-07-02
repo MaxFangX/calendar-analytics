@@ -68,6 +68,7 @@ INSTALLED_APPS = (
     # Vendor App(s)
     'rest_framework',
     'social.apps.django_app.default',
+    'loginas',
 )
 
 # TODO make an actual login page for redirection
