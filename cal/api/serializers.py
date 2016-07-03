@@ -10,6 +10,13 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('username', 'email',)
 
 
+class GCalendarSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = GCalendar
+        fields = ('calendar_id', 'meta')
+
+
 class GEventSerializer(serializers.ModelSerializer):
 
     class Meta:

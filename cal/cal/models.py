@@ -46,6 +46,12 @@ class Profile(models.Model):
     def __str__(self):
         return "{}'s profile".format(self.user)
 
+    def create_calendars(self, only_primary=True):
+        if only_primary and self.main_calendar:
+            return False
+        self.user.googlecredentials.import_calendars(only_primary)
+        return self.main_calendar
+
     def clear_credentials(self):
         qs = GoogleCredentials.objects.filter(user=self.user)
         if qs:
