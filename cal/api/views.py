@@ -57,16 +57,16 @@ class GEventList(generics.ListAPIView):
 
     Query Parameters
 
-    `start`:    (required) a string representing a date or a datetime
-    `end`:      (required) a string representing a date or a datetime
-    `calendar`  (optional) the calendar id from which to pull events. If a calendar id
-                is not supplied, defaults to the user's main calendar.
-    `timezone`: (optional) a string representing a timezone
-    `edge`:     (optional) whether events overlapping with the start/end boundaries
-                will be included. Options are 'inclusive', 'exclusive', and 'truncated'.
-                'truncated' means that events that overlap will be included, but will be
-                modified so that they start or end exactly at the boundary they overlap
-                with.
+    `start`:      (required) a string representing a date or a datetime
+    `end`:        (required) a string representing a date or a datetime
+    `calendarId`: (optional) the calendar id from which to pull events. If a calendar id
+                  is not supplied, defaults to the user's main calendar.
+    `timezone`:   (optional) a string representing a timezone
+    `edge`:       (optional) whether events overlapping with the start/end boundaries
+                  will be included. Options are 'inclusive', 'exclusive', and 'truncated'.
+                  'truncated' means that events that overlap will be included, but will be
+                  modified so that they start or end exactly at the boundary they overlap
+                  with.
     """
     serializer_class = GEventSerializer
 
@@ -82,7 +82,7 @@ class GEventList(generics.ListAPIView):
         calendar = None
         if calendar_id:
             try:
-                calendar = GCalendar.objects.filter(self.request.user).get(calendar_id=calendar_id)
+                calendar = GCalendar.objects.filter(user=self.request.user).get(calendar_id=calendar_id)
             except GCalendar.DoesNotExist:
                 raise Exception("{} was not a valid calendar id".format(calendar_id))
         else:
