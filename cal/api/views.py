@@ -26,10 +26,10 @@ def sync(request, format=None):
     profile = Profile.get_or_create(request.user)[0]
     
     if request.query_params.get('sync_all'):
-        profile.get_or_create_calendars(create_only_primary=False)
+        profile.create_calendars(only_primary=False)
         calendars = GCalendar.objects.filter(user=request.user)
     else:
-        profile.get_or_create_calendars(create_only_primary=True)
+        profile.create_calendars(only_primary=True)
         calendars = [profile.main_calendar]
 
     for calendar in calendars:
