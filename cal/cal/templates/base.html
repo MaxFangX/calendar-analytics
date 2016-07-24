@@ -1,18 +1,29 @@
 {% load staticfiles %}
 {% block top_html %}
-<html>
+<html ng-app="analyticsApp">
 {% endblock %}
   <head>
-    {% block head %}
-      <title>CalendarAnalytics</title>
-      <script src="{% static "lib/js/jquery-1.11.3.min.js" %}"></script>
-      <!-- Google Auth -->
-      <script src="https://apis.google.com/js/api:client.js"></script>
+    <title>CalendarAnalytics</title>
+    <meta charset="utf-8">
 
-    {% endblock %}
     {% block head_css %}
       <link rel="stylesheet" href="{% static "lib/css/bootstrap.min.css" %}">
       <link rel="stylesheet" href="{% static "css/calendaranalytics.css" %}">
+      <link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.css' />
+    {% endblock %}
+
+    {% block head %}
+      <script src="{% static "lib/js/jquery-1.11.3.min.js" %}"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
+
+      <!-- Google Auth -->
+      <script src="https://apis.google.com/js/api:client.js"></script>
+
+      <!-- BEGIN FullCalendar -->
+      <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
+      <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.4/moment-timezone-with-data-2010-2020.min.js"></script>
+      <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.js"></script>
+      <!-- END FullCalendar -->
     {% endblock %}
   </head>
   <body>
@@ -20,29 +31,8 @@
 
     {% block bottom_js %}
       <script type="text/javascript" src="{% static "lib/js/bootstrap.min.js" %}"></script>
-      <!-- Helper function to grab cookies, mostly for csrf -->
-			<script>
-        function getCookie(name) {
-            var cookieValue = null;
-            if (document.cookie && document.cookie != '') {
-                var cookies = document.cookie.split(';');
-                for (var i = 0; i < cookies.length; i++) {
-                    var cookie = jQuery.trim(cookies[i]);
-                    // Does this cookie string begin with the name we want?
-                    if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-        // Use like this:
-        // var csrftoken = getCookie('csrftoken');
-			</script>
-
       <script type="text/javascript" src="{% static "js/calendaranalytics.js" %}"></script>
-
+      <script type="text/javascript" src="{% static "js/app.js" %}"></script>
     {% endblock %}
   </body>
 </html>
