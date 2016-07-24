@@ -3,12 +3,6 @@
 
 {% block head %}
   {{ block.super }}
-  <!-- BEGIN FullCalendar -->
-  <link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.css' />
-  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
-  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.4/moment-timezone-with-data-2010-2020.min.js"></script>
-  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.js"></script>
-  <!-- END FullCalendar -->
 
   <!-- START PSA G+ Logout -->
   <script type="text/javascript">
@@ -19,9 +13,7 @@
         scope: "{{ social_auth_google_oauth2_scope | safe }}"
       });
       auth2.then(function () {
-
-        console.log("User is signed-in in Google+ platform?", auth2.isSignedIn.get() ? "Yes" : "No");
-
+        // console.log("User is signed-in in Google+ platform?", auth2.isSignedIn.get() ? "Yes" : "No");
         if (auth2.isSignedIn.get()) {
           $('#logout').on('click', function (event) {
             event.preventDefault();
@@ -39,7 +31,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="cal-home-logged-in">
+<div ng-controller="LoggedInController" class="cal-home-logged-in">
   <ul class="nav nav-tabs">
     <li>
       <a href="/">CalendarAnalytics</a>
@@ -50,7 +42,7 @@
   </ul>
   {% if request.user.profile.authed %}
     <div class="jumbotron">
-      <div id='calendar' class="cal-calendar"></div>
+      <div id="calendar" class="cal-calendar"></div>
     </div>
     <div class="col-md-6">
       {% include "_category_list.html"%}
@@ -64,6 +56,9 @@
     </div>
   {% endif %}
   {% if request.user.is_staff %}
+    {% verbatim %}
+    <p>Test string: {{ testString }}</p>
+    {% endverbatim %}
     <a href="/v1/sync?full_sync=true&sync_all=true"><button class="btn btn-primary pull-right">Full sync all</button></a>
     <a href="/v1/sync?sync_all=true"><button class="btn btn-primary pull-right">Sync all</button></a>
     <a href="/v1/sync?full_sync=true"><button class="btn btn-primary pull-right">Full sync</button></a>
@@ -72,70 +67,4 @@
   {% endif %}
   <br>
 </div>
-{% endblock %}
-
-{% block bottom_js %}
-  {{ block.super }}
-  <!-- BEGIN FullCalendar -->
-  <script>
-      $(document).ready(function() {
-          var calendarIds = null;
-          $('#calendar').fullCalendar({
-              defaultView: 'agendaWeek',
-              events: function(start, end, timezone, callback) {
-                  var query_timezone = '';
-                  if (!timezone) {
-                      query_timezone = 'UTC';
-                  } else if (timezone === 'local') {
-                      query_timezone = moment.tz.guess();
-                  } else {
-                      query_timezone = timezone;
-                  }
-                  allEvents = [];
-                  $.ajax({
-                      url: "/v1/gcalendars.json",
-                      dataType: 'json',
-                      data: {},
-                  }).done(function(data) {
-                      $.when.apply(this, data.results.map(function(cal) {
-                          return $.ajax({
-                              url: "/v1/gevents.json",
-                              dataType: 'json',
-                              data: {
-                                  calendarId: cal.calendar_id,
-                                  start: start.toISOString(),
-                                  end: end.toISOString(),
-                                  timezone: query_timezone,
-                                  edge: 'truncated'
-                              },
-                              success: function(data) {
-                                  var events = [];
-                                  $.each(data.results, function(index, gevent) {
-                                      events.push({
-                                          {% if request.user.is_staff %}
-                                          title: gevent.id + " " + gevent.name,
-                                          {% else %}
-                                          title: gevent.name,
-                                          {% endif %}
-                                          start: gevent.start,
-                                          end: gevent.end,
-                                          backgroundColor: gevent.color.background,
-                                          textColor: gevent.color.foreground,
-                                          borderColor: gevent.color.foreground,
-                                      })
-                                  });
-                                  allEvents = allEvents.concat(events);
-                              }
-                          });
-                      })).then(function() {
-                          callback(allEvents);
-                      });
-                  });
-
-              },
-              timezone: 'local',
-          })
-      });
-  </script>
-  <!-- END FullCalendar -->
 {% endblock %}
