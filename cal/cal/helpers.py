@@ -12,6 +12,11 @@ def json_response(data, status=200):
 
 
 def ensure_timezone_awareness(dt, optional_timezone=None):
+    """
+    Ensures that a datetime is timezone aware, and strips off seconds and microseconds.
+    `dt`: the datetime
+    `optional_timezone`: string representation of a timezone
+    """
     if timezone.is_naive(dt):
         if optional_timezone:
             dt = timezone.make_aware(dt, pytz.timezone(optional_timezone))
@@ -20,6 +25,7 @@ def ensure_timezone_awareness(dt, optional_timezone=None):
     dt = dt.astimezone(timezone.utc)
     # Remove seconds and microseconds
     dt = dt.replace(second=0, microsecond=0)
+    return dt
 
 
 class EventCollection:

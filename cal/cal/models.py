@@ -13,7 +13,6 @@ from oauth2client.client import AccessTokenRefreshError
 
 import ast
 import httplib2
-import pytz
 import sys
 import uuid
 
@@ -217,8 +216,10 @@ class GCalendar(models.Model):
             g.recurrence = str(event.get('recurrence', ''))
             g.recurring_event_id = event.get('recurringEventId', '')
             g.save()
+            print "Saved {} event".format(g.start)
 
         else:
+            print "Deleting event {}".format(event['id'])
             # Status is cancelled, create a DeletedEvent
 
             # 'event' looks like this:
@@ -466,16 +467,9 @@ class GEvent(Event):
         made_aware = False
         if timezone.is_naive(self.start):
             made_aware = True
-            
-            if self.timezone:
-                self.start = timezone.make_aware(self.start, pytz.timezone(self.timezone))
-            else:
-                self.start = timezone.make_aware(self.start, timezone.get_default_timezone())
-        if timezone.is_naive(self.end):
-            if self.timezone:
-                self.end = timezone.make_aware(self.end, pytz.timezone(self.timezone))
-            else:
-                self.end = timezone.make_aware(self.end, timezone.get_default_timezone())
+
+        self.start = ensure_timezone_awareness(self.start, self.timezone)
+        self.end = ensure_timezone_awareness(self.end, self.timezone)
 
         super(GEvent, self).save(*args, **kwargs)
 
@@ -483,9 +477,10 @@ class GEvent(Event):
             print "Made datetime timezone aware for GEvent {} with id {}".format(self.name, self.id)
 
     def fill_recurrences(self, end=None):
-        # TODO make this account for start and end range
         # TODO make this return the recurrences
         # TODO make sure this deletes events 
+        # TODO make sure this account for deleted recurrences (check 7/25 and 7/26)
+        # TODO check for syncing on incremental sync
         if not self.recurrence:
             return
 
@@ -499,7 +494,12 @@ class GEvent(Event):
             end = datetime.now() + timedelta(days=60)
 
         service = self.calendar.user.googlecredentials.get_service()
-        result = service.events().instances(calendarId='maxfangx@gmail.com', eventId=self.google_id).execute()
+
+        print "Filling recurrences for {}".format(self)
+        result = service.events().instances(calendarId='maxfangx@gmail.com',
+                                            eventId=self.google_id,
+                                            timeMin=start_range.isoformat(),
+                                            timeMax=end_range.isoformat()).execute()
         for event in result['items']:
             self.calendar.api_event_to_gevent(event)
 
@@ -618,15 +618,12 @@ class GRecurrence(models.Model):
     @property
     def created(self):
         event = GEvent.objects.get(google_id=self.recurring_event_id)
-
         return event.created
 
     def save(self, *args, **kwargs):
 
-        if timezone.is_naive(self.start):
-            self.start = timezone.make_aware(self.start, timezone.get_default_timezone())
-        if timezone.is_naive(self.end):
-            self.end = timezone.make_aware(self.end, timezone.get_default_timezone())
+        self.start = ensure_timezone_awareness(self.start)
+        self.end = ensure_timezone_awareness(self.end)
 
         return super(GRecurrence, self).save(*args, **kwargs)
 
