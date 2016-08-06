@@ -481,6 +481,7 @@ class GEvent(Event):
         # TODO make sure this deletes events 
         # TODO make sure this account for deleted recurrences (check 7/25 and 7/26)
         # TODO check for syncing on incremental sync
+        # TODO check for synced until. Change the start range accordingly
         if not self.recurrence:
             return
 
@@ -488,7 +489,7 @@ class GEvent(Event):
         end_range = ensure_timezone_awareness(end, self.timezone)
 
         if end:
-            assert start_range <= end_range, "Can't fill in recurrences for a negative time window"
+            assert self.start <= end_range, "Can't fill in recurrences for a negative time window"
         else:
             # By default, fill in two months past the present time
             end = datetime.now() + timedelta(days=60)
