@@ -1,11 +1,12 @@
 appnope==0.1.0
-awsebcli==3.7.6
+awsebcli==3.7.7
 blessed==1.9.5
-botocore==1.4.13
+botocore==1.4.43
 cement==2.8.2
 colorama==0.3.7
 decorator==4.0.9
 Django==1.8.4
+django-bower==5.1.0
 django-filter==0.11.0
 django-loginas==0.2.2
 djangorestframework==3.2.4
@@ -49,5 +50,5 @@ six==1.10.0
 texttable==0.8.4
 traitlets==4.2.1
 uritemplate==0.6
-wcwidth==0.1.6
+wcwidth==0.1.7
 websocket-client==0.37.0

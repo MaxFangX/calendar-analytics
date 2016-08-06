@@ -9,21 +9,24 @@
     {% block head_css %}
       <link rel="stylesheet" href="{% static "lib/css/bootstrap.min.css" %}">
       <link rel="stylesheet" href="{% static "css/calendaranalytics.css" %}">
-      <link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.css' />
+
+      <link rel="stylesheet" href="{% static "bower_components/fullcalendar/dist/fullcalendar.min.css" %}"/>
     {% endblock %}
 
     {% block head %}
       <script src="{% static "lib/js/jquery-1.11.3.min.js" %}"></script>
       <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.7/angular.min.js"></script>
 
+      <!-- BEGIN FullCalendar -->
+      <script type="text/javascript" src="{% static "bower_components/angular-ui-calendar/src/calendar.js" %}"></script>
+      <script type="text/javascript" src="{% static "bower_components/moment/min/moment.min.js" %}"></script>
+      <script type="text/javascript" src="{% static "bower_components/moment-timezone/builds/moment-timezone-with-data-2010-2020.min.js" %}"></script>
+      <script type="text/javascript" src="{% static "bower_components/fullcalendar/dist/fullcalendar.min.js" %}"></script>
+      <script type="text/javascript" src="{% static "bower_components/fullcalendar/dist/gcal.js" %}"></script>
+      <!-- END FullCalendar -->
+
       <!-- Google Auth -->
       <script src="https://apis.google.com/js/api:client.js"></script>
-
-      <!-- BEGIN FullCalendar -->
-      <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.13.0/moment.min.js"></script>
-      <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.4/moment-timezone-with-data-2010-2020.min.js"></script>
-      <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/fullcalendar/2.6.1/fullcalendar.min.js"></script>
-      <!-- END FullCalendar -->
     {% endblock %}
   </head>
   <body>
