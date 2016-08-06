@@ -178,14 +178,10 @@ if ENVIRONMENT == 'prod':
     STATIC_ROOT = os.path.join(BASE_DIR, "..", "www", "static")
     STATIC_URL = '/static/'
     BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, "..", "www", "static")
-    # STATICFILES_DIRS = [BOWER_COMPONENTS_ROOT]
 else:
     STATIC_ROOT = os.path.join(BASE_DIR, "static/")
     STATIC_URL = '/static/'
     BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, "cal", "static/")
-    # STATICFILES_DIRS = [BOWER_COMPONENTS_ROOT]
-
-
 
 STATICFILES_FINDERS = [
         'django.contrib.staticfiles.finders.FileSystemFinder',
