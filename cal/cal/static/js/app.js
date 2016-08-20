@@ -7,8 +7,8 @@ analyticsApp.controller('LoggedInController', function LoggedInController($scope
 
 });
 
-// Controller to generate graph data from chart directive
-analyticsApp.controller('CategoriesController', function($scope, $http){
+// Controller to generate graph data from chart directive, cumulative tags
+analyticsApp.controller('TagsController', function($scope, $http){
   var url = '/v1/tags';
 
   $http({ method: 'GET', url: url }).
@@ -42,12 +42,16 @@ analyticsApp.controller('CategoriesController', function($scope, $http){
           left: 0
         }
       }
-    }
+    },
+    title: {
+      enable: true,
+      text: 'Total Hours Spent from Tags'
+    },
   };
 });
 
-// Example line graph in categories
-analyticsApp.controller('TagsController', function($scope){
+// Example line graph in categories, line graph per week
+analyticsApp.controller('CategoriesController', function($scope){
   $scope.options = {
     chart: {
       type: 'lineChart',
@@ -68,42 +72,63 @@ analyticsApp.controller('TagsController', function($scope){
       tooltipHide: function(e){ console.log("tooltipHide"); }
     },
     xAxis: {
-      axisLabel: 'Time (ms)'
+      axisLabel: 'Categories',
+      tickFormat: function(d){
+          return d3.time.format('%b %d')(new Date(d));
+      },
     },
     yAxis: {
-      axisLabel: 'Voltage (v)',
+      axisLabel: 'Time (hours)',
       tickFormat: function(d){
           return d3.format('.02f')(d);
       },
       axisLabelDistance: -10
     },
-    callback: function(chart){
-      console.log("!!! lineChart callback !!!");
-    }
-  },
-  title: {
-    enable: true,
-    text: 'Title for Line Chart'
-  },
-  subtitle: {
-    enable: true,
-    text: 'Subtitle for simple line chart. Lorem ipsum dolor sit amet, at eam blandit sadipscing, vim adhuc sanctus disputando ex, cu usu affert alienum urbanitas.',
-    css: {
-      'text-align': 'center',
-      'margin': '10px 13px 0px 7px'
-    }
-  },
-  caption: {
-    enable: true,
-    html: '<b>Figure 1.</b> Lorem ipsum dolor sit amet, at eam blandit sadipscing, <span style="text-decoration: underline;">vim adhuc sanctus disputando ex</span>, cu usu affert alienum urbanitas. <i>Cum in purto erat, mea ne nominavi persecuti reformidans.</i> Docendi blandit abhorreant ea has, minim tantas alterum pro eu. <span style="color: darkred;">Exerci graeci ad vix, elit tacimates ea duo</span>. Id mel eruditi fuisset. Stet vidit patrioque in pro, eum ex veri verterem abhorreant, id unum oportere intellegam nec<sup>[1, <a href="https://github.com/krispo/angular-nvd3" target="_blank">2</a>, 3]</sup>.',
-    css: {
-        'text-align': 'justify',
-        'margin': '10px 13px 0px 7px'
-      }
-    }
+    // callback: function(chart){
+    //   console.log("!!! lineChart callback !!!");
+    // }
+    },
+    title: {
+      enable: true,
+      text: 'Categories - Last Week'
+    },
   };
 
-  $scope.data = sinAndCos();
+  // $scope.data = sinAndCos();
+  $scope.data = [
+    {
+      values: [
+        {x: new Date(2016, 5, 15), y: 4.5},
+        {x: new Date(2016, 5, 22), y: 0},
+        {x: new Date(2016, 5, 29), y: 5},
+        {x: new Date(2016, 6, 5), y: 9.25},
+      ],
+      key: 'Learning',
+      color: '#ff7f0e'
+    },
+    {
+      values: [
+        {x: new Date(2016, 5, 15), y: 55.25},
+        {x: new Date(2016, 5, 25), y: 62.26},
+        {x: new Date(2016, 5, 29), y: 57},
+        {x: new Date(2016, 6, 5), y: 52.25},
+      ],
+      key: 'Sleeping',
+      color: '#2ca02c'
+    },
+    {
+      values: [
+        {x: new Date(2016, 5, 15), y: 4.25},
+        {x: new Date(2016, 5, 25), y: 0},
+        {x: new Date(2016, 5, 29), y: 0.5},
+        {x: new Date(2016, 6, 5), y: 40.25},
+      ],
+      key: 'Working',
+      color: '#7777ff'
+    }
+  ];
+
+
 
   /*Random Data Generator */
   function sinAndCos() {
@@ -116,7 +141,7 @@ analyticsApp.controller('TagsController', function($scope){
       cos.push({x: i, y: 0.5 * Math.cos(i/10+ 2) + Math.random() / 10});
     }
 
-    //Line chart data should be sent as an array of series objects.
+    // Line chart data should be sent as an array of series objects.
     return [
       {
         values: sin,      //values - represents the array of {x,y} data points
