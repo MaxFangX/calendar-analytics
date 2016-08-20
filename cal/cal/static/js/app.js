@@ -6,7 +6,7 @@ analyticsApp.controller('LoggedInCtrl', function LoggedInController($scope) {
 
 });
 
-analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $compile, uiCalendarConfig) {
+analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $q) {
 
     $scope.events = function(start, end, timezone, callback) {
       var query_timezone = '';
@@ -18,25 +18,29 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $compile
         query_timezone = timezone;
       }
       allEvents = [];
-      $.ajax({
+
+      $http({
+        method: 'GET',
         url: "/v1/gcalendars.json",
-        dataType: 'json',
-        data: {},
-      }).done(function(data) {
-        $.when.apply(this, data.results.map(function(cal) {
-          return $.ajax({
+        cache: true,
+      }).then(function gcalSuccess(response) {
+
+        var collectedEvents = [];
+        var eventPromises = response.data.results.map(function(gcal) {
+          return $http({
+            method: 'GET',
             url: "/v1/gevents.json",
-            dataType: 'json',
-            data: {
-              calendarId: cal.calendar_id,
+            cache: true,
+            params: {
+              calendarId: gcal.calendar_id,
               start: start.toISOString(),
               end: end.toISOString(),
               timezone: query_timezone,
               edge: 'truncated'
             },
-            success: function(data) {
+          }).then(function eventSuccess(response) {
               var events = [];
-              $.each(data.results, function(index, gevent) {
+              $.each(response.data.results, function(index, gevent) {
                 events.push({
                   title: gevent.name,
                   start: gevent.start,
@@ -46,13 +50,21 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $compile
                   borderColor: gevent.color.foreground,
                 })
               });
-              allEvents = allEvents.concat(events);
-            }
+              // TODO if check here for if the calendar is enabled
+              collectedEvents = collectedEvents.concat(events);
+          }, function eventError(response) {
+            console.log("Ajax call to gevents failed: " + response);
           });
-        })).then(function() {
-          callback(allEvents);
         });
-      });
+
+        $q.all(eventPromises).then(function() {
+          callback(collectedEvents);
+        });
+
+      }, function gcalError(response) {
+        console.log("Ajax call to gcalendars failed: " + response);
+      })
+
     };
 
     $scope.uiConfig = {
