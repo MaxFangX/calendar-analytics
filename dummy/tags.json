@@ -1,0 +1,37 @@
+{
+  "count": 5,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "id": 1,
+      "label": "Bernie",
+      "keywords": "Bernie,bernie",
+      "hours": 5.0
+    },
+    {
+      "id": 2,
+      "label": "SIS",
+      "keywords": "SIS",
+      "hours": 10.0
+    },
+    {
+      "id": 3,
+      "label": "Projects",
+      "keywords": "calendar,tq",
+      "hours": 20.0
+    },
+    {
+      "id": 8,
+      "label": "andrew",
+      "keywords": "andrew",
+      "hours": 96.0
+    },
+    {
+      "id": 9,
+      "label": "deploy",
+      "keywords": "deploy",
+      "hours": 5.0
+    }
+  ]
+}

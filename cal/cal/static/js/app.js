@@ -8,15 +8,22 @@ analyticsApp.controller('LoggedInController', function LoggedInController($scope
 });
 
 // Controller to generate graph data from chart directive
-analyticsApp.controller('CategoriesController', function($scope){
-  $scope.data = [
-    { category: "One", hours: 5 },
-    { category: "Two", hours: 2 },
-    { category: "Three", hours: 9 },
-    { category: "Four", hours: 7 },
-    { category: "Five", hours: 4 },
-    { category: "Six", hours: 3 }
-  ];
+analyticsApp.controller('CategoriesController', function($scope, $http){
+  var url = '/v1/tags';
+
+  $http({ method: 'GET', url: url }).
+    success(function (data) {
+      // set the data
+      $scope.data = [];
+      for (var i = 0; i < data.results.length; i++) {
+        var tag = data.results[i];
+        $scope.data.push( {
+          category: tag.label,
+          hours: tag.hours
+        });
+      }
+    });
+
   $scope.options = {
     chart: {
       type: 'pieChart',
@@ -37,7 +44,6 @@ analyticsApp.controller('CategoriesController', function($scope){
       }
     }
   };
-  // $scope.options = pieChart.options;
 });
 
 // Example line graph in categories
