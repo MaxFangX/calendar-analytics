@@ -69,6 +69,12 @@ INSTALLED_APPS = (
     'rest_framework',
     'social.apps.django_app.default',
     'loginas',
+    'djangobower',
+)
+
+BOWER_INSTALLED_APPS = (
+    'angular-ui-calendar',
+    'moment-timezone',
 )
 
 # TODO make an actual login page for redirection
@@ -171,6 +177,14 @@ USE_TZ = True
 if ENVIRONMENT == 'prod':
     STATIC_ROOT = os.path.join(BASE_DIR, "..", "www", "static")
     STATIC_URL = '/static/'
+    BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, "..", "www", "static")
 else:
     STATIC_ROOT = os.path.join(BASE_DIR, "static/")
     STATIC_URL = '/static/'
+    BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, "cal", "static/")
+
+STATICFILES_FINDERS = [
+        'django.contrib.staticfiles.finders.FileSystemFinder',
+        'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+        'djangobower.finders.BowerFinder',
+        ]
