@@ -13,3 +13,12 @@ cal/cal/static/bower_components/*
 
 # Hide environment variables 
 .ebextensions/02-cal.config
+
+# Any .rc
+cal/.fishrc
+
+# Storage
+.DS_Store
+
+# Debug logs
+cal/cal/npm-debug.log
