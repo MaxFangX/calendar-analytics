@@ -3,6 +3,9 @@
 *.swp
 *.scssc
 
+# Bower
+cal/cal/static/bower_components/*
+
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
