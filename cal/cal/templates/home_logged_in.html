@@ -42,10 +42,31 @@
   </ul>
   {% if request.user.profile.authed %}
     <div class="jumbotron">
-      <div ng-controller="CalendarCtrl" class="cal-calendar">
-        <div ui-calendar="uiConfig.calendar" class="calendar" ng-model="eventSources"></div> 
+
+      <div ng-controller="CalendarCtrl as $ctrl" class="cal-calendar">
+
+        <div ui-calendar="uiConfig.calendar" calendar="panalytics" class="calendar" ng-model="$ctrl.eventSources"></div> 
+        <div class="btn-group">
+          <button type="button"
+            class="btn btn-default dropdown-toggle"
+            data-toggle="dropdown"
+            aria-haspopup="true"
+            aria-expanded="false">
+            Enable / disable calendars
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu">
+            <li ng-repeat="cal in calendars">
+              <a href="#"> 
+                <input type="checkbox" ng-model="cal.enabled" ng-click="$ctrl.refresh('panalytics')">
+                {% verbatim %} {{ cal.calendar_id }} {% endverbatim %}
+              </a>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
+
 
     <div class="col-md-6">
       {% include "_category_list.html"%}
@@ -58,6 +79,7 @@
       <h3><a href="/auth/google">Connect Google Calendar</a></h3>
     </div>
   {% endif %}
+
   {% if request.user.is_staff %}
     {% verbatim %}
     <p>Test string: {{ testString }}</p>
