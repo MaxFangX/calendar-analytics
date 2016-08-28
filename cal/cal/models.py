@@ -252,18 +252,21 @@ class GCalendar(models.Model):
         creds = self.user.googlecredentials
         service = creds.get_service()
 
-        event_list_args = {
+        default_list_args = {
                 'calendarId': self.calendar_id,
                 'singleEvents': True,
-                # Only sync up to two months in the future
-                'timeMax': ensure_timezone_awareness(datetime.now() + timedelta(days=60)).isoformat(),
                 'maxResults': 2500,
                 }
+        list_args_with_constraints = {
+                # Only sync up to two months in the future
+                'timeMax': ensure_timezone_awareness(datetime.now() + timedelta(days=60)).isoformat(),
+                }
+        list_args_with_constraints.update(default_list_args)
 
         next_page_token = None
         if full_sync:
             # Full sync - initial request without sync token or page token
-            result = service.events().list(**event_list_args).execute()
+            result = service.events().list(**list_args_with_constraints).execute()
             old_events = GEvent.objects.filter(calendar=self)
             for event in old_events:
                 event.delete()
@@ -274,12 +277,13 @@ class GCalendar(models.Model):
         else:
             # Incremental sync, initial request needs syncToken
             try:
-                result = service.events().list(syncToken=creds.next_sync_token, **event_list_args).execute()
+                # Google API doesn't accept constraints for the first request in incremental sync
+                result = service.events().list(syncToken=creds.next_sync_token, **default_list_args).execute()
             except Exception as e:
                 t, v, tb = sys.exc_info()
                 if hasattr(e, 'resp') and e.resp.status == 410:
                     # Sync token is no longer valid, perform full sync
-                    result = service.events().list(**event_list_args).execute()
+                    result = service.events().list(**list_args_with_constraints).execute()
                 else:
                     raise t, v, tb
 
@@ -297,7 +301,7 @@ class GCalendar(models.Model):
                 creds.save()
                 break
 
-            result = service.events().list(pageToken=next_page_token, **event_list_args).execute()
+            result = service.events().list(pageToken=next_page_token, **list_args_with_constraints).execute()
 
             # Assume at this point it's a correctly formatted event
             for item in result['items']:
