@@ -1,25 +1,50 @@
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
+from django.utils import timezone
 
 import json
 import datetime
+import pytz
 
 
 def json_response(data, status=200):
     return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), status=status, content_type="application/json")
 
 
+def ensure_timezone_awareness(dt, optional_timezone=None):
+    """
+    Ensures that a datetime is timezone aware, and strips off seconds and microseconds.
+    `dt`: the datetime
+    `optional_timezone`: string representation of a timezone
+    """
+    if timezone.is_naive(dt):
+        if optional_timezone:
+            dt = timezone.make_aware(dt, pytz.timezone(optional_timezone))
+        else:
+            dt = timezone.make_aware(dt, timezone.get_default_timezone())
+    dt = dt.astimezone(timezone.utc)
+    # Remove seconds and microseconds
+    dt = dt.replace(second=0, microsecond=0)
+    return dt
+
+
 class EventCollection:
+    """
+    Represents a Set of events
+    """
 
     def __init__(self, events_func=None, name=None):
         if events_func:
             self._events_func = events_func
         else:
-            self._events_func = lambda: []
+            self._events_func = lambda: set([])
 
         self._name = name if name else "EventCollection"
 
     def get_events(self):
+        """
+        Returns a set of events.
+        """
         return self._events_func()
     
     def intersection(self, other):
