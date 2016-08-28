@@ -98,4 +98,4 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $
     };
 
     this.eventSources = [this.events];
-})
+});

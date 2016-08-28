@@ -174,6 +174,7 @@ class GCalendar(models.Model):
 
     user = models.ForeignKey(User, related_name='gcalendars')
     calendar_id = models.CharField(max_length=250)
+    summary = models.CharField(max_length=250, help_text="Title of the calendar")
     meta = JSONField(default="{}", blank=True)
 
     def __str__(self):
@@ -182,6 +183,7 @@ class GCalendar(models.Model):
     def api_event_to_gevent(self, event):
         if event.get('status', 'confirmed') in set(['confirmed', 'tentative']):
             # Create or update the event
+
             try:
                 g = GEvent.objects.get(google_id=event['id'])
             except GEvent.DoesNotExist:
@@ -217,6 +219,7 @@ class GCalendar(models.Model):
             g.recurring_event_id = event.get('recurringEventId', '')
             g.save()
             print "Saved {} event".format(g.start)
+            return g
 
         else:
             print "Deleting event {}".format(event['id'])
@@ -246,17 +249,24 @@ class GCalendar(models.Model):
                 google_id=event['id'],
                 original_start_time=original_start_time,
                 recurring_event_id=event.get('recurringEventId', ''))
-    # END Helper Function #
 
     def sync(self, full_sync=False):
         result = None
         creds = self.user.googlecredentials
         service = creds.get_service()
 
+        event_list_args = {
+                'calendarId': self.calendar_id,
+                'singleEvents': True,
+                # Only sync up to two months in the future
+                'timeMax': ensure_timezone_awareness(datetime.now() + timedelta(days=60)).isoformat(),
+                'maxResults': 2500,
+                }
+
         next_page_token = None
         if full_sync:
             # Full sync - initial request without sync token or page token
-            result = service.events().list(calendarId=self.calendar_id).execute()
+            result = service.events().list(**event_list_args).execute()
             old_events = GEvent.objects.filter(calendar=self)
             for event in old_events:
                 event.delete()
@@ -267,12 +277,12 @@ class GCalendar(models.Model):
         else:
             # Incremental sync, initial request needs syncToken
             try:
-                result = service.events().list(calendarId=self.calendar_id, syncToken=creds.next_sync_token).execute()
+                result = service.events().list(syncToken=creds.next_sync_token, **event_list_args).execute()
             except Exception as e:
                 t, v, tb = sys.exc_info()
                 if hasattr(e, 'resp') and e.resp.status == 410:
                     # Sync token is no longer valid, perform full sync
-                    result = service.events().list(calendarId=self.calendar_id).execute()
+                    result = service.events().list(**event_list_args).execute()
                 else:
                     raise t, v, tb
 
@@ -290,13 +300,11 @@ class GCalendar(models.Model):
                 creds.save()
                 break
 
-            result = service.events().list(calendarId=self.calendar_id, pageToken=next_page_token).execute()
+            result = service.events().list(pageToken=next_page_token, **event_list_args).execute()
 
             # Assume at this point it's a correctly formatted event
             for item in result['items']:
                 self.api_event_to_gevent(item)
-
-        self.update_recurring()
 
         # Make this calendar consistent with existing DeletedEvents
         deleted_events = DeletedEvent.objects.filter(calendar=self)
@@ -325,7 +333,8 @@ class GCalendar(models.Model):
         """
         # TODO consider adding a field to GCalendar that models how far forward
         # recurring events has been updated
-        # TODO in incremental sync, if future exceptions have been made, sync up to at least that point
+        # TODO in incremental sync, if future exceptions have been made, sync
+        # up to at least that point
         # TODO sanity checks - don't fill for more than a year in advance
         if not end:
             # By default, fill in two months past the present time
@@ -369,6 +378,8 @@ class GCalendar(models.Model):
         # Prune duplicate values
         if result and 'id' in result:
             result.pop('id')
+
+        self.summary = result.get('summary')
         self.meta = result
         self.save()
 
@@ -430,6 +441,7 @@ class GEvent(Event):
     # Use ast.literal_eval(event.recurrence) to retrieve the list
     recurrence = models.CharField(max_length=1000, blank=True, help_text="string representation of list of RRULE, EXRULE, RDATE and EXDATE lines for a recurring event, as specified in RFC5545")
     recurring_event_id = models.CharField(max_length=1024, blank=True, help_text="For an instance of a recurring event, the id of the recurring event to which this instance belongs")
+    # recurrences_filled_until = models.DateTimeField(null=True, help_text="How far in advance we have filled in recurrences")
 
     # TODO handle all_day_event not being counted in time
     # TODO handle transparency being counted in time
@@ -477,7 +489,6 @@ class GEvent(Event):
             print "Made datetime timezone aware for GEvent {} with id {}".format(self.name, self.id)
 
     def fill_recurrences(self, end=None):
-        # TODO make this return the recurrences
         # TODO make sure this deletes events 
         # TODO make sure this account for deleted recurrences (check 7/25 and 7/26)
         # TODO check for syncing on incremental sync
@@ -501,10 +512,13 @@ class GEvent(Event):
                                             eventId=self.google_id,
                                             timeMin=start_range.isoformat(),
                                             timeMax=end_range.isoformat()).execute()
+        recurrences = []
         for event in result['items']:
-            self.calendar.api_event_to_gevent(event)
+            r = self.calendar.api_event_to_gevent(event)
+            if r:
+                recurrences.append(r)
 
-        return []
+        return recurrences
 
 
     def fill_recurrences_with_rrule(self, end=None):
