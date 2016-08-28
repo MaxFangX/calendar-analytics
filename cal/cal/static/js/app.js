@@ -7,13 +7,13 @@ analyticsApp.controller('LoggedInCtrl', function LoggedInController($scope) {
 });
 
 // Controller to generate graph data from chart directive, cumulative tags
-analyticsApp.controller('TagsController', function($scope, $http){
-  var url = '/v1/tags';
+analyticsApp.controller('TagsCtrl', function($scope, $http){
+  var url = '/v1/tags.json';
 });
 
 // Example line graph in categories, line graph per week
-analyticsApp.controller('CategoriesController', function($scope, $http){
-  var url = '/v1/colorcategories';
+analyticsApp.controller('CategoriesCtrl', function($scope, $http){
+  var url = '/v1/colorcategories.json';
 
   $http({ method: 'GET', url: url }).
     success(function (data) {
