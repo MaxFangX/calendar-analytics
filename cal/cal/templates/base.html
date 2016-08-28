@@ -9,8 +9,8 @@
     {% block head_css %}
       <link rel="stylesheet" href="{% static "lib/css/bootstrap.min.css" %}">
       <link rel="stylesheet" href="{% static "css/calendaranalytics.css" %}">
-
       <link rel="stylesheet" href="{% static "bower_components/fullcalendar/dist/fullcalendar.min.css" %}"/>
+      <link rel="stylesheet" href="{% static "bower_components/nvd3/build/nv.d3.css" %}">
     {% endblock %}
 
     {% block head %}
@@ -38,7 +38,6 @@
       <script src="{% static "bower_components/d3/d3.js" %}"></script>
       <script src="{% static "bower_components/nvd3/build/nv.d3.js" %}"></script>
       <script src="{% static "bower_components/angular-nvd3/dist/angular-nvd3.js" %}"></script>
-      <link rel="stylesheet" href="{% static "bower_components/nvd3/build/nv.d3.css"  %}">
 
     {% endblock %}
 
