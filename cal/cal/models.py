@@ -2,7 +2,6 @@ from apiclient.discovery import build
 from cal.constants import GOOGLE_CALENDAR_COLORS
 from cal.helpers import EventCollection, TimeNode, TimeNodeChain, ensure_timezone_awareness
 from datetime import date, datetime, timedelta
-from dateutil.rrule import rrulestr
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
@@ -11,10 +10,8 @@ from jsonfield import JSONField
 from oauth2client.django_orm import CredentialsField, FlowField
 from oauth2client.client import AccessTokenRefreshError
 
-import ast
 import httplib2
 import sys
-import uuid
 
 
 class Profile(models.Model):
@@ -327,23 +324,6 @@ class GCalendar(models.Model):
                 start_times[recurrence.recurring_event_id] = set()
             start_times[recurrence.recurring_event_id].add(recurrence.start)
 
-    def update_recurring(self, end=None):
-        """
-        Fill in recurring events up to the end time
-        """
-        # TODO consider adding a field to GCalendar that models how far forward
-        # recurring events has been updated
-        # TODO in incremental sync, if future exceptions have been made, sync
-        # up to at least that point
-        # TODO sanity checks - don't fill for more than a year in advance
-        if not end:
-            # By default, fill in two months past the present time
-            end = datetime.now() + timedelta(days=60)
-        unique_events = GEvent.objects.filter(calendar=self).exclude(recurrence__exact='')
-        for gevent in unique_events:
-            gevent.fill_recurrences(end=end)
-
-
     def find_gaps(self, start=None, end=None):
         qs = GEvent.objects.filter(calendar=self)
         if start:
@@ -487,126 +467,6 @@ class GEvent(Event):
 
         if made_aware:
             print "Made datetime timezone aware for GEvent {} with id {}".format(self.name, self.id)
-
-    def fill_recurrences(self, end=None):
-        # TODO make sure this deletes events 
-        # TODO make sure this account for deleted recurrences (check 7/25 and 7/26)
-        # TODO check for syncing on incremental sync
-        # TODO check for synced until. Change the start range accordingly
-        if not self.recurrence:
-            return
-
-        start_range = ensure_timezone_awareness(self.start, self.timezone)
-        end_range = ensure_timezone_awareness(end, self.timezone)
-
-        if end:
-            assert self.start <= end_range, "Can't fill in recurrences for a negative time window"
-        else:
-            # By default, fill in two months past the present time
-            end = datetime.now() + timedelta(days=60)
-
-        service = self.calendar.user.googlecredentials.get_service()
-
-        print "Filling recurrences for {}".format(self)
-        result = service.events().instances(calendarId='maxfangx@gmail.com',
-                                            eventId=self.google_id,
-                                            timeMin=start_range.isoformat(),
-                                            timeMax=end_range.isoformat()).execute()
-        recurrences = []
-        for event in result['items']:
-            r = self.calendar.api_event_to_gevent(event)
-            if r:
-                recurrences.append(r)
-
-        return recurrences
-
-
-    def fill_recurrences_with_rrule(self, end=None):
-
-        if not self.recurrence:
-            return
-
-        if end:
-            assert self.start <= end, "Can't fill in recurrences for a negative time window"
-        else:
-            # By default, fill in two months past the present time
-            end = datetime.now() + timedelta(days=60)
-
-        start_range = self.start
-        if timezone.is_naive(start_range):
-            start_range = timezone.make_aware(start_range, timezone.get_default_timezone())
-        start_range = start_range.astimezone(timezone.utc)
-        # Remove seconds and microseconds
-        start_range = start_range.replace(second=0, microsecond=0)
-        start_range = timezone.make_naive(start_range)
-
-        end_range = end
-        if timezone.is_naive(end_range):
-            end_range = timezone.make_aware(end_range, timezone.get_default_timezone())
-        end_range = end_range.astimezone(timezone.utc)
-        # Remove seconds and microseconds
-        end_range = end_range.replace(second=0, microsecond=0)
-        end_range = timezone.make_naive(end_range)
-
-        # self.recurrence looks like this:
-        u"[u'RRULE:FREQ=WEEKLY;WKST=MO;UNTIL=20160502T155959Z;BYDAY=MO,WE']"
-        # Convert to string
-        rules = ast.literal_eval(self.recurrence)
-        duration = self.end - self.start
-        created_recurrences = []
-        for rule_string in rules:
-            # Convert self.start to naive datetime (but actually in UTC) to work with rrulestr
-            dtstart = self.start
-            dtstart = dtstart.astimezone(timezone.utc)
-            dtstart = dtstart.replace(second=0, microsecond=0)
-            dtstart = timezone.make_naive(dtstart)
-            rule = rrulestr(rule_string, ignoretz=True, dtstart=dtstart)
-            recurrences = rule.between(after=start_range, before=end_range)
-
-            assert len(recurrences) < 1000, "Let's not pollute our database"
-            for instance_of_start_time in recurrences:
-                # Make times timezone aware again for saving into the database
-                tz_aware_start_time = timezone.make_aware(instance_of_start_time, timezone.get_default_timezone())
-                new_recurrence, created = GRecurrence.objects.get_or_create(calendar=self.calendar,
-                                                  start=tz_aware_start_time,
-                                                  end=tz_aware_start_time + duration,
-                                                  recurring_event_id=self.google_id)
-                if created:
-                    created_recurrences.append(new_recurrence)
-
-                # Alternative solution
-                try:
-                    GEvent.objects.get(start=tz_aware_start_time, recurring_event_id=self.google_id)
-                except GEvent.DoesNotExist:
-                    new_recurrence = GEvent(name=self.name,
-                                            start=tz_aware_start_time,
-                                            end=tz_aware_start_time + duration,
-                                            location=self.location,
-                                            created=self.created,
-                                            updated=self.updated,
-                                            calendar=self.calendar,
-                                            i_cal_uid=self.i_cal_uid,
-                                            color_index=self.color_index,
-                                            description=self.description,
-                                            status=self.status,
-                                            transparency=self.transparency,
-                                            all_day_event=self.all_day_event,
-                                            timezone=self.timezone,
-                                            end_time_unspecified=self.end_time_unspecified,
-                                            recurrence='',
-                                            recurring_event_id=self.google_id,
-                                            )
-                    # Generate a new google_id
-                    new_recurrence.google_id = uuid.uuid1().get_hex()
-                    new_recurrence.save()
-                    created_recurrences.append(new_recurrence)
-                except GEvent.MultipleObjectsReturned:
-                    # TODO fix this
-                    pass
-
-        # TODO check for offset events and delete them. probably just delete all recurrences once there has been a change
-
-        return created_recurrences
 
     def conflicts_with(self, gevent):
         """
