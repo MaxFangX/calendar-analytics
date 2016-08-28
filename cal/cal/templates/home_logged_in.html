@@ -30,6 +30,7 @@
 
 {% endblock %}
 
+<!-- Information when logged in -->
 {% block content %}
 <div ng-controller="LoggedInCtrl" class="cal-home-logged-in">
   <ul class="nav nav-tabs">
@@ -41,55 +42,59 @@
     </li>
   </ul>
   {% if request.user.profile.authed %}
-    <div class="jumbotron">
 
-      <div ng-controller="CalendarCtrl as $ctrl" class="cal-calendar">
-
-        <div ui-calendar="uiConfig.calendar" calendar="panalytics" class="calendar" ng-model="$ctrl.eventSources"></div> 
-        <div class="btn-group">
-          <button type="button"
-            class="btn btn-default dropdown-toggle"
-            data-toggle="dropdown"
-            aria-haspopup="true"
-            aria-expanded="false">
-            Enable / disable calendars
-            <span class="caret"></span>
-          </button>
-          <ul class="dropdown-menu">
-            <li ng-repeat="cal in calendars">
-              <a href="#"> 
-                <input type="checkbox" ng-model="cal.enabled" ng-click="$ctrl.refresh('panalytics')">
-                {% verbatim %} {{ cal.calendar_id }} {% endverbatim %}
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
+  <div ng-controller="CalendarCtrl as $ctrl" class="cal-calendar col-md-8">
+    <!-- Enable / disable calendars button -->
+    <div class="btn-group">
+      <button type="button"
+        class="btn btn-default dropdown-toggle"
+        data-toggle="dropdown"
+        aria-haspopup="true"
+        aria-expanded="false">
+        Select Calendars
+        <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu">
+        <li ng-repeat="cal in calendars">
+          <a href="#">
+            <input type="checkbox" ng-model="cal.enabled" ng-click="$ctrl.refresh('panalytics')">
+            {% verbatim %} {{ cal.calendar_id }} {% endverbatim %}
+          </a>
+        </li>
+      </ul>
     </div>
+    <!-- Calendar -->
+    <div ui-calendar="uiConfig.calendar" calendar="panalytics" class="calendar" ng-model="$ctrl.eventSources"></div>
+  </div>
 
+  <!-- Lists and other info on the side -->
+  <div class="col-md-4">
+    {% include "_category_list.html"%}
+  </div>
+  <div class="col-md-4">
+    {% include "_tag_list.html"%}
+  </div>
 
-    <div class="col-md-6">
-      {% include "_category_list.html"%}
-    </div>
-    <div class="col-md-6">
-      {% include "_tag_list.html"%}
-    </div>
+  <!-- For new users, needing to connect their calendars -->
   {% else %}
     <div class="jumbotron">
       <h3><a href="/auth/google">Connect Google Calendar</a></h3>
     </div>
   {% endif %}
 
+  <!-- Super user buttons -->
+  <div class="col-md-4">
   {% if request.user.is_staff %}
+    <h4 class="well">Options</h4>
     {% verbatim %}
     <p>Test string: {{ testString }}</p>
     {% endverbatim %}
-    <a href="/v1/sync?full_sync=true&sync_all=true"><button class="btn btn-primary pull-right">Full sync all</button></a>
-    <a href="/v1/sync?sync_all=true"><button class="btn btn-primary pull-right">Sync all</button></a>
-    <a href="/v1/sync?full_sync=true"><button class="btn btn-primary pull-right">Full sync</button></a>
-    <a href="/v1/sync"><button class="btn btn-primary pull-right">Sync</button></a>
-    <a href="/auth/clear"><button class="btn btn-primary pull-right">Reset credentials</button></a>
+    <a href="/v1/sync"><button class="btn btn-primary pull-left">Sync</button></a>
+    <a href="/v1/sync?full_sync=true"><button class="btn btn-primary pull-left">Full Sync</button></a>
+    <a href="/v1/sync?sync_all=true"><button class="btn btn-primary pull-left">Sync All Calendars</button></a>
+    <a href="/v1/sync?full_sync=true&sync_all=true"><button class="btn btn-primary pull-left">Full Sync All Calendars</button></a>
+    <a href="/auth/clear"><button class="btn btn-primary pull-left">Reset Credentials</button></a>
   {% endif %}
-  <br>
+  </div>
 </div>
 {% endblock %}
