@@ -1,8 +1,7 @@
 from apiclient.discovery import build
 from cal.constants import GOOGLE_CALENDAR_COLORS
-from cal.helpers import EventCollection, TimeNode, TimeNodeChain
+from cal.helpers import EventCollection, TimeNode, TimeNodeChain, ensure_timezone_awareness
 from datetime import date, datetime, timedelta
-from dateutil.rrule import rrulestr
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
@@ -11,11 +10,8 @@ from jsonfield import JSONField
 from oauth2client.django_orm import CredentialsField, FlowField
 from oauth2client.client import AccessTokenRefreshError
 
-import ast
 import httplib2
-import pytz
 import sys
-import uuid
 
 
 class Profile(models.Model):
@@ -107,6 +103,7 @@ class TagGroup(models.Model):
     user = models.ForeignKey(User, related_name='taggroups')
     label = models.CharField(max_length=100, help_text="The name of this tag family")
 
+
 class Tag(models.Model, EventCollection):
 
     user = models.ForeignKey(User, related_name='tags')
@@ -127,8 +124,11 @@ class Tag(models.Model, EventCollection):
 
         return super(Tag, self).save(*args, **kwargs)
 
-    def get_events(self, calendar=None):
-        return set(self.query(calendar))
+    def get_events(self):
+        """
+        Overrides EventCollection.get_events
+        """
+        return set(self.query())
 
     def query(self, calendar=None):
         """
@@ -171,94 +171,102 @@ class GCalendar(models.Model):
 
     user = models.ForeignKey(User, related_name='gcalendars')
     calendar_id = models.CharField(max_length=250)
+    summary = models.CharField(max_length=250, help_text="Title of the calendar")
     meta = JSONField(default="{}", blank=True)
 
     def __str__(self):
         return "{}'s calendar {}".format(self.user, self.calendar_id)
+
+    def api_event_to_gevent(self, event):
+        if event.get('status', 'confirmed') in set(['confirmed', 'tentative']):
+            # Create or update the event
+
+            try:
+                g = GEvent.objects.get(google_id=event['id'])
+            except GEvent.DoesNotExist:
+                g = GEvent()
+            g.name = event.get('summary', '')
+            if event['start'].get('dateTime'):
+                # This is a date time
+                g.start = parse_datetime(event['start']['dateTime'])
+                g.end = parse_datetime(event['end']['dateTime'])
+            else:
+                # This is a date, convert it to a datetime starting/ending at midnight
+                g.start = datetime.combine(parse_date(event['start']['date']), datetime.min.time())
+                g.end = g.start + timedelta(days=1)
+                g.all_day_event = True
+            g.location = event.get('location', '')
+            if event.get('created', None):
+                g.created = parse_datetime(event['created'])
+                g.updated = parse_datetime(event['updated'])
+
+            g.calendar = self
+            g.google_id = event['id']
+            g.i_cal_uid = event['iCalUID']
+            g.color_index = event.get('colorId', '')
+            g.description = event.get('description', '')
+            g.status = event.get('status', 'confirmed')
+            g.transparency = event.get('transparency', 'opaque')
+            g.all_day_event = True if event['start'].get('date', None) else False
+            if not g.all_day_event:
+                # Some events don't have timezones
+                g.timezone = event['start'].get('timeZone')
+            g.end_time_unspecified = event.get('endTimeUnspecified', False)
+            g.recurrence = str(event.get('recurrence', ''))
+            g.recurring_event_id = event.get('recurringEventId', '')
+            g.save()
+            print "Saved {} event".format(g.start)
+            return g
+
+        else:
+            print "Deleting event {}".format(event['id'])
+            # Status is cancelled, create a DeletedEvent
+
+            # 'event' looks like this:
+            # {
+            #     u'status': u'cancelled',
+            #     u'kind': u'calendar#event',
+            #     u'originalStartTime': {u'dateTime': u'2014-10-23T11:00:00-07:00'},
+            #     u'etag': u'"2827884681552000"',
+            #     u'recurringEventId': u'bpbt1o1k55c4hnv9ig9uet69ns',
+            #     u'id': u'bpbt1o1k55c4hnv9ig9uet69ns_20141023T180000Z'
+            # }
+            if event.get('originalStartTime'):
+                if event['originalStartTime'].get('dateTime'):
+                    # This is a date time
+                    original_start_time = parse_datetime(event['originalStartTime']['dateTime'])
+                else:
+                    # This is a date, convert it to a datetime
+                    original_start_time = datetime.combine(parse_date(event['originalStartTime']['date']), datetime.min.time())
+            else:
+                original_start_time = None
+
+            DeletedEvent.objects.get_or_create(
+                calendar=self,
+                google_id=event['id'],
+                original_start_time=original_start_time,
+                recurring_event_id=event.get('recurringEventId', ''))
 
     def sync(self, full_sync=False):
         result = None
         creds = self.user.googlecredentials
         service = creds.get_service()
 
-        def update_event(event):
-            """
-            Helper function
-            """
-            if event.get('status', 'confirmed') in set(['confirmed', 'tentative']):
-                # Create or update the event
-                try:
-                    g = GEvent.objects.get(google_id=event['id'])
-                except GEvent.DoesNotExist:
-                    g = GEvent()
-                g.name = event.get('summary', '')
-                if event['start'].get('dateTime'):
-                    # This is a date time
-                    g.start = parse_datetime(event['start']['dateTime'])
-                    g.end = parse_datetime(event['end']['dateTime'])
-                else:
-                    # This is a date, convert it to a datetime starting/ending at midnight
-                    g.start = datetime.combine(parse_date(event['start']['date']), datetime.min.time())
-                    g.end = g.start + timedelta(days=1)
-                    g.all_day_event = True
-                g.location = event.get('location', '')
-                if event.get('created', None):
-                    g.created = parse_datetime(event['created'])
-                    g.updated = parse_datetime(event['updated'])
-
-                g.calendar = self
-                g.google_id = event['id']
-                g.i_cal_uid = event['iCalUID']
-                g.color_index = event.get('colorId', '')
-                g.description = event.get('description', '')
-                g.status = event.get('status', 'confirmed')
-                g.transparency = event.get('transparency', 'opaque')
-                g.all_day_event = True if event['start'].get('date', None) else False
-                if not g.all_day_event:
-                    # Some events don't have timezones
-                    g.timezone = event['start'].get('timeZone')
-                g.end_time_unspecified = event.get('endTimeUnspecified', False)
-                g.recurrence = str(event.get('recurrence', ''))
-                g.recurring_event_id = event.get('recurringEventId', '')
-                g.save()
-
-                if g.recurrence != '':
-                    g.fill_recurrences()
-
-            else:
-                # Status is cancelled, create a DeletedEvent
-
-                # 'event' looks like this:
-                # {
-                #     u'status': u'cancelled',
-                #     u'kind': u'calendar#event',
-                #     u'originalStartTime': {u'dateTime': u'2014-10-23T11:00:00-07:00'},
-                #     u'etag': u'"2827884681552000"',
-                #     u'recurringEventId': u'bpbt1o1k55c4hnv9ig9uet69ns',
-                #     u'id': u'bpbt1o1k55c4hnv9ig9uet69ns_20141023T180000Z'
-                # }
-                if event.get('originalStartTime'):
-                    if event['originalStartTime'].get('dateTime'):
-                        # This is a date time
-                        original_start_time = parse_datetime(event['originalStartTime']['dateTime'])
-                    else:
-                        # This is a date, convert it to a datetime
-                        original_start_time = datetime.combine(parse_date(event['originalStartTime']['date']), datetime.min.time())
-                else:
-                    original_start_time = None
-
-                DeletedEvent.objects.get_or_create(
-                    calendar=self,
-                    google_id=event['id'],
-                    original_start_time=original_start_time,
-                    recurring_event_id=event.get('recurringEventId', ''))
-        # END Helper Function #
+        default_list_args = {
+                'calendarId': self.calendar_id,
+                'singleEvents': True,
+                'maxResults': 2500,
+                }
+        list_args_with_constraints = {
+                # Only sync up to two months in the future
+                'timeMax': ensure_timezone_awareness(datetime.now() + timedelta(days=60)).isoformat(),
+                }
+        list_args_with_constraints.update(default_list_args)
 
         next_page_token = None
-
         if full_sync:
             # Full sync - initial request without sync token or page token
-            result = service.events().list(calendarId=self.calendar_id).execute()
+            result = service.events().list(**list_args_with_constraints).execute()
             old_events = GEvent.objects.filter(calendar=self)
             for event in old_events:
                 event.delete()
@@ -269,18 +277,19 @@ class GCalendar(models.Model):
         else:
             # Incremental sync, initial request needs syncToken
             try:
-                result = service.events().list(calendarId=self.calendar_id, syncToken=creds.next_sync_token).execute()
+                # Google API doesn't accept constraints for the first request in incremental sync
+                result = service.events().list(syncToken=creds.next_sync_token, **default_list_args).execute()
             except Exception as e:
                 t, v, tb = sys.exc_info()
                 if hasattr(e, 'resp') and e.resp.status == 410:
                     # Sync token is no longer valid, perform full sync
-                    result = service.events().list(calendarId=self.calendar_id).execute()
+                    result = service.events().list(**list_args_with_constraints).execute()
                 else:
                     raise t, v, tb
 
         # Run the first iteration, for the first request
         for item in result['items']:
-            update_event(item)
+            self.api_event_to_gevent(item)
 
         # Paginate through the rest, if applicable
         while True:
@@ -292,11 +301,11 @@ class GCalendar(models.Model):
                 creds.save()
                 break
 
-            result = service.events().list(calendarId=self.calendar_id, pageToken=next_page_token).execute()
+            result = service.events().list(pageToken=next_page_token, **list_args_with_constraints).execute()
 
             # Assume at this point it's a correctly formatted event
             for item in result['items']:
-                update_event(item)
+                self.api_event_to_gevent(item)
 
         # Make this calendar consistent with existing DeletedEvents
         deleted_events = DeletedEvent.objects.filter(calendar=self)
@@ -318,22 +327,6 @@ class GCalendar(models.Model):
             if not start_times.get(recurrence.recurring_event_id, None):
                 start_times[recurrence.recurring_event_id] = set()
             start_times[recurrence.recurring_event_id].add(recurrence.start)
-
-    def update_recurring(self, end=None):
-        """
-        Fill in recurring events up to the end time
-        """
-        # TODO consider adding a field to GCalendar that models how far forward
-        # recurring events has been updated
-        # TODO in incremental sync, if future exceptions have been made, sync up to at least that point
-        # TODO sanity checks - don't fill for more than a year in advance
-        if not end:
-            # By default, fill in two months past the present time
-            end = datetime.now() + timedelta(days=60)
-        unique_events = GEvent.objects.filter(calendar=self).exclude(recurrence__exact='')
-        for gevent in unique_events:
-            gevent.fill_recurrences(end=end)
-
 
     def find_gaps(self, start=None, end=None):
         qs = GEvent.objects.filter(calendar=self)
@@ -369,6 +362,8 @@ class GCalendar(models.Model):
         # Prune duplicate values
         if result and 'id' in result:
             result.pop('id')
+
+        self.summary = result.get('summary')
         self.meta = result
         self.save()
 
@@ -430,6 +425,7 @@ class GEvent(Event):
     # Use ast.literal_eval(event.recurrence) to retrieve the list
     recurrence = models.CharField(max_length=1000, blank=True, help_text="string representation of list of RRULE, EXRULE, RDATE and EXDATE lines for a recurring event, as specified in RFC5545")
     recurring_event_id = models.CharField(max_length=1024, blank=True, help_text="For an instance of a recurring event, the id of the recurring event to which this instance belongs")
+    # recurrences_filled_until = models.DateTimeField(null=True, help_text="How far in advance we have filled in recurrences")
 
     # TODO handle all_day_event not being counted in time
     # TODO handle transparency being counted in time
@@ -467,108 +463,14 @@ class GEvent(Event):
         made_aware = False
         if timezone.is_naive(self.start):
             made_aware = True
-            
-            if self.timezone:
-                self.start = timezone.make_aware(self.start, pytz.timezone(self.timezone))
-            else:
-                self.start = timezone.make_aware(self.start, timezone.get_default_timezone())
-        if timezone.is_naive(self.end):
-            if self.timezone:
-                self.end = timezone.make_aware(self.end, pytz.timezone(self.timezone))
-            else:
-                self.end = timezone.make_aware(self.end, timezone.get_default_timezone())
+
+        self.start = ensure_timezone_awareness(self.start, self.timezone)
+        self.end = ensure_timezone_awareness(self.end, self.timezone)
 
         super(GEvent, self).save(*args, **kwargs)
 
         if made_aware:
             print "Made datetime timezone aware for GEvent {} with id {}".format(self.name, self.id)
-
-    def fill_recurrences(self, end=None):
-
-        if not self.recurrence:
-            return
-
-        if end:
-            assert self.start <= end, "Can't fill in recurrences for a negative time window"
-        else:
-            # By default, fill in two months past the present time
-            end = datetime.now() + timedelta(days=60)
-
-        start_range = self.start
-        if timezone.is_naive(start_range):
-            start_range = timezone.make_aware(start_range, timezone.get_default_timezone())
-        start_range = start_range.astimezone(timezone.utc)
-        # Remove seconds and microseconds
-        start_range = start_range.replace(second=0, microsecond=0)
-        start_range = timezone.make_naive(start_range)
-
-        end_range = end
-        if timezone.is_naive(end_range):
-            end_range = timezone.make_aware(end_range, timezone.get_default_timezone())
-        end_range = end_range.astimezone(timezone.utc)
-        # Remove seconds and microseconds
-        end_range = end_range.replace(second=0, microsecond=0)
-        end_range = timezone.make_naive(end_range)
-
-        # self.recurrence looks like this:
-        u"[u'RRULE:FREQ=WEEKLY;WKST=MO;UNTIL=20160502T155959Z;BYDAY=MO,WE']"
-        # Convert to string
-        rules = ast.literal_eval(self.recurrence)
-        duration = self.end - self.start
-        created_recurrences = []
-        for rule_string in rules:
-            # Convert self.start to naive datetime (but actually in UTC) to work with rrulestr
-            dtstart = self.start
-            dtstart = dtstart.astimezone(timezone.utc)
-            dtstart = dtstart.replace(second=0, microsecond=0)
-            dtstart = timezone.make_naive(dtstart)
-            rule = rrulestr(rule_string, ignoretz=True, dtstart=dtstart)
-            recurrences = rule.between(after=start_range, before=end_range)
-
-            assert len(recurrences) < 1000, "Let's not pollute our database"
-            for instance_of_start_time in recurrences:
-                # Make times timezone aware again for saving into the database
-                tz_aware_start_time = timezone.make_aware(instance_of_start_time, timezone.get_default_timezone())
-                new_recurrence, created = GRecurrence.objects.get_or_create(calendar=self.calendar,
-                                                  start=tz_aware_start_time,
-                                                  end=tz_aware_start_time + duration,
-                                                  recurring_event_id=self.google_id)
-                if created:
-                    created_recurrences.append(new_recurrence)
-
-                # Alternative solution
-                try:
-                    GEvent.objects.get(start=tz_aware_start_time, recurring_event_id=self.google_id)
-                except GEvent.DoesNotExist:
-                    new_recurrence = GEvent(name=self.name,
-                                            start=tz_aware_start_time,
-                                            end=tz_aware_start_time + duration,
-                                            location=self.location,
-                                            created=self.created,
-                                            updated=self.updated,
-                                            calendar=self.calendar,
-                                            i_cal_uid=self.i_cal_uid,
-                                            color_index=self.color_index,
-                                            description=self.description,
-                                            status=self.status,
-                                            transparency=self.transparency,
-                                            all_day_event=self.all_day_event,
-                                            timezone=self.timezone,
-                                            end_time_unspecified=self.end_time_unspecified,
-                                            recurrence='',
-                                            recurring_event_id=self.google_id,
-                                            )
-                    # Generate a new google_id
-                    new_recurrence.google_id = uuid.uuid1().get_hex()
-                    new_recurrence.save()
-                    created_recurrences.append(new_recurrence)
-                except GEvent.MultipleObjectsReturned:
-                    # TODO fix this
-                    pass
-
-        # TODO check for offset events and delete them. probably just delete all recurrences once there has been a change
-
-        return created_recurrences
 
     def conflicts_with(self, gevent):
         """
@@ -595,15 +497,12 @@ class GRecurrence(models.Model):
     @property
     def created(self):
         event = GEvent.objects.get(google_id=self.recurring_event_id)
-
         return event.created
 
     def save(self, *args, **kwargs):
 
-        if timezone.is_naive(self.start):
-            self.start = timezone.make_aware(self.start, timezone.get_default_timezone())
-        if timezone.is_naive(self.end):
-            self.end = timezone.make_aware(self.end, timezone.get_default_timezone())
+        self.start = ensure_timezone_awareness(self.start)
+        self.end = ensure_timezone_awareness(self.end)
 
         return super(GRecurrence, self).save(*args, **kwargs)
 

@@ -17,8 +17,5 @@ cal/cal/static/bower_components/*
 # DS Store
 .DS_Store
 
-# Fishrc
-cal/.fishrc
-
 # NPM-debug log
 cal/cal/npm-debug.log
