@@ -11,14 +11,11 @@ cal/cal/static/bower_components/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
 
-# Hide environment variables 
+# Hide environment variables
 .ebextensions/02-cal.config
 
 # DS Store
 .DS_Store
 
-# Fishrc
-cal/.fishrc
-
-# NPM
+# NPM-debug log
 cal/cal/npm-debug.log
