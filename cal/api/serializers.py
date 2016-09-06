@@ -42,7 +42,7 @@ class GEventSerializer(serializers.ModelSerializer):
 
 
 class StatisticSerializer(serializers.ModelSerializer):
-    
+
     class Meta:
         model = Statistic
         fields = ('name', 'start_time', 'end_time')
@@ -52,7 +52,7 @@ class ColorCategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ColorCategory
-        fields = ('color', 'label')
+        fields = ('color', 'label', 'hours')
 
 
 class TagSerializer(serializers.ModelSerializer):

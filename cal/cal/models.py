@@ -65,6 +65,10 @@ class ColorCategory(models.Model, EventCollection):
     def __str__(self):
         return "{} by {}".format(self.label, self.user.username)
 
+    @property
+    def hours(self):
+        return self.total_time() / 3600
+
     def get_events(self, calendar=None):
         if not calendar:
             calendar = self.user.profile.main_calendar
