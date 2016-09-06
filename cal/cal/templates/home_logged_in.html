@@ -58,7 +58,7 @@
         <li ng-repeat="cal in calendars">
           <a href="#">
             <input type="checkbox" ng-model="cal.enabled" ng-click="$ctrl.refresh('panalytics')">
-            {% verbatim %} {{ cal.calendar_id }} {% endverbatim %}
+            {% verbatim %} {{ cal.summary }} {% endverbatim %}
           </a>
         </li>
       </ul>
