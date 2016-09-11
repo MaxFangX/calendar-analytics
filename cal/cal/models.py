@@ -1,7 +1,7 @@
 from apiclient.discovery import build
 from cal.constants import GOOGLE_CALENDAR_COLORS
 from cal.helpers import EventCollection, TimeNode, TimeNodeChain, ensure_timezone_awareness
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
@@ -85,31 +85,6 @@ class ColorCategory(models.Model, EventCollection):
         qs = GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color_index=self.color)
         return qs
 
-    def get_last_week(self, calendar=None):
-        """
-        Returns the last week's worth of GEvents in a calendar
-        """
-        if not calendar:
-            calendar = self.user.profile.main_calendar
-
-        qs = GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color_index=self.color)
-        now = date.today()
-        one_week_ago = now - timedelta(days=7)
-        qs = qs.filter(start__range=(one_week_ago, now), end__range=(one_week_ago, now))
-        qs = qs.order_by('updated')
-        return qs
-
-    def get_last_month(self, calendar=None):
-        if not calendar:
-            calendar = self.user.profile.main_calendar
-
-        qs = GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color_index=self.color)
-        now = date.today()
-        one_month_ago = now - timedelta(days=28)  # 28 days to maintain consistency between weeks
-        qs = qs.filter(start__range=(one_month_ago, now), end__range=(one_month_ago, now))
-        qs = qs.order_by('updated')
-        return qs
-
 
 class TagGroup(models.Model):
 
@@ -133,47 +108,53 @@ class Tag(models.Model, EventCollection):
 
         return super(Tag, self).save(*args, **kwargs)
 
-    def hours(self, calendar=None, start=None, end=None):
+    def hours(self, calendar_ids=None, start=None, end=None):
         events = self.get_events(start=start, end=end)
 
         return EventCollection(lambda: events).total_time() / 3600
 
-    def get_events(self, calendar=None, start=None, end=None):
+    def get_events(self, calendar_ids=None, start=None, end=None):
         """
         Overrides EventCollection.get_events
         """
 
         # TODO handle edges here
-        queryset = self.query(calendar, start, end)
+        queryset = self.query(calendar_ids, start, end)
 
         return set(queryset)
 
-    def query(self, calendar=None, start=None, end=None):
+    def query(self, calendar_ids=None, start=None, end=None):
         """
         Returns a QuerySet of events matching this Tag.
         Does not truncate at the edges.
         """
-        if calendar:
+        calendars = []
+        if calendar_ids:
             # Check that this calendar belongs to the User
-            if calendar.user != self.user:
-                raise InvalidParameterException("That calendar doesn't belong to you!")
+            for calendar_str in calendar_ids:
+                try:
+                    c = GCalendar.objects.filter(calendar_id=calendar_str)
+                except GCalendar.DoesNotExist:
+                    raise InvalidParameterException("Provided calendar {} does not exist".format(calendar_str))
+                if c.user != self.user:
+                    raise InvalidParameterException("That calendar doesn't belong to you!")
+                calendars.append(c)
         else:
-            # Try to use the main calendar
-            calendar = self.user.profile.main_calendar
-            if not calendar:
+            # TODO take the default from preferences
+            calendars = GCalendar.objects.filter(user=self.user)
+            if not calendars:
                 raise InvalidParameterException("That calendar doesn't belong to you!")
 
         keywords = self.keywords.split(',')
         if not keywords:
             raise InvalidParameterException("No keywords defined for this tag")
 
-        querysets = map(
-                lambda keyword: GEvent.objects.filter(
-                    calendar=calendar,
-                    name__icontains=keyword
-                    ),
-                keywords
-                )
+        querysets = [
+                GEvent.objects.filter(calendar=calendar, name__icontains=keyword)
+                for keyword in keywords 
+                for calendar in calendars
+                ]
+
         # Union over the querysets
         events_qs = reduce(lambda qs1, qs2: qs1 | qs2, querysets)
 
