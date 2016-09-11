@@ -150,6 +150,12 @@ class TagList(generics.ListCreateAPIView):
     
     serializer_class = TagSerializer
 
+    def get_serializer_context(self):
+        return {
+                'start': self.request.query_params.get('start'),
+                'end': self.request.query_params.get('end')
+                }
+
     def get_queryset(self):
         qs = Tag.objects.filter(user=self.request.user)
         start = self.request.query_params.get('start')

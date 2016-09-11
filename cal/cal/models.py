@@ -122,21 +122,6 @@ class Tag(models.Model, EventCollection):
     def __str__(self):
         return "<Tag '{}'>".format(self.label, self.keywords)
 
-    @property
-    def hours(self):
-
-        now = datetime.now()
-        start = now - timedelta(days=7)
-        end = now
-
-        events = self.get_events(start=start, end=end)
-        total = timedelta()
-        for e in events:
-            total += e.end - e.start
-        return int(total.total_seconds()) / 3600
-
-        # return self.total_time() / 3600
-
     def save(self, *args, **kwargs):
         # Remove beginning and ending spaces
         self.keywords = ",".join([k.strip() for k in self.keywords.split(',')])
@@ -182,7 +167,21 @@ class Tag(models.Model, EventCollection):
         # Union over the querysets
         events_qs = reduce(lambda qs1, qs2: qs1 | qs2, querysets)
 
+        if start:
+            events_qs = events_qs.filter(end__gt=start)
+        if end:
+            events_qs = events_qs.filter(start__lt=end)
+
         return events_qs.order_by('start')
+
+    def hours(self, calendar=None, start=None, end=None):
+
+        events = self.get_events(start=start, end=end)
+        total = timedelta()
+        for e in events:
+            total += e.end - e.start
+        return int(total.total_seconds()) / 3600
+
 
 
 class GCalendar(models.Model):

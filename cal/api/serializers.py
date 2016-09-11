@@ -57,6 +57,14 @@ class ColorCategorySerializer(serializers.ModelSerializer):
 
 class TagSerializer(serializers.ModelSerializer):
 
+    hours = serializers.SerializerMethodField()
+
     class Meta:
         model = Tag
         fields = ('id', 'label', 'keywords', 'hours')
+
+    def get_hours(self, obj):
+        start = self.context['start']
+        end = self.context['end']
+        return obj.hours(calendar=None, start=start, end=end)
+
