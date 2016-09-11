@@ -1,13 +1,12 @@
-from cal.helpers import json_response, TimeNodeChain
-from cal.models import ColorCategory, GoogleCredentials, GoogleFlow, Profile, Tag
+from cal.helpers import json_response
+from cal.models import GoogleCredentials, GoogleFlow, Profile
 
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseServerError
-from django.shortcuts import render_to_response
-from django.template import RequestContext
+from django.shortcuts import render
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import ensure_csrf_cookie
 
@@ -18,26 +17,10 @@ from oauth2client.django_orm import Storage
 
 @ensure_csrf_cookie
 def home(request):
-    context = RequestContext(request)
-
     if request.user.is_authenticated():
-        color_categories = [{
-            'label': c.label,
-            'hours': TimeNodeChain(c.get_last_week()).total_time / 3600 }
-            for c in ColorCategory.objects.filter(user=request.user).order_by('label')]
-        context['color_categories'] = color_categories
-        tags = [{
-            'label': t.label,
-            'hours': t.total_time() / 3600,
-            }
-            for t in Tag.objects.filter(user=request.user).order_by('label')]
-        context['tags'] = tags
-
-        return render_to_response(template_name='home_logged_in.html',
-                                  context=context)
+        return render(request, template_name='home_logged_in.html')
     else:
-        return render_to_response(template_name='home_logged_out.html',
-                                  context=context)
+        return render(request, template_name='home_logged_out.html')
 
 
 def logout_view(request):

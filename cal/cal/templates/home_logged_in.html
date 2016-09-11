@@ -69,10 +69,24 @@
 
   <!-- Lists and other info on the side -->
   <div class="col-md-4">
-    {% include "_category_list.html"%}
+    <div class="cal-category-list" ng-controller="CategoriesCtrl">
+      <h4 class="well">Categories - Last Week</h4>
+      <ul class="list-group">
+        <li class="list-group-item" ng-repeat="category in categories">
+          {% verbatim %} {{ category.label }}: {{ category.hours }} hours {% endverbatim %}
+        </li>
+      </ul>
+      <nvd3 options="options" data="categories"></nvd3>
+    </div>
   </div>
-  <div class="col-md-4">
-    {% include "_tag_list.html"%}
+  <div class="col-md-4" ng-controller="TagsCtrl">
+    <h4 class="well">Tags - Cumulative</h4>
+    <ul class="list-group">
+      <li class="list-group-item" ng-repeat="tag in tags">
+        {% verbatim %} {{ tag.label }}: {{ tag.hours }} hours {% endverbatim %}
+      </li>
+            
+    </ul>
   </div>
 
   <!-- For new users, needing to connect their calendars -->

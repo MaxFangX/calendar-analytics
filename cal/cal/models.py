@@ -1,7 +1,7 @@
 from apiclient.discovery import build
 from cal.constants import GOOGLE_CALENDAR_COLORS
 from cal.helpers import EventCollection, TimeNode, TimeNodeChain, ensure_timezone_awareness
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
@@ -12,6 +12,10 @@ from oauth2client.client import AccessTokenRefreshError
 
 import httplib2
 import sys
+
+
+class InvalidParameterException(Exception):
+    pass
 
 
 class Profile(models.Model):
@@ -65,40 +69,20 @@ class ColorCategory(models.Model, EventCollection):
     def __str__(self):
         return "{} by {}".format(self.label, self.user.username)
 
-    @property
-    def hours(self):
-        return self.total_time() / 3600
+    def hours(self, calendar=None, start=None, end=None):
+        events = self.get_events(start=start, end=end)
 
-    def get_events(self, calendar=None):
-        if not calendar:
-            calendar = self.user.profile.main_calendar
+        return EventCollection(lambda: events).total_time() / 3600
 
-        qs = GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color_index=self.color)
+    def get_events(self, calendar=None, start=None, end=None):
+        qs = self.query(calendar, start, end)
         return set(qs)
 
-    def get_last_week(self, calendar=None):
-        """
-        Returns the last week's worth of GEvents in a calendar
-        """
+    def query(self, calendar=None, start=None, end=None):
         if not calendar:
             calendar = self.user.profile.main_calendar
 
         qs = GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color_index=self.color)
-        now = date.today()
-        one_week_ago = now - timedelta(days=7)
-        qs = qs.filter(start__range=(one_week_ago, now), end__range=(one_week_ago, now))
-        qs = qs.order_by('updated')
-        return qs
-
-    def get_last_month(self, calendar=None):
-        if not calendar:
-            calendar = self.user.profile.main_calendar
-
-        qs = GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color_index=self.color)
-        now = date.today()
-        one_month_ago = now - timedelta(days=28)  # 28 days to maintain consistency between weeks
-        qs = qs.filter(start__range=(one_month_ago, now), end__range=(one_month_ago, now))
-        qs = qs.order_by('updated')
         return qs
 
 
@@ -118,53 +102,68 @@ class Tag(models.Model, EventCollection):
     def __str__(self):
         return "<Tag '{}'>".format(self.label, self.keywords)
 
-    @property
-    def hours(self):
-        return self.total_time() / 3600
-
     def save(self, *args, **kwargs):
         # Remove beginning and ending spaces
         self.keywords = ",".join([k.strip() for k in self.keywords.split(',')])
 
         return super(Tag, self).save(*args, **kwargs)
 
-    def get_events(self):
+    def hours(self, calendar_ids=None, start=None, end=None):
+        events = self.get_events(start=start, end=end)
+
+        return EventCollection(lambda: events).total_time() / 3600
+
+    def get_events(self, calendar_ids=None, start=None, end=None):
         """
         Overrides EventCollection.get_events
         """
-        return set(self.query())
 
-    def query(self, calendar=None):
+        # TODO handle edges here
+        queryset = self.query(calendar_ids, start, end)
+
+        return set(queryset)
+
+    def query(self, calendar_ids=None, start=None, end=None):
         """
-        Returns a QuerySet of events matching this Tag
+        Returns a QuerySet of events matching this Tag.
+        Does not truncate at the edges.
         """
-        if calendar:
+        calendars = []
+        if calendar_ids:
             # Check that this calendar belongs to the User
-            if calendar.user != self.user:
-                # TODO replace this with appropriate exception
-                return []
+            for calendar_str in calendar_ids:
+                try:
+                    c = GCalendar.objects.filter(calendar_id=calendar_str)
+                except GCalendar.DoesNotExist:
+                    raise InvalidParameterException("Provided calendar {} does not exist".format(calendar_str))
+                if c.user != self.user:
+                    raise InvalidParameterException("That calendar doesn't belong to you!")
+                calendars.append(c)
         else:
-            # Try to use the main calendar
-            calendar = self.user.profile.main_calendar
-            if not calendar:
-                # TODO replace this with appropriate exception
-                return []
+            # TODO take the default from preferences
+            calendars = GCalendar.objects.filter(user=self.user)
+            if not calendars:
+                raise InvalidParameterException("That calendar doesn't belong to you!")
 
         keywords = self.keywords.split(',')
         if not keywords:
-            return []
+            raise InvalidParameterException("No keywords defined for this tag")
 
-        querysets = set()
-        for kw in keywords:
-            # TODO extend this be able to search in note as well
-            qs = GEvent.objects.filter(calendar=calendar, name__icontains=kw)
-            querysets.add(qs)
+        querysets = [
+                GEvent.objects.filter(calendar=calendar, name__icontains=keyword)
+                for keyword in keywords 
+                for calendar in calendars
+                ]
 
         # Union over the querysets
         events_qs = reduce(lambda qs1, qs2: qs1 | qs2, querysets)
 
-        return events_qs.order_by('start')
+        if start:
+            events_qs = events_qs.filter(end__gt=start)
+        if end:
+            events_qs = events_qs.filter(start__lt=end)
 
+        return events_qs.order_by('start')
 
 class GCalendar(models.Model):
     

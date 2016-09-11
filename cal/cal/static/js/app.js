@@ -9,6 +9,23 @@ analyticsApp.controller('LoggedInCtrl', function LoggedInController($scope) {
 // Controller to generate graph data from chart directive, cumulative tags
 analyticsApp.controller('TagsCtrl', function($scope, $http){
   var url = '/v1/tags.json';
+  $scope.url = url;
+  $scope.tags = [];
+
+  $http({ method: 'GET', url: url }).
+    success(function successCallback(data) {
+
+      for (var i = 0; i < data.results.length; i++) {
+        var tag = data.results[i];
+        $scope.tags.push({
+          label: tag.label,
+          keywords: tag.keywords,
+          hours: tag.hours
+        });
+      }
+
+    });
+
 });
 
 // Example line graph in categories, line graph per week
@@ -18,11 +35,11 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
   $http({ method: 'GET', url: url }).
     success(function (data) {
       // set the data
-      $scope.data = [];
+      $scope.categories = [];
       for (var i = 0; i < data.results.length; i++) {
         var category = data.results[i];
-        $scope.data.push( {
-          category: category.label,
+        $scope.categories.push({
+          label: category.label,
           hours: category.hours
         });
       }
@@ -32,7 +49,7 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
     chart: {
       type: 'pieChart',
       height: 500,
-      x: function(d){return d.category;},
+      x: function(d){return d.label;},
       y: function(d){return d.hours;},
       showLabels: true,
       duration: 500,
