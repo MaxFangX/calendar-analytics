@@ -1,4 +1,5 @@
 from api.serializers import GCalendarSerializer, GEventSerializer, StatisticSerializer, ColorCategorySerializer, TagSerializer
+from cal.helpers import truncated_queryset
 from cal.models import ColorCategory, GCalendar, GEvent, Statistic, Profile, Tag
 from datetime import datetime
 from django.http import HttpResponseRedirect
@@ -71,8 +72,6 @@ class GEventList(generics.ListAPIView):
     serializer_class = GEventSerializer
 
     def get_queryset(self):
-        EDGE_OPTIONS = set(['inclusive', 'exclusive', 'truncated'])
-
         calendar_id = self.request.query_params.get('calendarId')
         start_str = self.request.query_params.get('start')
         end_str = self.request.query_params.get('end')
@@ -90,12 +89,6 @@ class GEventList(generics.ListAPIView):
 
         qs = GEvent.objects.filter(calendar=calendar)
         qs = qs.exclude(status__in=['tentative', 'cancelled'])
-
-        edge = None
-        if edge_str:
-            if edge_str not in EDGE_OPTIONS:
-                raise Exception("Edge query parameter {} is not one of {}".format(edge_str, EDGE_OPTIONS))
-            edge = edge_str
 
         if not start_str or not end_str:
             raise Exception("Missing query parameter `start` or `end`")
@@ -131,19 +124,8 @@ class GEventList(generics.ListAPIView):
 
         start = handle_time_string(start_str)
         end = handle_time_string(end_str)
-        if edge == 'truncated':
-            start_edge = list(qs.filter(start__lt=start, end__gt=start).order_by('start'))
-            exclusive = list(qs.filter(start__gte=start, end__lte=end).order_by('start'))
-            end_edge = list(qs.filter(start__lt=end, end__gt=end).order_by('start'))
-            for s in start_edge:
-                s.start = start
-            for e in end_edge:
-                e.end = end
-            qs = start_edge + exclusive + end_edge
-        elif edge == 'exclusive':
-            qs = qs.filter(start__gte=start, end__lte=end).order_by('start')
-        elif edge == 'inclusive' or not edge:
-            qs = qs.filter(end__gt=start, start__lt=end).order_by('start')
+
+        qs = truncated_queryset(qs, edge_str, start, end)
 
         return qs
 

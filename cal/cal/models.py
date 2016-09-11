@@ -14,6 +14,10 @@ import httplib2
 import sys
 
 
+class InvalidParameterException(Exception):
+    pass
+
+
 class Profile(models.Model):
 
     user = models.OneToOneField(User)
@@ -120,7 +124,18 @@ class Tag(models.Model, EventCollection):
 
     @property
     def hours(self):
-        return self.total_time() / 3600
+
+        now = datetime.now()
+        start = now - timedelta(days=7)
+        end = now
+
+        events = self.get_events(start=start, end=end)
+        total = timedelta()
+        for e in events:
+            total += e.end - e.start
+        return int(total.total_seconds()) / 3600
+
+        # return self.total_time() / 3600
 
     def save(self, *args, **kwargs):
         # Remove beginning and ending spaces
@@ -128,38 +143,42 @@ class Tag(models.Model, EventCollection):
 
         return super(Tag, self).save(*args, **kwargs)
 
-    def get_events(self):
+    def get_events(self, calendar=None, start=None, end=None):
         """
         Overrides EventCollection.get_events
         """
-        return set(self.query())
 
-    def query(self, calendar=None):
+        # TODO handle edges here
+        queryset = self.query(calendar, start, end)
+
+        return set(queryset)
+
+    def query(self, calendar=None, start=None, end=None):
         """
-        Returns a QuerySet of events matching this Tag
+        Returns a QuerySet of events matching this Tag.
+        Does not truncate at the edges.
         """
         if calendar:
             # Check that this calendar belongs to the User
             if calendar.user != self.user:
-                # TODO replace this with appropriate exception
-                return []
+                raise InvalidParameterException("That calendar doesn't belong to you!")
         else:
             # Try to use the main calendar
             calendar = self.user.profile.main_calendar
             if not calendar:
-                # TODO replace this with appropriate exception
-                return []
+                raise InvalidParameterException("That calendar doesn't belong to you!")
 
         keywords = self.keywords.split(',')
         if not keywords:
-            return []
+            raise InvalidParameterException("No keywords defined for this tag")
 
-        querysets = set()
-        for kw in keywords:
-            # TODO extend this be able to search in note as well
-            qs = GEvent.objects.filter(calendar=calendar, name__icontains=kw)
-            querysets.add(qs)
-
+        querysets = map(
+                lambda keyword: GEvent.objects.filter(
+                    calendar=calendar,
+                    name__icontains=keyword
+                    ),
+                keywords
+                )
         # Union over the querysets
         events_qs = reduce(lambda qs1, qs2: qs1 | qs2, querysets)
 

@@ -1,9 +1,9 @@
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
 from django.utils import timezone
+from datetime import timedelta
 
 import json
-import datetime
 import pytz
 
 
@@ -26,6 +26,39 @@ def ensure_timezone_awareness(dt, optional_timezone=None):
     # Remove seconds and microseconds
     dt = dt.replace(second=0, microsecond=0)
     return dt
+
+
+EDGE_OPTIONS = set(['inclusive', 'exclusive', 'truncated'])
+def truncated_queryset(queryset, edge, start, end):
+    """
+    Takes in a QuerySet and returns the final Iterable(List) of Events.
+
+    `edge`: Whether events overlapping with the start/end boundaries
+            will be included. Options are 'inclusive', 'exclusive', and 'truncated'.
+            'truncated' means that events that overlap will be included, but will be
+            modified so that they start or end exactly at the boundary they overlap
+            with.
+    """
+    from cal.models import InvalidParameterException
+
+    if edge not in EDGE_OPTIONS:
+        raise InvalidParameterException("Edge query parameter {} is not one of {}".format(edge, EDGE_OPTIONS))
+
+    if edge == 'truncated':
+        start_edge = list(queryset.filter(start__lt=start, end__gt=start).order_by('start'))
+        exclusive = list(queryset.filter(start__gte=start, end__lte=end).order_by('start'))
+        end_edge = list(queryset.filter(start__lt=end, end__gt=end).order_by('start'))
+        for s in start_edge:
+            s.start = start
+        for e in end_edge:
+            e.end = end
+        queryset = start_edge + exclusive + end_edge
+    elif edge == 'exclusive':
+        queryset = queryset.filter(start__gte=start, end__lte=end).order_by('start')
+    elif edge == 'inclusive' or not edge:
+        queryset = queryset.filter(end__gt=start, start__lt=end).order_by('start')
+
+    return queryset
 
 
 class EventCollection:
@@ -69,12 +102,11 @@ class EventCollection:
 
         events = self.get_events()
 
-        total = datetime.timedelta()
+        total = timedelta()
         for e in events:
             total += e.end - e.start
 
-        # TODO convert to int?
-        return total.total_seconds()
+        return int(total.total_seconds())
         
 
 class TimeNodeChain(EventCollection):
@@ -126,7 +158,7 @@ class TimeNodeChain(EventCollection):
         Overrides EventCollection.total_time with memoized version
         """
         if not self._total_time:
-            total = datetime.timedelta()
+            total = timedelta()
             current = self.get_head()
             while current and current.next:
                 total += current.end - current.start
