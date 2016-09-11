@@ -69,16 +69,21 @@ class ColorCategory(models.Model, EventCollection):
     def __str__(self):
         return "{} by {}".format(self.label, self.user.username)
 
-    @property
-    def hours(self):
-        return self.total_time() / 3600
+    def hours(self, calendar=None, start=None, end=None):
+        events = self.get_events(start=start, end=end)
 
-    def get_events(self, calendar=None):
+        return EventCollection(lambda: events).total_time() / 3600
+
+    def get_events(self, calendar=None, start=None, end=None):
+        qs = self.query(calendar, start, end)
+        return set(qs)
+
+    def query(self, calendar=None, start=None, end=None):
         if not calendar:
             calendar = self.user.profile.main_calendar
 
         qs = GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color_index=self.color)
-        return set(qs)
+        return qs
 
     def get_last_week(self, calendar=None):
         """
@@ -128,6 +133,11 @@ class Tag(models.Model, EventCollection):
 
         return super(Tag, self).save(*args, **kwargs)
 
+    def hours(self, calendar=None, start=None, end=None):
+        events = self.get_events(start=start, end=end)
+
+        return EventCollection(lambda: events).total_time() / 3600
+
     def get_events(self, calendar=None, start=None, end=None):
         """
         Overrides EventCollection.get_events
@@ -173,16 +183,6 @@ class Tag(models.Model, EventCollection):
             events_qs = events_qs.filter(start__lt=end)
 
         return events_qs.order_by('start')
-
-    def hours(self, calendar=None, start=None, end=None):
-
-        events = self.get_events(start=start, end=end)
-        total = timedelta()
-        for e in events:
-            total += e.end - e.start
-        return int(total.total_seconds()) / 3600
-
-
 
 class GCalendar(models.Model):
     

@@ -142,6 +142,12 @@ class ColorCategoryList(generics.ListAPIView):
 
     serializer_class = ColorCategorySerializer
 
+    def get_serializer_context(self):
+        return {
+                'start': self.request.query_params.get('start'),
+                'end': self.request.query_params.get('end')
+                }
+
     def get_queryset(self):
         return ColorCategory.objects.filter(user=self.request.user)
 
