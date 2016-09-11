@@ -144,6 +144,7 @@ class ColorCategoryList(generics.ListAPIView):
 
     def get_serializer_context(self):
         return {
+                'calendar_ids': self.request.query_params.get('calendar_ids'),
                 'start': self.request.query_params.get('start'),
                 'end': self.request.query_params.get('end')
                 }

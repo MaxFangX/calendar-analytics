@@ -46,6 +46,26 @@ class Profile(models.Model):
     def __str__(self):
         return "{}'s profile".format(self.user)
 
+    def get_calendars_for_calendarids(self, calendar_ids=None):
+        calendars = []
+        if calendar_ids:
+            for calendar_str in calendar_ids:
+                try:
+                    c = GCalendar.objects.filter(calendar_id=calendar_str)
+                except GCalendar.DoesNotExist:
+                    raise InvalidParameterException("Provided calendar {} does not exist".format(calendar_str))
+                if c.user != self.user:
+                    raise InvalidParameterException("That calendar doesn't belong to you!")
+                calendars.append(c)
+        else:
+            # TODO take the default from preferences
+            # TODO if no preferences specified, use main calendar
+            calendars = GCalendar.objects.filter(user=self.user)
+            if not calendars:
+                raise Exception("User must sync")
+
+        return calendars
+
     def create_calendars(self, only_primary=True):
         if only_primary and self.main_calendar:
             return False
@@ -69,21 +89,27 @@ class ColorCategory(models.Model, EventCollection):
     def __str__(self):
         return "{} by {}".format(self.label, self.user.username)
 
-    def hours(self, calendar=None, start=None, end=None):
-        events = self.get_events(start=start, end=end)
+    def hours(self, calendar_ids=None, start=None, end=None):
+        events = self.get_events(calendar_ids=calendar_ids, start=start, end=end)
 
         return EventCollection(lambda: events).total_time() / 3600
 
-    def get_events(self, calendar=None, start=None, end=None):
-        qs = self.query(calendar, start, end)
+    def get_events(self, calendar_ids=None, start=None, end=None):
+        qs = self.query(calendar_ids, start, end)
         return set(qs)
 
-    def query(self, calendar=None, start=None, end=None):
-        if not calendar:
-            calendar = self.user.profile.main_calendar
+    def query(self, calendar_ids=None, start=None, end=None):
+        calendars = self.user.profile.get_calendars_for_calendarids(calendar_ids)
 
-        qs = GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color_index=self.color)
-        return qs
+        querysets = [
+                GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color_index=self.color)
+                for calendar in calendars
+                ]
+
+        # Union over the querysets
+        events_qs = reduce(lambda qs1, qs2: qs1 | qs2, querysets)
+
+        return events_qs
 
 
 class TagGroup(models.Model):
@@ -128,22 +154,7 @@ class Tag(models.Model, EventCollection):
         Returns a QuerySet of events matching this Tag.
         Does not truncate at the edges.
         """
-        calendars = []
-        if calendar_ids:
-            # Check that this calendar belongs to the User
-            for calendar_str in calendar_ids:
-                try:
-                    c = GCalendar.objects.filter(calendar_id=calendar_str)
-                except GCalendar.DoesNotExist:
-                    raise InvalidParameterException("Provided calendar {} does not exist".format(calendar_str))
-                if c.user != self.user:
-                    raise InvalidParameterException("That calendar doesn't belong to you!")
-                calendars.append(c)
-        else:
-            # TODO take the default from preferences
-            calendars = GCalendar.objects.filter(user=self.user)
-            if not calendars:
-                raise InvalidParameterException("That calendar doesn't belong to you!")
+        calendars = self.user.profile.get_calendars_for_calendarids(calendar_ids)
 
         keywords = self.keywords.split(',')
         if not keywords:
