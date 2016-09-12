@@ -2,8 +2,6 @@ var analyticsApp = angular.module('analyticsApp', ['nvd3', 'ui.calendar']);
 
 analyticsApp.controller('LoggedInCtrl', function LoggedInController($scope) {
 
-  $scope.testString = "hello angular 1.5!";
-
 });
 
 // Controller to generate graph data from chart directive, cumulative tags
