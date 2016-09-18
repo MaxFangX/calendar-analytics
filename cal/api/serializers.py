@@ -52,9 +52,14 @@ class ColorCategorySerializer(serializers.ModelSerializer):
 
     hours = serializers.SerializerMethodField()
 
+    def get_fields(self, *args, **kwargs):
+        fields = super(ColorCategorySerializer, self).get_fields(*args, **kwargs)
+        fields['calendar'].queryset = fields['calendar'].queryset.filter(user=self.context['user'])
+        return fields
+
     class Meta:
         model = ColorCategory
-        fields = ('color', 'label', 'hours')
+        fields = ('color', 'label', 'hours', 'calendar')
 
     def get_hours(self, obj):
         calendar_ids = self.context['calendar_ids']
