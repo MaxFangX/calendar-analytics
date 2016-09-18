@@ -80,102 +80,6 @@ class Profile(models.Model):
         self.save()
 
 
-class ColorCategory(models.Model, EventCollection):
-
-    user = models.ForeignKey(User, related_name='colorcategories')
-    color = models.CharField(max_length=100, help_text="str of the number of the event color in constants.py")
-    label = models.CharField(max_length=100)
-
-    def __str__(self):
-        return "{} by {}".format(self.label, self.user.username)
-
-    def hours(self, calendar_ids=None, start=None, end=None):
-        events = self.get_events(calendar_ids=calendar_ids, start=start, end=end)
-
-        return EventCollection(lambda: events).total_time() / 3600
-
-    def get_events(self, calendar_ids=None, start=None, end=None):
-        qs = self.query(calendar_ids, start, end)
-        return set(qs)
-
-    def query(self, calendar_ids=None, start=None, end=None):
-        calendars = self.user.profile.get_calendars_for_calendarids(calendar_ids)
-
-        querysets = [
-                GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color_index=self.color)
-                for calendar in calendars
-                ]
-
-        # Union over the querysets
-        events_qs = reduce(lambda qs1, qs2: qs1 | qs2, querysets)
-
-        return events_qs
-
-
-class TagGroup(models.Model):
-
-    user = models.ForeignKey(User, related_name='taggroups')
-    label = models.CharField(max_length=100, help_text="The name of this tag family")
-
-
-class Tag(models.Model, EventCollection):
-
-    user = models.ForeignKey(User, related_name='tags')
-    label = models.CharField(max_length=100, help_text="The name of this tag")
-    keywords = models.CharField(max_length=100, help_text="Comma-separated list of strings to search for")
-    group = models.ForeignKey(TagGroup, null=True, default=None, related_name='tags')
-
-    def __str__(self):
-        return "<Tag '{}'>".format(self.label, self.keywords)
-
-    def save(self, *args, **kwargs):
-        # Remove beginning and ending spaces
-        self.keywords = ",".join([k.strip() for k in self.keywords.split(',')])
-
-        return super(Tag, self).save(*args, **kwargs)
-
-    def hours(self, calendar_ids=None, start=None, end=None):
-        events = self.get_events(start=start, end=end)
-
-        return EventCollection(lambda: events).total_time() / 3600
-
-    def get_events(self, calendar_ids=None, start=None, end=None):
-        """
-        Overrides EventCollection.get_events
-        """
-
-        # TODO handle edges here
-        queryset = self.query(calendar_ids, start, end)
-
-        return set(queryset)
-
-    def query(self, calendar_ids=None, start=None, end=None):
-        """
-        Returns a QuerySet of events matching this Tag.
-        Does not truncate at the edges.
-        """
-        calendars = self.user.profile.get_calendars_for_calendarids(calendar_ids)
-
-        keywords = self.keywords.split(',')
-        if not keywords:
-            raise InvalidParameterException("No keywords defined for this tag")
-
-        querysets = [
-                GEvent.objects.filter(calendar=calendar, name__icontains=keyword)
-                for keyword in keywords 
-                for calendar in calendars
-                ]
-
-        # Union over the querysets
-        events_qs = reduce(lambda qs1, qs2: qs1 | qs2, querysets)
-
-        if start:
-            events_qs = events_qs.filter(end__gt=start)
-        if end:
-            events_qs = events_qs.filter(start__lt=end)
-
-        return events_qs.order_by('start')
-
 class GCalendar(models.Model):
     
     """
@@ -560,6 +464,104 @@ class DeletedEvent(models.Model):
         qs2 = GEvent.objects.filter(calendar=self.calendar, google_id=self.google_id)
         for event in qs2:
             event.delete()
+
+
+class ColorCategory(models.Model, EventCollection):
+
+    calendar = models.ForeignKey(GCalendar, null=True, related_name='colorcategories')
+    user = models.ForeignKey(User, related_name='colorcategories')
+    color = models.CharField(max_length=100, help_text="str of the number of the event color in constants.py")
+    label = models.CharField(max_length=100)
+
+    def __str__(self):
+        return "{} by {}".format(self.label, self.user.username)
+
+    def hours(self, calendar_ids=None, start=None, end=None):
+        events = self.get_events(calendar_ids=calendar_ids, start=start, end=end)
+
+        return EventCollection(lambda: events).total_time() / 3600
+
+    def get_events(self, calendar_ids=None, start=None, end=None):
+        qs = self.query(calendar_ids, start, end)
+        return set(qs)
+
+    def query(self, calendar_ids=None, start=None, end=None):
+        calendars = self.user.profile.get_calendars_for_calendarids(calendar_ids)
+
+        querysets = [
+                GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color_index=self.color)
+                for calendar in calendars
+                ]
+
+        # Union over the querysets
+        events_qs = reduce(lambda qs1, qs2: qs1 | qs2, querysets)
+
+        return events_qs
+
+
+class TagGroup(models.Model):
+
+    user = models.ForeignKey(User, related_name='taggroups')
+    label = models.CharField(max_length=100, help_text="The name of this tag family")
+
+
+class Tag(models.Model, EventCollection):
+
+    user = models.ForeignKey(User, related_name='tags')
+    label = models.CharField(max_length=100, help_text="The name of this tag")
+    keywords = models.CharField(max_length=100, help_text="Comma-separated list of strings to search for")
+    group = models.ForeignKey(TagGroup, null=True, default=None, related_name='tags')
+
+    def __str__(self):
+        return "<Tag '{}'>".format(self.label, self.keywords)
+
+    def save(self, *args, **kwargs):
+        # Remove beginning and ending spaces
+        self.keywords = ",".join([k.strip() for k in self.keywords.split(',')])
+
+        return super(Tag, self).save(*args, **kwargs)
+
+    def hours(self, calendar_ids=None, start=None, end=None):
+        events = self.get_events(start=start, end=end)
+
+        return EventCollection(lambda: events).total_time() / 3600
+
+    def get_events(self, calendar_ids=None, start=None, end=None):
+        """
+        Overrides EventCollection.get_events
+        """
+
+        # TODO handle edges here
+        queryset = self.query(calendar_ids, start, end)
+
+        return set(queryset)
+
+    def query(self, calendar_ids=None, start=None, end=None):
+        """
+        Returns a QuerySet of events matching this Tag.
+        Does not truncate at the edges.
+        """
+        calendars = self.user.profile.get_calendars_for_calendarids(calendar_ids)
+
+        keywords = self.keywords.split(',')
+        if not keywords:
+            raise InvalidParameterException("No keywords defined for this tag")
+
+        querysets = [
+                GEvent.objects.filter(calendar=calendar, name__icontains=keyword)
+                for keyword in keywords 
+                for calendar in calendars
+                ]
+
+        # Union over the querysets
+        events_qs = reduce(lambda qs1, qs2: qs1 | qs2, querysets)
+
+        if start:
+            events_qs = events_qs.filter(end__gt=start)
+        if end:
+            events_qs = events_qs.filter(start__lt=end)
+
+        return events_qs.order_by('start')
 
 
 class Statistic(models.Model):
