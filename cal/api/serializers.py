@@ -54,7 +54,7 @@ class ColorCategorySerializer(serializers.ModelSerializer):
 
     def get_fields(self, *args, **kwargs):
         fields = super(ColorCategorySerializer, self).get_fields(*args, **kwargs)
-        fields['calendar'].queryset = fields['calendar'].queryset.filter(user=self.context['user'])
+        fields['calendar'].queryset = fields['calendar'].queryset.filter(user=self.context['request'].user)
         return fields
 
     class Meta:
