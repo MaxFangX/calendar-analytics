@@ -47,6 +47,10 @@ class Profile(models.Model):
         return "{}'s profile".format(self.user)
 
     def get_calendars_for_calendarids(self, calendar_ids=None):
+        """
+        Given a list of string calendar_id's, will always return a list of
+        GCalendars on which you can execute a query.
+        """
         calendars = []
         if calendar_ids:
             for calendar_str in calendar_ids:
@@ -486,7 +490,14 @@ class ColorCategory(models.Model, EventCollection):
         return set(qs)
 
     def query(self, calendar_ids=None, start=None, end=None):
-        calendars = self.user.profile.get_calendars_for_calendarids(calendar_ids)
+        if calendar_ids and self.calendar:
+            message = "Calendar ids can only be specified for ColorCategories without a calendar field attached."
+            raise InvalidParameterException(message)
+
+        if self.calendar:
+            calendars = [self.calendar]
+        else:
+            calendars = self.user.profile.get_calendars_for_calendarids(calendar_ids)
 
         querysets = [
                 GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color_index=self.color)
