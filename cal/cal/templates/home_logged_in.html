@@ -45,7 +45,8 @@
 
   <div ng-controller="CalendarCtrl as $ctrl" class="cal-calendar col-md-8">
     <!-- Enable / disable calendars button -->
-    <div class="btn-group">
+    <div id="select-calendar-button">
+      <div class="btn-group" >
       <button type="button"
         class="btn btn-default dropdown-toggle"
         data-toggle="dropdown"
@@ -62,6 +63,7 @@
           </a>
         </li>
       </ul>
+      </div>
     </div>
     <!-- Calendar -->
     <div ui-calendar="uiConfig.calendar" calendar="panalytics" class="calendar" ng-model="$ctrl.eventSources"></div>
@@ -96,12 +98,14 @@
 
     <!-- Super user buttons -->
     {% if request.user.is_staff %}
-      <h4 class="well">Options</h4>
-      <a href="/v1/sync"><button class="btn btn-primary pull-left">Sync</button></a>
-      <a href="/v1/sync?full_sync=true"><button class="btn btn-primary pull-left">Full Sync</button></a>
-      <a href="/v1/sync?sync_all=true"><button class="btn btn-primary pull-left">Sync All Calendars</button></a>
-      <a href="/v1/sync?full_sync=true&sync_all=true"><button class="btn btn-primary pull-left">Full Sync All Calendars</button></a>
-      <a href="/auth/clear"><button class="btn btn-primary pull-left">Reset Credentials</button></a>
+      <div>
+        <h4 class="well">Options</h4>
+        <a href="/v1/sync"><button class="btn btn-primary pull-left">Sync</button></a>
+        <a href="/v1/sync?full_sync=true"><button class="btn btn-primary pull-left">Full Sync</button></a>
+        <a href="/v1/sync?sync_all=true"><button class="btn btn-primary pull-left">Sync All Calendars</button></a>
+        <a href="/v1/sync?full_sync=true&sync_all=true"><button class="btn btn-primary pull-left">Full Sync All Calendars</button></a>
+        <a href="/auth/clear"><button class="btn btn-primary pull-left">Reset Credentials</button></a>
+      </div>
     {% endif %}
   </div>
 </div>
