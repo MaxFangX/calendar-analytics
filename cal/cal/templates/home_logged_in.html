@@ -78,34 +78,31 @@
       </ul>
       <nvd3 options="options" data="categories"></nvd3>
     </div>
-  </div>
-  <div class="col-md-4" ng-controller="TagsCtrl">
-    <h4 class="well">Tags - Cumulative</h4>
-    <ul class="list-group">
-      <li class="list-group-item" ng-repeat="tag in tags">
-        {% verbatim %} {{ tag.label }}: {{ tag.hours }} hours {% endverbatim %}
-      </li>
-
-    </ul>
-  </div>
-
-  <!-- For new users, needing to connect their calendars -->
-  {% else %}
-    <div class="jumbotron">
-      <h3><a href="/auth/google">Connect Google Calendar</a></h3>
+    <div ng-controller="TagsCtrl">
+      <h4 class="well">Tags - Cumulative</h4>
+      <ul class="list-group">
+        <li class="list-group-item" ng-repeat="tag in tags">
+          {% verbatim %} {{ tag.label }}: {{ tag.hours }} hours {% endverbatim %}
+        </li>
+      </ul>
     </div>
-  {% endif %}
 
-  <!-- Super user buttons -->
-  <div class="col-md-4">
-  {% if request.user.is_staff %}
-    <h4 class="well">Options</h4>
-    <a href="/v1/sync"><button class="btn btn-primary pull-left">Sync</button></a>
-    <a href="/v1/sync?full_sync=true"><button class="btn btn-primary pull-left">Full Sync</button></a>
-    <a href="/v1/sync?sync_all=true"><button class="btn btn-primary pull-left">Sync All Calendars</button></a>
-    <a href="/v1/sync?full_sync=true&sync_all=true"><button class="btn btn-primary pull-left">Full Sync All Calendars</button></a>
-    <a href="/auth/clear"><button class="btn btn-primary pull-left">Reset Credentials</button></a>
-  {% endif %}
+    <!-- For new users, needing to connect their calendars -->
+    {% else %}
+      <div class="jumbotron">
+        <h3><a href="/auth/google">Connect Google Calendar</a></h3>
+      </div>
+    {% endif %}
+
+    <!-- Super user buttons -->
+    {% if request.user.is_staff %}
+      <h4 class="well">Options</h4>
+      <a href="/v1/sync"><button class="btn btn-primary pull-left">Sync</button></a>
+      <a href="/v1/sync?full_sync=true"><button class="btn btn-primary pull-left">Full Sync</button></a>
+      <a href="/v1/sync?sync_all=true"><button class="btn btn-primary pull-left">Sync All Calendars</button></a>
+      <a href="/v1/sync?full_sync=true&sync_all=true"><button class="btn btn-primary pull-left">Full Sync All Calendars</button></a>
+      <a href="/auth/clear"><button class="btn btn-primary pull-left">Reset Credentials</button></a>
+    {% endif %}
   </div>
 </div>
 {% endblock %}

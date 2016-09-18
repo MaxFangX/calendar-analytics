@@ -45,32 +45,29 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
   $scope.options = {
     chart: {
       type: 'pieChart',
-      height: 500,
+      height: 400,
       x: function(d){return d.label;},
       y: function(d){return d.hours;},
       showLabels: true,
+      growOnHover: true,
       duration: 500,
       labelThreshold: 0.01,
       labelSunbeamLayout: false,
       legend: {
         margin: {
           top: 5,
-          right: 35,
-          bottom: 5,
+          right: 0,
+          bottom: 0,
           left: 0
         }
-      }
-    },
-    title: {
-      enable: true,
-      text: 'Total Hours Spent from Categories'
+      },
     },
   };
 });
 
 analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $q, uiCalendarConfig) {
 
-    $scope.calendars = {}
+    $scope.calendars = {};
 
     this.events = function(start, end, timezone, callback) {
         var query_timezone = '';
@@ -119,7 +116,7 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $
                           backgroundColor: gevent.color.background,
                           textColor: gevent.color.foreground,
                           borderColor: gevent.color.foreground,
-                      })
+                      });
                   });
 
                   if ($scope.calendars[gcal.calendar_id].enabled) {
@@ -136,7 +133,7 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $
 
         }, function gcalError(response) {
             console.log("Ajax call to gcalendars failed: " + response);
-        })
+        });
 
     };
 
