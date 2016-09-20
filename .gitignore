@@ -16,6 +16,7 @@ cal/cal/static/bower_components/*
 
 # DS Store
 .DS_Store
+cal/cal/static/.DS_Store
 
 # NPM-debug log
 cal/cal/npm-debug.log
