@@ -83,6 +83,41 @@ class Profile(models.Model):
         self.authed = False
         self.save()
 
+    def generate_categories(self):
+        """
+        Generates a ColorCategory for every permutation of color and calendar that exists
+        """
+        def create_category_if_nonexistent(color_index, gcalendar=None):
+            try:
+                ColorCategory.objects.get(color_index=color_index, calendar=gcalendar)
+            except ColorCategory.DoesNotExist:
+                label = "Generated Category {}".format(color_index)
+                if gcalendar:
+                    label += " for calendar {}".format(gcalendar.calendar_id)
+                cc = ColorCategory(
+                                   calendar=gcalendar,
+                                   user=self.user,
+                                   color_index=color_index,
+                                   label=label,
+                                   )
+                cc.save()
+                print "Created color category {}".format(cc)
+
+        # Create categories for event colors
+        for key in GEvent.EVENT_COLORS_KEYS:
+            # Skip default events, those will use a calendar key
+            if key == "1":
+                continue
+            qs = GEvent.objects.filter(calendar__user=self.user)
+            if qs.count() > 0:
+                create_category_if_nonexistent(color_index=key)
+
+        # Create cateogries for default event colors on separate calendars
+        for calendar in GCalendar.objects.filter(user=self.user):
+            qs = GEvent.objects.filter(calendar__user=self.user, color_index="1")
+            if qs.count() > 0:
+                create_category_if_nonexistent(color_index="1", gcalendar=calendar)
+
 
 class GCalendar(models.Model):
     
@@ -478,7 +513,10 @@ class ColorCategory(models.Model, EventCollection):
     label = models.CharField(max_length=100)
 
     def __str__(self):
-        return "{} by {}".format(self.label, self.user.username)
+        val = "{} by {}".format(self.label, self.user.username)
+        if self.calendar:
+            val += " for calendar {}".format(self.calendar.calendar_id)
+        return val
 
     def hours(self, calendar_ids=None, start=None, end=None):
         events = self.get_events(calendar_ids=calendar_ids, start=start, end=end)
