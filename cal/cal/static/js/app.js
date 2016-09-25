@@ -23,6 +23,15 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
 
     });
 
+  // adding a tag
+  // %http({ method: 'POST', url: 'v1/tags/'});
+
+  // deleting a tag
+  // %http({ method: 'DELETE', url: 'v1/tags/'});
+
+  // editing a tag
+  // %http({ method: 'POST', url: 'v1/tags/'});
+
 });
 
 // Example line graph in categories, line graph per week

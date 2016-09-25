@@ -621,6 +621,9 @@ class Tag(models.Model, EventCollection):
 
         return events_qs.order_by('start')
 
+# class TagForm(forms.ModelForm):
+#     class Meta:
+#         model = Tag
 
 class Statistic(models.Model):
 

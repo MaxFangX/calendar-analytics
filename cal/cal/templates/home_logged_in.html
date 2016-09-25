@@ -4,8 +4,8 @@
 {% block head %}
   {{ block.super }}
 
-  <!-- START PSA G+ Logout -->
   <script type="text/javascript">
+    // PSA G+ Logout
     gapi.load('auth2', function () {
       var auth2;
       auth2 = gapi.auth2.init({
@@ -25,8 +25,32 @@
         }
       });
     });
+
+    $("#add-tag-button").click(function(){
+      $.ajax({
+        url: '/v1/tags',
+        type: 'POST',
+        data: {
+          label: $('input[name=label]').val(),
+          keywords: $('input[name=keywords]').val()
+        },
+        dataType: 'json'
+      });
+    });
+
+    $("#delete-tag-button").click(function(){
+      $.ajax({
+        url: '/v1/tags/18',
+        type: 'DELETE',
+        // data: {
+        //   label: $('input[name=label]').val(),
+        //   keywords: $('input[name=keywords]').val()
+        // },
+        dataType: 'json'
+      });
+    });
+
   </script>
-  <!-- END PSA G+ Logout -->
 
 {% endblock %}
 
@@ -85,8 +109,10 @@
       <ul class="list-group">
         <li class="list-group-item" ng-repeat="tag in tags">
           {% verbatim %} {{ tag.label }}: {{ tag.hours }} hours {% endverbatim %}
+          <button class="btn btn-primary" id="delete-tag-button">Delete Tag</button>
         </li>
       </ul>
+      <!-- Add a tag -->
       <form action="/v1/tags/" method="POST">{% csrf_token %}
         <h5>Add a Tag</h5>
         <fieldset>
@@ -100,12 +126,12 @@
           <div class="form-group">
             <label class="col-sm-2 control-label">Keywords</label>
             <div class="col-sm-10">
-              <input name="label" class="form-control" type="text">
+              <input name="keywords" class="form-control" type="text">
               <span class="help-block">Comma-separated list of strings to search for</span>
             </div>
           </div>
           <div class="form-actions">
-            <button class="btn btn-primary" title="Make a POST request on the Tag List resource">Add Tag</button>
+            <button class="btn btn-primary" id="add-tag-button">Add Tag</button>
           </div>
         </fieldset>
       </form>

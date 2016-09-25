@@ -141,3 +141,20 @@ def login_google(request):
 
     # At this point, all users should be logged in.
     return json_response({"message": "Successfully logged in!"}, status=200)
+
+# @login_required
+# def add_tag(request):
+#     saved = False
+
+#     if request.method == 'POST':
+#         form = TagForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             tag = Tag()
+#             tag.label = form.cleaned_data['label']
+#             tag.keywords = form.cleaned_data['keywords']
+#             saved = True
+#             tag.save()
+#     else:
+#         form = TagForm()
+
+#     return render(request, 'board/add_card.html', locals())
