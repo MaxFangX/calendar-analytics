@@ -500,7 +500,9 @@ class ColorCategory(models.Model, EventCollection):
             calendars = self.user.profile.get_calendars_for_calendarids(calendar_ids)
 
         querysets = [
-                GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color_index=self.color_index)
+                GEvent.objects
+                .filter(calendar__user=self.user, calendar=calendar, color_index=self.color_index)
+                .exclude(all_day_event=True)
                 for calendar in calendars
                 ]
 
@@ -559,7 +561,9 @@ class Tag(models.Model, EventCollection):
             raise InvalidParameterException("No keywords defined for this tag")
 
         querysets = [
-                GEvent.objects.filter(calendar=calendar, name__icontains=keyword)
+                GEvent.objects
+                .filter(calendar=calendar, name__icontains=keyword)
+                .exclude(all_day_event=True)
                 for keyword in keywords 
                 for calendar in calendars
                 ]
