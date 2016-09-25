@@ -59,7 +59,7 @@ class ColorCategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ColorCategory
-        fields = ('color', 'label', 'hours', 'calendar')
+        fields = ('color_index', 'label', 'hours', 'calendar')
 
     def get_hours(self, obj):
         calendar_ids = self.context['calendar_ids']

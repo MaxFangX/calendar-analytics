@@ -474,7 +474,7 @@ class ColorCategory(models.Model, EventCollection):
 
     calendar = models.ForeignKey(GCalendar, null=True, related_name='colorcategories')
     user = models.ForeignKey(User, related_name='colorcategories')
-    color = models.CharField(max_length=100, help_text="str of the number of the event color in constants.py")
+    color_index = models.CharField(max_length=100, help_text="str of the number of the event color in constants.py")
     label = models.CharField(max_length=100)
 
     def __str__(self):
@@ -500,7 +500,7 @@ class ColorCategory(models.Model, EventCollection):
             calendars = self.user.profile.get_calendars_for_calendarids(calendar_ids)
 
         querysets = [
-                GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color_index=self.color)
+                GEvent.objects.filter(calendar__user=self.user, calendar=calendar, color_index=self.color_index)
                 for calendar in calendars
                 ]
 
