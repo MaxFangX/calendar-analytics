@@ -76,7 +76,7 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ('id', 'label', 'keywords', 'hours')
 
     def get_hours(self, obj):
-        calendar_ids = self.context['calendar_ids']
-        start = self.context['start']
-        end = self.context['end']
+        calendar_ids = self.context.get('calendar_ids')
+        start = self.context.get('start')
+        end = self.context.get('end')
         return obj.hours(calendar_ids=calendar_ids, start=start, end=end)
