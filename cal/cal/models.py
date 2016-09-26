@@ -108,7 +108,7 @@ class Profile(models.Model):
             # Skip default events, those will use a calendar key
             if key == "1":
                 continue
-            qs = GEvent.objects.filter(calendar__user=self.user)
+            qs = GEvent.objects.filter(calendar__user=self.user, color_index=key)
             if qs.count() > 0:
                 create_category_if_nonexistent(color_index=key)
 
