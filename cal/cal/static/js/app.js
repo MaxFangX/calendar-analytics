@@ -6,32 +6,40 @@ analyticsApp.controller('LoggedInCtrl', function LoggedInController($scope) {
 // Controller to generate graph data from chart directive, cumulative tags
 analyticsApp.controller('TagsCtrl', function($scope, $http){
   var url = '/v1/tags.json';
+  var tag_url = '/v1/tags/';
   $scope.url = url;
   $scope.tags = [];
 
   $http({ method: 'GET', url: url }).
     success(function successCallback(data) {
-
       for (var i = 0; i < data.results.length; i++) {
         var tag = data.results[i];
         $scope.tags.push({
+          id: tag.id,
           label: tag.label,
           keywords: tag.keywords,
           hours: tag.hours
         });
       }
-
     });
 
-  // adding a tag
-  // %http({ method: 'POST', url: 'v1/tags/'});
-
-  // deleting a tag
-  // %http({ method: 'DELETE', url: 'v1/tags/'});
-
-  // editing a tag
-  // %http({ method: 'POST', url: 'v1/tags/'});
-
+    this.deleteTag = function(tagId) {
+      $http({
+        method: 'POST',
+        url: tag_url + tagId,
+        data: $.param({
+          csrfmiddlewaretoken: getCookie('csrftoken'),
+          _method: 'DELETE'
+        }),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }).
+        success(function successCallback(data) {
+          console.log(tagId);
+          // delete tag from front-end
+        });
+    };
 });
 
 // Example line graph in categories, line graph per week

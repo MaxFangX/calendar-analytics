@@ -37,19 +37,6 @@
         dataType: 'json'
       });
     });
-
-    $("#delete-tag-button").click(function(){
-      $.ajax({
-        url: '/v1/tags/18',
-        type: 'DELETE',
-        // data: {
-        //   label: $('input[name=label]').val(),
-        //   keywords: $('input[name=keywords]').val()
-        // },
-        dataType: 'json'
-      });
-    });
-
   </script>
 
 {% endblock %}
@@ -104,12 +91,12 @@
       </ul>
       <nvd3 options="options" data="categories"></nvd3>
     </div>
-    <div ng-controller="TagsCtrl">
+    <div ng-controller="TagsCtrl as $ctrl">
       <h4 class="well">Tags - Cumulative</h4>
       <ul class="list-group">
         <li class="list-group-item" ng-repeat="tag in tags">
           {% verbatim %} {{ tag.label }}: {{ tag.hours }} hours {% endverbatim %}
-          <button class="btn btn-primary" id="delete-tag-button">Delete Tag</button>
+          <button class="btn btn-primary" ng-click="$ctrl.deleteTag(tag.id)">Delete Tag</button>
         </li>
       </ul>
       <!-- Add a tag -->
