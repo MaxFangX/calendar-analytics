@@ -3,13 +3,14 @@ var analyticsApp = angular.module('analyticsApp', ['nvd3', 'ui.calendar']);
 analyticsApp.controller('LoggedInCtrl', function LoggedInController($scope) {
 });
 
-// Controller to generate graph data from chart directive, cumulative tags
 analyticsApp.controller('TagsCtrl', function($scope, $http){
   var url = '/v1/tags.json';
-  var tag_url = '/v1/tags/';
+  var tagUrl = '/v1/tags/';
+
   $scope.url = url;
   $scope.tags = [];
 
+  // Generate graph data
   $http({ method: 'GET', url: url }).
     success(function successCallback(data) {
       for (var i = 0; i < data.results.length; i++) {
@@ -23,10 +24,47 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
       }
     });
 
+    // add tag
+    // this.addTag = function() {
+    //   $http({
+    //     method: 'POST',
+    //     url: url,
+    //     data: {
+    //       label: $('input[name=label]').val(),
+    //       keywords: $('input[name=keywords]').val()
+    //     },
+    //     headers: {
+    //       'Content-Type': 'application/x-www-form-urlencoded'
+    //     }
+    //   }).
+    //     success(function redirectToHome(data) {
+    //       //
+    //     });
+    // };
+
+    // edit tag
+    this.editTag = function(tagId) {
+      $http({
+        method: 'POST',
+        url: tagUrl + tagId,
+        data: $.param({
+          csrfmiddlewaretoken: getCookie('csrftoken'),
+          _method: 'PUT'
+        }),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }).
+        success(function editTagInTags(data) {
+          // edit label or keywords in tags if it changed
+        });
+    };
+
+    // delete tag
     this.deleteTag = function(tagId) {
       $http({
         method: 'POST',
-        url: tag_url + tagId,
+        url: tagUrl + tagId,
         data: $.param({
           csrfmiddlewaretoken: getCookie('csrftoken'),
           _method: 'DELETE'
@@ -35,17 +73,18 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
           'Content-Type': 'application/x-www-form-urlencoded'
         }
       }).
-        success(function successCallback(data) {
-          console.log(tagId);
-          // delete tag from front-end
+        success(function removeTagFromFrontend(data) {
+          $scope.tags = $scope.tags.filter(function(tag) {
+            return tag.id !== tagId;
+          });
         });
     };
 });
 
-// Example line graph in categories, line graph per week
 analyticsApp.controller('CategoriesCtrl', function($scope, $http){
   var url = '/v1/colorcategories.json';
 
+  // Generate graph data
   $http({ method: 'GET', url: url }).
     success(function (data) {
       // set the data

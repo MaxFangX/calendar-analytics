@@ -26,17 +26,18 @@
       });
     });
 
-    $("#add-tag-button").click(function(){
-      $.ajax({
-        url: '/v1/tags',
-        type: 'POST',
-        data: {
-          label: $('input[name=label]').val(),
-          keywords: $('input[name=keywords]').val()
-        },
-        dataType: 'json'
-      });
-    });
+    // $("#add-tag-button").click(function(){
+    //   $.ajax({
+    //     url: '/v1/tags',
+    //     type: 'POST',
+    //     data: {
+    //       label: $('input[name=label]').val(),
+    //       keywords: $('input[name=keywords]').val()
+    //     },
+    //     dataType: 'json'
+    //   });
+    // });
+
   </script>
 
 {% endblock %}
@@ -96,6 +97,7 @@
       <ul class="list-group">
         <li class="list-group-item" ng-repeat="tag in tags">
           {% verbatim %} {{ tag.label }}: {{ tag.hours }} hours {% endverbatim %}
+          <!-- <button class="btn btn-primary" ng-click="$ctrl.editTag(tag.id)">Edit Tag</button> -->
           <button class="btn btn-primary" ng-click="$ctrl.deleteTag(tag.id)">Delete Tag</button>
         </li>
       </ul>
@@ -118,7 +120,7 @@
             </div>
           </div>
           <div class="form-actions">
-            <button class="btn btn-primary" id="add-tag-button">Add Tag</button>
+            <button class="btn btn-primary" ng-click="$ctrl.addTag(tag.id)">Add Tag</button>
           </div>
         </fieldset>
       </form>
