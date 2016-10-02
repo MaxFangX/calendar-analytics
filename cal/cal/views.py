@@ -151,4 +151,15 @@ def add_tag(request):
         tag.save()
         return HttpResponseRedirect("/")
     else:
-        return HttpResponseBadRequest("Failed to log in user")
+        return HttpResponseBadRequest("Failed to add tag")
+
+@login_required
+def edit_tag(request):
+    if request.method == 'POST':
+        label = request.POST.get('label')
+        keywords = request.POST.get('keywords')
+        tag = Tag(label=label, keywords=keywords, user=request.user)
+        tag.save()
+        return HttpResponseRedirect("/")
+    else:
+        return HttpResponseBadRequest("Failed to edit tag")

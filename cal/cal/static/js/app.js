@@ -24,7 +24,6 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
       }
     });
 
-    // add tag
     this.addTag = function() {
       $.ajax({
         url: url,
@@ -36,12 +35,13 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
       });
     };
 
-    // edit tag
     this.editTag = function(tagId) {
       $http({
         method: 'POST',
         url: tagUrl + tagId,
         data: $.param({
+          label: $('input[name=label]').val(),
+          keywords: $('input[name=keywords]').val(),
           csrfmiddlewaretoken: getCookie('csrftoken'),
           _method: 'PUT'
         }),
@@ -54,7 +54,6 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
         });
     };
 
-    // delete tag
     this.deleteTag = function(tagId) {
       $http({
         method: 'POST',
@@ -67,7 +66,7 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
           'Content-Type': 'application/x-www-form-urlencoded'
         }
       }).
-        success(function removeTagFromFrontend(data) {
+        success(function removeTagFromList(data) {
           $scope.tags = $scope.tags.filter(function(tag) {
             return tag.id !== tagId;
           });
