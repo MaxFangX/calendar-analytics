@@ -25,19 +25,6 @@
         }
       });
     });
-
-    // $("#add-tag-button").click(function(){
-    //   $.ajax({
-    //     url: '/v1/tags',
-    //     type: 'POST',
-    //     data: {
-    //       label: $('input[name=label]').val(),
-    //       keywords: $('input[name=keywords]').val()
-    //     },
-    //     dataType: 'json'
-    //   });
-    // });
-
   </script>
 
 {% endblock %}
@@ -102,7 +89,7 @@
         </li>
       </ul>
       <!-- Add a tag -->
-      <form action="/v1/tags/" method="POST">{% csrf_token %}
+      <form action="/add_tag/" method="POST">{% csrf_token %}
         <h5>Add a Tag</h5>
         <fieldset>
           <div class="form-group">
@@ -119,9 +106,7 @@
               <span class="help-block">Comma-separated list of strings to search for</span>
             </div>
           </div>
-          <div class="form-actions">
-            <button class="btn btn-primary" ng-click="$ctrl.addTag(tag.id)">Add Tag</button>
-          </div>
+          <input type="submit" value="Add Tag" class="btn btn-primary">
         </fieldset>
       </form>
     </div>

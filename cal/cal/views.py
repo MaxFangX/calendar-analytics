@@ -1,5 +1,5 @@
 from cal.helpers import json_response
-from cal.models import GoogleCredentials, GoogleFlow, Profile
+from cal.models import GoogleCredentials, GoogleFlow, Profile, Tag
 
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
@@ -141,3 +141,14 @@ def login_google(request):
 
     # At this point, all users should be logged in.
     return json_response({"message": "Successfully logged in!"}, status=200)
+
+@login_required
+def add_tag(request):
+    if request.method == 'POST':
+        label = request.POST.get('label')
+        keywords = request.POST.get('keywords')
+        tag = Tag(label=label, keywords=keywords, user=request.user)
+        tag.save()
+        return HttpResponseRedirect("/")
+    else:
+        return HttpResponseBadRequest("Failed to log in user")

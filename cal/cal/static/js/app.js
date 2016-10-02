@@ -25,22 +25,16 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
     });
 
     // add tag
-    // this.addTag = function() {
-    //   $http({
-    //     method: 'POST',
-    //     url: url,
-    //     data: {
-    //       label: $('input[name=label]').val(),
-    //       keywords: $('input[name=keywords]').val()
-    //     },
-    //     headers: {
-    //       'Content-Type': 'application/x-www-form-urlencoded'
-    //     }
-    //   }).
-    //     success(function redirectToHome(data) {
-    //       //
-    //     });
-    // };
+    this.addTag = function() {
+      $.ajax({
+        url: url,
+        type: 'POST',
+        data: {
+          label: $('input[name=label]').val(),
+          keywords: $('input[name=keywords]').val()
+        }
+      });
+    };
 
     // edit tag
     this.editTag = function(tagId) {

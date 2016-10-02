@@ -12,6 +12,7 @@ urlpatterns = patterns(
     url(r'^auth/clear', 'cal.views.clear_auth', name='clear_auth'),
     url(r'^login/google', 'cal.views.login_google', name='login_google'),
     url(r'^accounts/profile', 'cal.views.accounts_profile', name='accounts_profile'),
+    url(r'^add_tag/$', 'cal.views.add_tag', name='add_tag'),
 
     # Django REST framework
     url(r'^', include('api.urls')),
