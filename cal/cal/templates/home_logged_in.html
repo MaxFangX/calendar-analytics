@@ -86,7 +86,7 @@
           {% verbatim %} {{ tag.label }}: {{ tag.hours }} hours {% endverbatim %}
           <!-- <button class="btn btn-primary" ng-click="$ctrl.editTag(tag.id)">Edit Tag</button> -->
           <!-- Edit a tag -->
-<!--           <form action="/edit_tag/" method="POST">{% csrf_token %}
+          <form action="/edit_tag/" method="POST">{% csrf_token %}
             <h5>Edit a Tag</h5>
             <fieldset>
               <div class="form-group">
@@ -103,9 +103,9 @@
                   <span class="help-block">Comma-separated list of strings to search for</span>
                 </div>
               </div>
-              <input type="submit" value="Edit Tag" class="btn btn-primary">
+              <button class="btn btn-primary" ng-click="$ctrl.editTag(tag.id)">Edit Tag</button>
             </fieldset>
-          </form> -->
+          </form>
 
           <button class="btn btn-primary" ng-click="$ctrl.deleteTag(tag.id)">Delete Tag</button>
         </li>

@@ -156,9 +156,10 @@ def add_tag(request):
 @login_required
 def edit_tag(request):
     if request.method == 'POST':
-        label = request.POST.get('label')
-        keywords = request.POST.get('keywords')
-        tag = Tag(label=label, keywords=keywords, user=request.user)
+        tag_id = request.POST.get('id')
+        tag = Tag.objects.get(id=tag_id)
+        tag.label = request.POST.get('label')
+        tag.keywords = request.POST.get('keywords')
         tag.save()
         return HttpResponseRedirect("/")
     else:
