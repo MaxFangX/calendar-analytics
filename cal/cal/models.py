@@ -153,9 +153,11 @@ class GCalendar(models.Model):
                 g.end = g.start + timedelta(days=1)
                 g.all_day_event = True
             g.location = event.get('location', '')
-            if event.get('created', None):
-                g.created = parse_datetime(event['created'])
-                g.updated = parse_datetime(event['updated'])
+
+            g.updated = parse_datetime(event['updated'])
+
+            # Sometimes Google is stupid and fails to return the mandatory 'created' field
+            g.created = parse_datetime(event.get('created', g.updated))
 
             g.calendar = self
             g.google_id = event['id']
