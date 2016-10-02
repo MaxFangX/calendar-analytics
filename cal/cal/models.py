@@ -157,7 +157,10 @@ class GCalendar(models.Model):
             g.updated = parse_datetime(event['updated'])
 
             # Sometimes Google is stupid and fails to return the mandatory 'created' field
-            g.created = parse_datetime(event.get('created', g.updated))
+            if event.get('created'):
+                g.created = parse_datetime(event['created'])
+            else:
+                g.created = g.updated
 
             g.calendar = self
             g.google_id = event['id']
