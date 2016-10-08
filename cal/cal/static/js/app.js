@@ -24,32 +24,43 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
       }
     });
 
-    this.addTag = function() {
+    this.addTag = function(tag) {
       $.ajax({
         url: url,
         type: 'POST',
         data: {
-          label: $('input[name=label]').val(),
-          keywords: $('input[name=keywords]').val()
+          label: tag.label,
+          keywords: tag.keywords,
+          csrfmiddlewaretoken: getCookie('csrftoken')
         }
-      });
+      }).
+        success(function addToList(data) {
+          $scope.tags.push({
+            id: tag.id,
+            label: tag.label,
+            keywords: tag.keywords,
+            hours: tag.hours
+          });
+        });
     };
 
     this.editTag = function(tagId) {
+      var tag = search(tagId, $scope.tags);
+
       $http({
         method: 'POST',
         url: tagUrl + tagId,
         data: $.param({
-          label: $('input[name=label]').val(),
-          keywords: $('input[name=keywords]').val(),
+          label: tag.label,
+          keywords: tag.keywords,
           csrfmiddlewaretoken: getCookie('csrftoken'),
-          _method: 'PUT'
+          _method: 'PATCH'
         }),
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
       }).
-        success(function editTagInTags(data) {
+        success(function editToList(data) {
           // edit label or keywords in tags if it changed
         });
     };
@@ -72,6 +83,15 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
           });
         });
     };
+
+    function search(id, tags){
+    for (var i=0; i < tags.length; i++) {
+        if (tags[i].id === id) {
+            return tags[i];
+        }
+      }
+    }
+
 });
 
 analyticsApp.controller('CategoriesCtrl', function($scope, $http){
