@@ -55,7 +55,7 @@ class Profile(models.Model):
         if calendar_ids:
             for calendar_str in calendar_ids:
                 try:
-                    c = GCalendar.objects.filter(calendar_id=calendar_str)
+                    c = GCalendar.objects.get(calendar_id=calendar_str)
                 except GCalendar.DoesNotExist:
                     raise InvalidParameterException("Provided calendar {} does not exist".format(calendar_str))
                 if c.user != self.user:
@@ -578,7 +578,7 @@ class Tag(models.Model, EventCollection):
         return super(Tag, self).save(*args, **kwargs)
 
     def hours(self, calendar_ids=None, start=None, end=None):
-        events = self.get_events(start=start, end=end)
+        events = self.get_events(calendar_ids=calendar_ids, start=start, end=end)
 
         return EventCollection(lambda: events).total_time() / 3600
 
