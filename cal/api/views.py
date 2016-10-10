@@ -189,8 +189,8 @@ class TagList(generics.ListCreateAPIView):
         tag.label = label
         tag.save()
 
-        # TODO return serialized object
-        return Response({'Successfully created tag!'}, status=status.HTTP_201_CREATED)
+        serializer = TagSerializer(tag)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class TagDetail(generics.RetrieveUpdateDestroyAPIView):
