@@ -8,11 +8,13 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseServerError
 from django.shortcuts import render
 from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 
 from oauth2client import client, crypt
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.django_orm import Storage
+
+from social.apps.django_app.utils import psa
 
 
 @ensure_csrf_cookie
@@ -45,6 +47,21 @@ def accounts_profile(request):
     """
     # TODO either remove this view or change Python Social Auth after login
     return HttpResponseRedirect("/")
+
+@csrf_exempt
+@psa('social:complete')
+def complete_with_token(request, backend):
+    # This view expects an access_token GET parameter, if it's needed,
+    # request.backend and request.strategy will be loaded with the current
+    # backend and strategy.
+    token = request.POST.get('access_token')
+    print "Token: {}".format(token)
+    user = request.backend.do_auth(token)
+    if user:
+        login(request, user)
+        return HttpResponseRedirect("/")
+    else:
+        return HttpResponseRedirect("/")
 
 @login_required
 def google_auth(request):
