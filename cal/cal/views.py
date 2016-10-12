@@ -1,5 +1,5 @@
 from cal.helpers import json_response
-from cal.models import GoogleCredentials, GoogleFlow, Profile, Tag
+from cal.models import GoogleCredentials, GoogleFlow, Profile
 
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout

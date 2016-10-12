@@ -25,21 +25,24 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
     });
 
     this.addTag = function(tag) {
-      $.ajax({
+      $http({
+        method: 'POST',
         url: url,
-        type: 'POST',
-        data: {
+        data: $.param({
           label: tag.label,
           keywords: tag.keywords,
           csrfmiddlewaretoken: getCookie('csrftoken')
+        }),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
         }
       }).
         success(function addToList(data) {
           $scope.tags.push({
-            id: tag.id,
-            label: tag.label,
-            keywords: tag.keywords,
-            hours: tag.hours
+            id: data.id,
+            label: data.label,
+            keywords: data.keywords,
+            hours: data.hours
           });
         });
     };
@@ -61,7 +64,9 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
         }
       }).
         success(function editToList(data) {
-          // edit label or keywords in tags if it changed
+          tag.label = data.label;
+          tag.keywords = data.keywords;
+          tag.hours = data.hours;
         });
     };
 

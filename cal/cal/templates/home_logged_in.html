@@ -4,6 +4,7 @@
 {% block head %}
   {{ block.super }}
 
+  <!-- START PSA G+ Logout -->
   <script type="text/javascript">
     // PSA G+ Logout
     gapi.load('auth2', function () {
@@ -26,6 +27,7 @@
       });
     });
   </script>
+  <!-- END PSA G+ Logout -->
 
 {% endblock %}
 
@@ -97,7 +99,7 @@
       <form novalidate class="simple-form">{% csrf_token %}
         Label: <input type="text" ng-model="tag.label" /><br />
         Keywords: <input type="text" ng-model="tag.keywords" /><br />
-        <input type="submit" ng-click="$ctrl.addTag(tag)" value="Add Tag" />
+        <button class="btn btn-primary" ng-click="$ctrl.addTag(tag)">Add Tag</button>
       </form>
     </div>
 
