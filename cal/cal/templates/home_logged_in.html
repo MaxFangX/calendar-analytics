@@ -86,12 +86,14 @@
       <ul class="list-group">
         <li class="list-group-item" ng-repeat="tag in tags">
           {% verbatim %} {{ tag.label }}: {{ tag.hours }} hours {% endverbatim %}
-          <form novalidate class="simple-form">{% csrf_token %}
+          <button class="btn btn-primary" ng-click="showEdit = ! showEdit">Edit</button>
+          <button class="btn btn-primary" ng-click="$ctrl.deleteTag(tag.id)">Delete</button>
+          <form novalidate class="simple-form" ng-show="showEdit">{% csrf_token %}
             Label: <input type="text" ng-model="tag.label" /><br />
             Keywords: <input type="text" ng-model="tag.keywords" /><br />
-            <input type="submit" ng-click="$ctrl.editTag(tag.id)" value="Edit Tag" />
+            <button class="btn btn-primary" ng-click="$ctrl.editTag(tag.id)">Submit</button>
+            <button class="btn" ng-click="$ctrl.resetTag(tag.id)">Cancel</button>
           </form>
-          <button class="btn btn-primary" ng-click="$ctrl.deleteTag(tag.id)">Delete Tag</button>
         </li>
       </ul>
       <!-- Add a tag -->

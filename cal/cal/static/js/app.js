@@ -42,7 +42,9 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
             id: data.id,
             label: data.label,
             keywords: data.keywords,
-            hours: data.hours
+            hours: data.hours,
+            original_label: data.label,
+            original_keywords: data.keywords
           });
         });
     };
@@ -66,7 +68,34 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
         success(function editToList(data) {
           tag.label = data.label;
           tag.keywords = data.keywords;
+          tag.original_label = data.label;
+          tag.original_keywords = data.keywords;
           tag.hours = data.hours;
+        });
+    };
+
+    this.resetTag = function(tagId) {
+      var tag = search(tagId, $scope.tags);
+
+      $http({
+        method: 'POST',
+        url: tagUrl + tagId,
+        data: $.param({
+          label: tag.label,
+          keywords: tag.keywords,
+          csrfmiddlewaretoken: getCookie('csrftoken'),
+          _method: 'PATCH'
+        }),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }).
+        success(function editToList(data) {
+          tag.label = tag.original_label;
+          tag.keywords = tag.original_keywords;
+          tag.original_label = tag.original_label;
+          tag.original_keywords = tag.keywords;
+          tag.hours = tag.hours;
         });
     };
 
