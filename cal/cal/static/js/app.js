@@ -94,7 +94,7 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
           tag.label = tag.original_label;
           tag.keywords = tag.original_keywords;
           tag.original_label = tag.original_label;
-          tag.original_keywords = tag.keywords;
+          tag.original_keywords = tag.original_keywords;
           tag.hours = tag.hours;
         });
     };

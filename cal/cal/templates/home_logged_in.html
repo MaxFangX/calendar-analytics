@@ -83,26 +83,51 @@
     </div>
     <div ng-controller="TagsCtrl as $ctrl">
       <h4 class="well">Tags - Cumulative</h4>
-      <ul class="list-group">
-        <li class="list-group-item" ng-repeat="tag in tags">
-          {% verbatim %} {{ tag.label }}: {{ tag.hours }} hours {% endverbatim %}
-          <button class="btn btn-primary" ng-click="showEdit = ! showEdit">Edit</button>
-          <button class="btn btn-primary" ng-click="$ctrl.deleteTag(tag.id)">Delete</button>
-          <form novalidate class="simple-form" ng-show="showEdit">{% csrf_token %}
-            Label: <input type="text" ng-model="tag.label" /><br />
-            Keywords: <input type="text" ng-model="tag.keywords" /><br />
-            <button class="btn btn-primary" ng-click="$ctrl.editTag(tag.id)">Submit</button>
-            <button class="btn" ng-click="$ctrl.resetTag(tag.id)">Cancel</button>
-          </form>
-        </li>
-      </ul>
-      <!-- Add a tag -->
-      <h5>Add a Tag</h5>
-      <form novalidate class="simple-form">{% csrf_token %}
-        Label: <input type="text" ng-model="tag.label" /><br />
-        Keywords: <input type="text" ng-model="tag.keywords" /><br />
-        <button class="btn btn-primary" ng-click="$ctrl.addTag(tag)">Add Tag</button>
-      </form>
+        <table class="table table-hover">
+          <thead>
+            <th>Label</th>
+            <th>Keywords</th>
+            <th>Hours</th>
+          </thead>
+          <tbody>
+            <tr ng-repeat="tag in tags">
+              {% verbatim %}
+              <td>{{ tag.label }}</td>
+              <td>{{ tag.keywords }}</td>
+              <td>{{ tag.hours }} hours</td>
+              {% endverbatim %}
+              <td>
+                <form novalidate class="simple-form" ng-show="showEdit">{% csrf_token %}
+                Label: <input type="text" ng-model="tag.label" /><br />
+                Keywords: <input type="text" ng-model="tag.keywords" /><br />
+                <button class="btn btn-primary" ng-click="$ctrl.editTag(tag.id)">Submit</button>
+                <button class="btn" ng-click="$ctrl.resetTag(tag.id)">Cancel</button>
+                </form>
+              </td>
+              <td class="text-right text-nowrap">
+                <button class="btn btn-info">
+                  <span class="glyphicon glyphicon-edit" ng-click="showEdit = ! showEdit"></span>
+                </button>
+                <button class="btn btn-danger">
+                  <span class="glyphicon glyphicon-trash" ng-click="$ctrl.deleteTag(tag.id)"></span>
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <form novalidate class="simple-form">{% csrf_token %}
+                <td><input type="text" ng-model="tag.label" /></td>
+                <td><input type="text" ng-model="tag.keywords" /></td>
+                <td></td>
+                <td></td>
+                <td class="text-right text-nowrap">
+                  <button class="btn btn-success">
+                    <span class="glyphicon glyphicon-plus" ng-click="$ctrl.addTag(tag)"></span>
+                  </button>
+                </td>
+              </form>
+            </tr>
+          </tbody>
+        </table>
     </div>
 
     <!-- For new users, needing to connect their calendars -->
