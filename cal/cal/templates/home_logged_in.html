@@ -74,23 +74,6 @@
   <div class="col-md-4">
     <div class="cal-category-list" ng-controller="CategoriesCtrl">
       <h4 class="well">Categories - Last Week</h4>
-      <!-- table version -->
-<!--         <table class="table table-hover">
-          <thead>
-            <th>Label</th>
-            <th>Hours</th>
-          </thead>
-          <tbody>
-            <tr ng-repeat="category in categories">
-              {% verbatim %}
-              <td>{{ category.label }}</td>
-              <td>{{ category.hours }}</td>
-              {% endverbatim %}
-            </tr>
-          </tbody>
-        </table> -->
-
-        <!-- list version -->
       <ul class="list-group">
         <li class="list-group-item" ng-repeat="category in categories">
           {% verbatim %} {{ category.label }}: {{ category.hours }} hours {% endverbatim %}
@@ -111,15 +94,19 @@
               <td ng-show="!tag.showEdit">{{ tag.label }}</td>
               <td ng-show="!tag.showEdit">{{ tag.hours }}</td>
               {% endverbatim %}
-              <td>
-                <form novalidate class="simple-form" ng-show="tag.showEdit">{% csrf_token %}
-                Label<br>
-                  <input type="text" ng-model="tag.new_label" /><br />
-                  Keywords<br>
-                  <input type="text" ng-model="tag.new_keywords" /><br />
-                  <button class="btn btn-primary" ng-click="$ctrl.submit(tag.id)">Submit</button>
-                  <button class="btn" ng-click="$ctrl.cancel(tag.id)">Cancel</button>
-                </form>
+              <td ng-show="tag.showEdit">
+                Label<br><input type="text" ng-model="tag.new_label">
+              </td>
+              <td ng-show="tag.showEdit">
+                Keywords<br><input type="text" ng-model="tag.new_keywords">
+              </td>
+              <td class="text-right text-nowrap" ng-show="tag.showEdit">
+                <button class="btn btn-success">
+                  <span class="glyphicon glyphicon-ok" ng-click="$ctrl.submit(tag.id)"></span>
+                </button>
+                <button class="btn btn-warning">
+                  <span class="glyphicon glyphicon-remove" ng-click="$ctrl.cancel(tag.id)"></span>
+                </button>
               </td>
               <td class="text-right text-nowrap" ng-show="!tag.showEdit">
                 <button class="btn btn-info">
@@ -131,19 +118,13 @@
               </td>
             </tr>
             <tr>
-              <form novalidate class="simple-form">{% csrf_token %}
-                <td>
-                  Label <br> <input type="text" ng-model="tag.label" /><br>
-                  Keywords <br> <input type="text" ng-model="tag.keywords" />
-                </td>
-                <td></td>
-                <td></td>
-                <td class="text-right text-nowrap">
-                  <button class="btn btn-success">
-                    <span class="glyphicon glyphicon-plus" ng-click="$ctrl.addTag(tag)"></span>
-                  </button>
-                </td>
-              </form>
+              <td>Label <br> <input type="text" ng-model="tag.label"></td>
+              <td>Keywords <br> <input type="text" ng-model="tag.keywords"></td>
+              <td class="text-right text-nowrap">
+                <button class="btn btn-primary">
+                  <span class="glyphicon glyphicon-plus" ng-click="$ctrl.addTag(tag)"></span>
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>
