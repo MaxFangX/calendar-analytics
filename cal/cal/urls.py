@@ -12,7 +12,6 @@ urlpatterns = patterns(
     url(r'^auth/clear', 'cal.views.clear_auth', name='clear_auth'),
     url(r'^complete-with-token/(?P<backend>[^/]+)/$',
         'cal.views.complete_with_token', name='complete_with_token'),
-    url(r'^login/google', 'cal.views.login_google', name='login_google'),
     url(r'^accounts/profile', 'cal.views.accounts_profile', name='accounts_profile'),
 
     # Django REST framework
