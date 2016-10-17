@@ -11,7 +11,7 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 
 from oauth2client import client, crypt
-from oauth2client.client import OAuth2WebServerFlow
+from oauth2client.client import OAuth2WebServerFlow, AccessTokenCredentials
 from oauth2client.django_orm import Storage
 
 from social.apps.django_app.utils import psa
@@ -51,7 +51,7 @@ def accounts_profile(request):
 @csrf_exempt
 @psa('social:complete')
 def complete_with_token(request, backend):
-    # This view expects an access_token GET parameter, if it's needed,
+    # This view expects an access_token POST parameter, if it's needed,
     # request.backend and request.strategy will be loaded with the current
     # backend and strategy.
     token = request.POST.get('access_token')
@@ -59,6 +59,12 @@ def complete_with_token(request, backend):
     user = request.backend.do_auth(token)
     if user:
         login(request, user)
+
+        # The user agent is only used for logs
+        credential = AccessTokenCredentials(token, 'dummy-user-agent/1.0')
+        storage = Storage(GoogleCredentials, 'user', request.user, 'credential')
+        storage.put(credential)
+
         return HttpResponseRedirect("/")
     else:
         return HttpResponseRedirect("/")
@@ -77,6 +83,7 @@ def google_auth(request):
                                        scope=['https://www.googleapis.com/auth/calendar','profile','email'],
                                        redirect_uri=settings.BASE_URL + '/auth/google')
     default_flow.params['access_type'] = 'offline'
+    default_flow.params['include_granted_scopes'] = True
 
     # Try to retrieve an existing flow, or create one if it doesn't exist
     gflow = GoogleFlow.objects.filter(id=request.user).last()
@@ -100,6 +107,7 @@ def google_auth(request):
         profile, _ = Profile.get_or_create(user=request.user)
         profile.authed = True
         profile.save()
+
         # TODO improve the latency over here
         request.user.googlecredentials.import_calendars()
 
