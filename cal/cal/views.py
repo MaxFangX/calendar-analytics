@@ -1,16 +1,12 @@
-from cal.helpers import json_response
 from cal.models import GoogleCredentials, GoogleFlow, Profile
 
 from django.conf import settings
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseServerError
+from django.http import HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render
-from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 
-from oauth2client import client, crypt
 from oauth2client.client import OAuth2WebServerFlow, AccessTokenCredentials
 from oauth2client.django_orm import Storage
 
