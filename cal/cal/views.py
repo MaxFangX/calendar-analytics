@@ -61,9 +61,7 @@ def complete_with_token(request, backend):
         storage = Storage(GoogleCredentials, 'user', request.user, 'credential')
         storage.put(credential)
 
-        return HttpResponseRedirect("/")
-    else:
-        return HttpResponseRedirect("/")
+    return HttpResponseRedirect("/")
 
 @login_required
 def google_auth(request):
