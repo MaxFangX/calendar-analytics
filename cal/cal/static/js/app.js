@@ -4,14 +4,11 @@ analyticsApp.controller('LoggedInCtrl', function LoggedInController($scope) {
 });
 
 analyticsApp.controller('TagsCtrl', function($scope, $http){
-  var url = '/v1/tags.json';
-  var tagUrl = '/v1/tags/';
-
-  $scope.url = url;
+  var tagUrl = '/v1/tags';
   $scope.tags = [];
 
   // Generate graph data
-  $http({ method: 'GET', url: url }).
+  $http({method: 'GET', url: tagUrl + '.json' }).
     success(function successCallback(data) {
       for (var i = 0; i < data.results.length; i++) {
         var tag = data.results[i];
@@ -27,7 +24,7 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
     this.create = function(tag) {
       $http({
         method: 'POST',
-        url: url,
+        url: tagUrl + '.json',
         data: $.param({
           label: tag.label,
           keywords: tag.keywords,
@@ -61,7 +58,7 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
 
       $http({
         method: 'POST',
-        url: tagUrl + tagId,
+        url: tagUrl + '/' + tagId,
         data: $.param({
           label: tag.newLabel,
           keywords: tag.newKeywords,
@@ -87,7 +84,7 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
     this.delete = function(tagId) {
       $http({
         method: 'POST',
-        url: tagUrl + tagId,
+        url: tagUrl + '/' + tagId,
         data: $.param({
           csrfmiddlewaretoken: getCookie('csrftoken'),
           _method: 'DELETE'
@@ -104,11 +101,9 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
     };
 
     function search(id, tags){
-    for (var i=0; i < tags.length; i++) {
-        if (tags[i].id === id) {
-            return tags[i];
-        }
-      }
+      return tags.find(function (element, index, array) {
+        return element.id == id;
+      });
     }
 
 });
