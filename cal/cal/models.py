@@ -91,9 +91,9 @@ class Profile(models.Model):
             try:
                 ColorCategory.objects.get(color_index=color_index, calendar=gcalendar)
             except ColorCategory.DoesNotExist:
-                label = "Generated Category {}".format(color_index)
+                label = color_index
                 if gcalendar:
-                    label += " for calendar {}".format(gcalendar.calendar_id)
+                    label = gcalendar.summary
                 cc = ColorCategory(
                                    calendar=gcalendar,
                                    user=self.user,
@@ -120,7 +120,7 @@ class Profile(models.Model):
 
 
 class GCalendar(models.Model):
-    
+
     """
     Represents a Google Calendar. The GEvents associated with this are designed to maintain
     the state of the User's Google Calendar.
@@ -340,7 +340,7 @@ class Event(models.Model, TimeNode):
 
     class Meta:
         abstract = True
-    
+
     def __init__(self, *args, **kwargs):
 
         TimeNode.__init__(self, start=kwargs.get('start'), end=kwargs.get('end'), id=kwargs.get('id'))
@@ -607,7 +607,7 @@ class Tag(models.Model, EventCollection):
                 GEvent.objects
                 .filter(calendar=calendar, name__icontains=keyword)
                 .exclude(all_day_event=True)
-                for keyword in keywords 
+                for keyword in keywords
                 for calendar in calendars
                 ]
 
@@ -681,7 +681,7 @@ class GoogleCredentials(models.Model):
         Hits the CalendarList.list() endpoint and updates database with any calendars found.
         only_primary specifies if only the primary calendar is saved to the database.
         """
-        
+
         service = self.get_service()
         result = service.calendarList().list().execute()
 
@@ -729,5 +729,5 @@ class GoogleCredentials(models.Model):
                 gcal, gcal_created = GCalendar.objects.get_or_create(user=self.user, calendar_id=item['id'])
                 if gcal_created:
                     gcal.update_meta()
-        
+
         self.save()
