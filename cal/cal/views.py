@@ -1,18 +1,16 @@
-from cal.helpers import json_response
 from cal.models import GoogleCredentials, GoogleFlow, Profile
 
 from django.conf import settings
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.models import User
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, HttpResponseBadRequest, HttpResponseServerError
+from django.http import HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render
-from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 
-from oauth2client import client, crypt
-from oauth2client.client import OAuth2WebServerFlow
+from oauth2client.client import OAuth2WebServerFlow, AccessTokenCredentials
 from oauth2client.django_orm import Storage
+
+from social.apps.django_app.utils import psa
 
 
 @ensure_csrf_cookie
@@ -46,6 +44,25 @@ def accounts_profile(request):
     # TODO either remove this view or change Python Social Auth after login
     return HttpResponseRedirect("/")
 
+@csrf_exempt
+@psa('social:complete')
+def complete_with_token(request, backend):
+    # This view expects an access_token POST parameter, if it's needed,
+    # request.backend and request.strategy will be loaded with the current
+    # backend and strategy.
+    token = request.POST.get('access_token')
+    print "Token: {}".format(token)
+    user = request.backend.do_auth(token)
+    if user:
+        login(request, user)
+
+        # The user agent is only used for logs
+        credential = AccessTokenCredentials(token, 'dummy-user-agent/1.0')
+        storage = Storage(GoogleCredentials, 'user', request.user, 'credential')
+        storage.put(credential)
+
+    return HttpResponseRedirect("/")
+
 @login_required
 def google_auth(request):
     """
@@ -60,6 +77,7 @@ def google_auth(request):
                                        scope=['https://www.googleapis.com/auth/calendar','profile','email'],
                                        redirect_uri=settings.BASE_URL + '/auth/google')
     default_flow.params['access_type'] = 'offline'
+    default_flow.params['include_granted_scopes'] = True
 
     # Try to retrieve an existing flow, or create one if it doesn't exist
     gflow = GoogleFlow.objects.filter(id=request.user).last()
@@ -83,6 +101,7 @@ def google_auth(request):
         profile, _ = Profile.get_or_create(user=request.user)
         profile.authed = True
         profile.save()
+
         # TODO improve the latency over here
         request.user.googlecredentials.import_calendars()
 
@@ -90,54 +109,3 @@ def google_auth(request):
     else:
         auth_uri = flow.step1_get_authorize_url()
         return HttpResponseRedirect(auth_uri)
-
-@require_POST
-def login_google(request):
-    """
-    Logs in the user using Google sign in
-    """
-    id_token = request.POST.get('id_token', None)
-    code = request.POST.get('code', None)
-    if not id_token or not code:
-        return HttpResponseBadRequest("Missing code or id_token")
-    try:
-        idinfo = client.verify_id_token(id_token, settings.GOOGLE_CALENDAR_API_CLIENT_ID)
-    except crypt.AppIdentityError:
-        return HttpResponseBadRequest("Invalid id_token.")
-    except Exception as e:
-        return HttpResponseServerError("Error: {}".format(e))
-
-    try:
-        user = User.objects.get(email=idinfo['email'])
-    except User.DoesNotExist:
-        # TODO allow changing the username
-        first_name = idinfo['given_name']
-        last_name = idinfo['family_name']
-        username = (first_name + last_name)[:30]
-        extra_fields = {
-            'first_name': first_name,
-            'last_name' : last_name,
-        }
-        user = User.objects.create_user(username=username, email=idinfo['email'], extra_fields=extra_fields)
-
-    profile, created = Profile.get_or_create(user)
-    if created:
-        # Fill in additional data only for the first time
-        profile.google_id = idinfo['sub']
-        profile.locale = idinfo['locale']
-        profile.picture_url = idinfo['picture']
-        profile.save()
-
-    if not request.user.is_authenticated():
-        # Log them in
-        user = authenticate(email=user.email)
-        if user is not None:
-            if user.is_active:
-                login(request, user)
-            else:
-                return HttpResponseBadRequest("User inactive - likely banned")
-        else:
-            return HttpResponseBadRequest("Failed to log in user")
-
-    # At this point, all users should be logged in.
-    return json_response({"message": "Successfully logged in!"}, status=200)
