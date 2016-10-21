@@ -15,8 +15,7 @@ cal/cal/static/bower_components/*
 .ebextensions/02-cal.config
 
 # DS Store
-.DS_Store
-cal/cal/static/.DS_Store
+*.DS_Store
 
 # NPM-debug log
 cal/cal/npm-debug.log

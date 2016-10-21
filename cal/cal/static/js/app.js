@@ -24,7 +24,7 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
       }
     });
 
-    this.addTag = function(tag) {
+    this.create = function(tag) {
       $http({
         method: 'POST',
         url: url,
@@ -43,28 +43,28 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
             label: data.label,
             keywords: data.keywords,
             hours: data.hours,
-            showEdit: false
+            editing: false
           });
         });
     };
 
-    this.editTag = function(tagId) {
+    this.startEdit = function(tagId) {
       var tag = search(tagId, $scope.tags);
-      tag.new_label = tag.label;
-      tag.new_keywords = tag.keywords;
-      tag.showEdit = true;
+      tag.newLabel = tag.label;
+      tag.newKeywords = tag.keywords;
+      tag.editing = true;
     };
 
     this.submit = function(tagId) {
       var tag = search(tagId, $scope.tags);
-      tag.showEdit = false;
+      tag.editing = false;
 
       $http({
         method: 'POST',
         url: tagUrl + tagId,
         data: $.param({
-          label: tag.new_label,
-          keywords: tag.new_keywords,
+          label: tag.newLabel,
+          keywords: tag.newKeywords,
           csrfmiddlewaretoken: getCookie('csrftoken'),
           _method: 'PATCH'
         }),
@@ -72,19 +72,19 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
           'Content-Type': 'application/x-www-form-urlencoded'
         }
       }).
-        success(function editToList(data) {
+        success(function addToList(data) {
           tag.label = data.label;
           tag.keywords = data.keywords;
           tag.hours = data.hours;
         });
     };
 
-    this.cancel = function(tagId) {
+    this.cancelEdit = function(tagId) {
       var tag = search(tagId, $scope.tags);
-      tag.showEdit = false;
+      tag.editing = false;
     };
 
-    this.deleteTag = function(tagId) {
+    this.delete = function(tagId) {
       $http({
         method: 'POST',
         url: tagUrl + tagId,
@@ -96,7 +96,7 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
           'Content-Type': 'application/x-www-form-urlencoded'
         }
       }).
-        success(function removeTagFromList(data) {
+        success(function removeFromList(data) {
           $scope.tags = $scope.tags.filter(function(tag) {
             return tag.id !== tagId;
           });
