@@ -79,6 +79,53 @@
           {% verbatim %} {{ category.label }}: {{ category.hours }} hours {% endverbatim %}
         </li>
       </ul> -->
+        <table class="table table-hover">
+          <thead>
+            <th>Label</th>
+            <th>Hours</th>
+          </thead>
+          <tbody>
+            <tr ng-repeat="category in categories">
+              {% verbatim %}
+              <td ng-hide="category.editing">{{ category.label }}</td>
+              <td ng-hide="category.editing">{{ category.hours }}</td>
+              {% endverbatim %}
+              <td ng-show="category.editing">
+                Label<br>
+                <input type="text" ng-model="category.newLabel">
+              </td>
+              <td></td>
+              <td class="text-right text-nowrap" ng-show="category.editing">
+                <button class="btn btn-success">
+                  <span class="glyphicon glyphicon-ok" ng-click="$ctrl.submit(category.id)"></span>
+                </button>
+                <button class="btn btn-warning">
+                  <span class="glyphicon glyphicon-remove" ng-click="$ctrl.cancelEdit(category.id)"></span>
+                </button>
+              </td>
+              <td class="text-right text-nowrap" ng-hide="category.editing">
+                <button class="btn btn-info">
+                  <span class="glyphicon glyphicon-edit" ng-click="$ctrl.startEdit(category.id)"></span>
+                </button>
+                <button class="btn btn-danger">
+                  <span class="glyphicon glyphicon-trash" ng-click="$ctrl.remove(category.id)"></span>
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>Label<br>
+                <input type="text" ng-model="category.label">
+              </td>
+              <td></td>
+              <td></td>
+              <td class="text-right text-nowrap">
+                <button class="btn btn-primary">
+                  <span class="glyphicon glyphicon-plus" ng-click="$ctrl.add(category)"></span>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       <nvd3 options="options" data="categories"></nvd3>
     </div>
     <div ng-controller="TagsCtrl as $ctrl">

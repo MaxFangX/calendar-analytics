@@ -102,22 +102,78 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
 });
 
 analyticsApp.controller('CategoriesCtrl', function($scope, $http){
-  var url = '/v1/colorcategories.json';
+  var categoryUrl = '/v1/colorcategories';
+  $scope.categories = [];
+  $scope.removedCategories = [];
 
-  // Generate graph data
-  $http({ method: 'GET', url: url }).
-    success(function (data) {
-      // set the data
-      $scope.categories = [];
+  // populate the categories pie chart
+  $http({ method: 'GET', url: categoryUrl + '.json' }).
+    success(function successCallback(data) {
       for (var i = 0; i < data.results.length; i++) {
         var category = data.results[i];
         $scope.categories.push({
+          id: category.id,
           label: category.label,
-          hours: category.hours
+          hours: category.hours,
+          colorIndex: category.color_index,
+          calendar: category.calendar
         });
       }
     });
 
+  this.add = function(data) {
+    var category = search(data.id, $scope.removedCategories);
+    $scope.categories.push({
+      id: category.id,
+      label: category.label,
+      hours: category.hours,
+      colorIndex: category.color_index,
+      calendar: category.calendar,
+      editing: false
+    });
+  };
+
+  this.startEdit = function(categoryId) {
+    var category = search(categoryId, $scope.categories);
+    category.newLabel = category.label;
+    category.editing = true;
+  };
+
+  this.submit = function(categoryId) {
+    var category = search(categoryId, $scope.categories);
+    category.editing = false;
+    category.label = data.newLabel;
+  };
+
+  this.cancelEdit = function(categoryId) {
+    var category = search(categoryId, $scope.categories);
+    category.editing = false;
+  };
+
+  this.remove = function(categoryId) {
+    var category = search(categoryId, $scope.categories);
+
+    $scope.removedCategories.push({
+      id: category.id,
+      label: category.label,
+      hours: category.hours,
+      colorIndex: category.color_index,
+      calendar: category.calendar,
+      editing: false
+    });
+
+    $scope.categories = $scope.categories.filter(function(category) {
+      return category.id !== categoryId;
+    });
+  };
+
+  function search(id, array){
+    return array.find(function (element, index, array) {
+      return element.id == id;
+    });
+  }
+
+  // categories pie chart
   $scope.options = {
     chart: {
       type: 'pieChart',
