@@ -22,9 +22,9 @@ class GEventSerializer(serializers.ModelSerializer):
     class Meta:
         model = GEvent
         fields = ('id', 'name', 'start', 'end', 'location', 'created', 'updated',
-                'calendar', 'google_id', 'i_cal_uid', 'color_index', 'description',
-                'status', 'transparency', 'all_day_event', 'timezone',
-                'end_time_unspecified', 'recurring_event_id', 'color')
+                  'calendar', 'google_id', 'i_cal_uid', 'color_index', 'description',
+                  'status', 'transparency', 'all_day_event', 'timezone',
+                  'end_time_unspecified', 'recurring_event_id', 'color')
         # color = serializers.SerializerMethodField()
 
     class GCalendarField(serializers.Field):
@@ -32,6 +32,7 @@ class GEventSerializer(serializers.ModelSerializer):
             return {
                 'calendar_id': obj.calendar_id,
             }
+
         def to_internal_value(self, data):
             try:
                 return GCalendar.objects.get(calendar_id=data)
@@ -59,13 +60,14 @@ class ColorCategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ColorCategory
-        fields = ('color_index', 'label', 'hours', 'calendar')
+        fields = ('id', 'color_index', 'label', 'hours', 'calendar')
 
     def get_hours(self, obj):
-        calendar_ids = self.context['calendar_ids']
-        start = self.context['start']
-        end = self.context['end']
+        calendar_ids = self.context.get('calendar_ids')
+        start = self.context.get('start')
+        end = self.context.get('end')
         return obj.hours(calendar_ids=calendar_ids, start=start, end=end)
+
 
 class TagSerializer(serializers.ModelSerializer):
 

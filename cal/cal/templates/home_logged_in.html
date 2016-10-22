@@ -74,11 +74,11 @@
   <div class="col-md-4">
     <div class="cal-category-list" ng-controller="CategoriesCtrl">
       <h4 class="well">Categories - Last Week</h4>
-      <ul class="list-group">
+<!--       <ul class="list-group">
         <li class="list-group-item" ng-repeat="category in categories">
           {% verbatim %} {{ category.label }}: {{ category.hours }} hours {% endverbatim %}
         </li>
-      </ul>
+      </ul> -->
       <nvd3 options="options" data="categories"></nvd3>
     </div>
     <div ng-controller="TagsCtrl as $ctrl">
