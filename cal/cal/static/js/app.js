@@ -104,6 +104,7 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
 analyticsApp.controller('CategoriesCtrl', function($scope, $http){
   var categoryUrl = '/v1/colorcategories';
   $scope.categories = [];
+  // TODO: create a hidden field in colorCategory
   $scope.removedCategories = [];
 
   // populate the categories pie chart
@@ -122,7 +123,11 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
     });
 
   this.add = function(data) {
-    var category = search(data.id, $scope.removedCategories);
+    var category = $scope.removedCategories.find(function(category, index, array) {
+      return category.id == data.id;
+    });
+    // TODO make a POST request to change the hidden field
+    // add category to categories
     $scope.categories.push({
       id: category.id,
       label: category.label,
@@ -131,28 +136,43 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
       calendar: category.calendar,
       editing: false
     });
+
+    // remove the category from removedCategories
+    $scope.removedCategories = $scope.removedCategories.filter(function(category) {
+      return category.id !== data.id;
+    });
+
   };
 
   this.startEdit = function(categoryId) {
-    var category = search(categoryId, $scope.categories);
+    var category = $scope.categories.find(function(category, index, array) {
+      return category.id == categoryId;
+    });
     category.newLabel = category.label;
     category.editing = true;
   };
 
   this.submit = function(categoryId) {
-    var category = search(categoryId, $scope.categories);
+    var category = $scope.categories.find(function(category, index, array) {
+      return category.id == categoryId;
+    });
+    // TODO: make a POST request to change label
     category.editing = false;
     category.label = data.newLabel;
   };
 
   this.cancelEdit = function(categoryId) {
-    var category = search(categoryId, $scope.categories);
+    var category = $scope.categories.find(function(category, index, array) {
+      return category.id == categoryId;
+    });
     category.editing = false;
   };
 
   this.remove = function(categoryId) {
-    var category = search(categoryId, $scope.categories);
-
+    var category = $scope.categories.find(function(category, index, array) {
+      return category.id == categoryId;
+    });
+    // TODO: make a POST request to change the hidden field
     $scope.removedCategories.push({
       id: category.id,
       label: category.label,
@@ -166,12 +186,6 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
       return category.id !== categoryId;
     });
   };
-
-  function search(id, array){
-    return array.find(function (element, index, array) {
-      return element.id == id;
-    });
-  }
 
   // categories pie chart
   $scope.options = {
