@@ -46,14 +46,14 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
     };
 
     this.startEdit = function(tagId) {
-      var tag = search(tagId, $scope.tags);
+      var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
       tag.newLabel = tag.label;
       tag.newKeywords = tag.keywords;
       tag.editing = true;
     };
 
     this.submit = function(tagId) {
-      var tag = search(tagId, $scope.tags);
+      var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
       tag.editing = false;
 
       $http({
@@ -77,7 +77,7 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
     };
 
     this.cancelEdit = function(tagId) {
-      var tag = search(tagId, $scope.tags);
+      var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
       tag.editing = false;
     };
 
@@ -99,13 +99,6 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
           });
         });
     };
-
-    function search(id, tags){
-      return tags.find(function (element, index, array) {
-        return element.id == id;
-      });
-    }
-
 });
 
 analyticsApp.controller('CategoriesCtrl', function($scope, $http){
