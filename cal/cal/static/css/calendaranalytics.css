@@ -19,6 +19,11 @@ button {
   float: right;
   padding: 0 5 5 5; }
 
+.textbox input {
+  width: 100%;
+  box-sizing: border-box;
+  -moz-box-sizing: border-box; }
+
 #google-plus-button {
   margin-top: 10%; }
 

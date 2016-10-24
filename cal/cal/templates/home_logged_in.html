@@ -82,16 +82,17 @@
           <tbody>
             <tr ng-repeat="category in categories">
               {% verbatim %}
-              <!-- TODO: Add a checkbox -->
-              <!-- TODO: Make textbox go the whole line -->
-              <!-- TODO: Move checks and xs over one -->
-              <td ng-hide="category.editing">{{ category.label }}</td>
-              <td ng-hide="category.editing">{{ category.hours }}</td>
+              <td ng-hide="category.editing">
+                <input type="checkbox" ng-model="category.include" ng-click="$ctrl.chartToggle(category.id)"> {{ category.label }}
+              </td>
+              <td ng-hide="category.editing">
+                {{ category.hours }}
+              </td>
               {% endverbatim %}
-              <td ng-show="category.editing">
+              <td ng-show="category.editing" class="textbox">
                 <input type="text" ng-model="category.newLabel">
               </td>
-              <td></td>
+              <td ng-show="category.editing"></td> <!-- Hacky way of making it even -->
               <td class="text-right text-nowrap" ng-show="category.editing">
                 <button class="btn btn-success">
                   <span class="glyphicon glyphicon-ok" ng-click="$ctrl.submit(category.id)"></span>
@@ -116,7 +117,7 @@
             </tr>
           </tbody>
         </table>
-      <nvd3 options="options" data="categories"></nvd3>
+      <nvd3 options="options" data="categoriesForChart"></nvd3>
     </div>
 
     <div ng-controller="TagsCtrl as $ctrl">
@@ -128,16 +129,15 @@
           </thead>
           <tbody>
             <tr ng-repeat="tag in tags">
-              <!-- TODO: Make textbox go the whole line -->
               {% verbatim %}
               <td ng-hide="tag.editing">{{ tag.label }}</td>
               <td ng-hide="tag.editing">{{ tag.hours }}</td>
               {% endverbatim %}
-              <td ng-show="tag.editing">
+              <td ng-show="tag.editing" class="textbox">
                 Label<br>
                 <input type="text" ng-model="tag.newLabel">
               </td>
-              <td ng-show="tag.editing">
+              <td ng-show="tag.editing" class="textbox">
                 Keywords<br>
                 <input type="text" ng-model="tag.newKeywords">
               </td>
@@ -159,10 +159,10 @@
               </td>
             </tr>
             <tr>
-              <td>Label<br>
+              <td class="textbox">Label<br>
                 <input type="text" ng-model="tag.label">
               </td>
-              <td>Keywords<br>
+              <td class="textbox">Keywords<br>
                <input type="text" ng-model="tag.keywords">
               </td>
               <td class="text-right text-nowrap">

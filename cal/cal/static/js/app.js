@@ -7,7 +7,7 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
   var tagUrl = '/v1/tags';
   $scope.tags = [];
 
-  // Generate graph data
+  // add all the tags
   $http({method: 'GET', url: tagUrl + '.json' }).
     success(function successCallback(data) {
       for (var i = 0; i < data.results.length; i++) {
@@ -104,6 +104,7 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
 analyticsApp.controller('CategoriesCtrl', function($scope, $http){
   var categoryUrl = '/v1/colorcategories';
   $scope.categories = [];
+  $scope.categoriesForChart = [];
 
   // populate the categories pie chart
   $http({ method: 'GET', url: categoryUrl + '.json' }).
@@ -114,6 +115,13 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
           id: category.id,
           label: category.label,
           hours: category.hours,
+          include: true
+        });
+        $scope.categoriesForChart.push({
+          id: category.id,
+          label: category.label,
+          hours: category.hours,
+          include: true
         });
       }
     });
@@ -175,7 +183,30 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
           return category.id !== categoryId;
         });
       });
+  };
 
+  // when category is checked, include in pie chart, if not don't include
+  this.chartToggle = function(categoryId) {
+    var category = $scope.categories.find(function(category, index, array) {
+      return category.id == categoryId;
+    });
+
+    // when user checks a category
+    if (category.include) {
+      $scope.categoriesForChart.push({
+        id: category.id,
+        label: category.label,
+        hours: category.hours,
+      });
+      category.include = true;
+
+    // when user unchecks a category
+    } else {
+      $scope.categoriesForChart = $scope.categoriesForChart.filter(function(category) {
+        return category.id !== categoryId;
+      });
+      category.include = false;
+    }
   };
 
   // categories pie chart
@@ -185,11 +216,11 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
       height: 400,
       x: function(d){return d.label;},
       y: function(d){return d.hours;},
-      showLabels: true,
+      showLabels: false,
       growOnHover: true,
       duration: 500,
       labelThreshold: 0.01,
-      labelSunbeamLayout: false,
+      labelSunbeamLayout: true,
       legend: {
         margin: {
           top: 5,
