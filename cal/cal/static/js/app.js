@@ -104,8 +104,6 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
 analyticsApp.controller('CategoriesCtrl', function($scope, $http){
   var categoryUrl = '/v1/colorcategories';
   $scope.categories = [];
-  // TODO: create a hidden field in colorCategory
-  $scope.removedCategories = [];
 
   // populate the categories pie chart
   $http({ method: 'GET', url: categoryUrl + '.json' }).
@@ -116,33 +114,9 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
           id: category.id,
           label: category.label,
           hours: category.hours,
-          colorIndex: category.color_index,
-          calendar: category.calendar
         });
       }
     });
-
-  this.add = function(data) {
-    var category = $scope.removedCategories.find(function(category, index, array) {
-      return category.id == data.id;
-    });
-    // TODO make a POST request to change the hidden field
-    // add category to categories
-    $scope.categories.push({
-      id: category.id,
-      label: category.label,
-      hours: category.hours,
-      colorIndex: category.color_index,
-      calendar: category.calendar,
-      editing: false
-    });
-
-    // remove the category from removedCategories
-    $scope.removedCategories = $scope.removedCategories.filter(function(category) {
-      return category.id !== data.id;
-    });
-
-  };
 
   this.startEdit = function(categoryId) {
     var category = $scope.categories.find(function(category, index, array) {
@@ -169,22 +143,23 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
   };
 
   this.remove = function(categoryId) {
-    var category = $scope.categories.find(function(category, index, array) {
-      return category.id == categoryId;
-    });
-    // TODO: make a POST request to change the hidden field
-    $scope.removedCategories.push({
-      id: category.id,
-      label: category.label,
-      hours: category.hours,
-      colorIndex: category.color_index,
-      calendar: category.calendar,
-      editing: false
-    });
+    $http({
+      method: 'POST',
+      url: categoryUrl + '/' + categoryId,
+      data: $.param({
+        csrfmiddlewaretoken: getCookie('csrftoken'),
+        _method: 'DELETE'
+      }),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    }).
+      success(function removeFromList(data) {
+        $scope.categories = $scope.categories.filter(function(category) {
+          return category.id !== categoryId;
+        });
+      });
 
-    $scope.categories = $scope.categories.filter(function(category) {
-      return category.id !== categoryId;
-    });
   };
 
   // categories pie chart
