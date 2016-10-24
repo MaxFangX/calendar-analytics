@@ -130,10 +130,26 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
     var category = $scope.categories.find(function(category, index, array) {
       return category.id == categoryId;
     });
-    // TODO: make a POST request to change label
     category.editing = false;
-    category.label = data.newLabel;
+
+    $http({
+      method: 'POST',
+      url: categoryUrl + '/' + categoryId,
+      data: $.param({
+        label: category.newLabel,
+        csrfmiddlewaretoken: getCookie('csrftoken'),
+        _method: 'PATCH'
+      }),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    }).
+      success(function addToList(data) {
+        category.label = data.label;
+        category.hours = data.hours;
+      });
   };
+
 
   this.cancelEdit = function(categoryId) {
     var category = $scope.categories.find(function(category, index, array) {

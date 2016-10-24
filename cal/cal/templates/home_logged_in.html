@@ -83,11 +83,12 @@
             <tr ng-repeat="category in categories">
               {% verbatim %}
               <!-- TODO: Add a checkbox -->
+              <!-- TODO: Make textbox go the whole line -->
+              <!-- TODO: Move checks and xs over one -->
               <td ng-hide="category.editing">{{ category.label }}</td>
               <td ng-hide="category.editing">{{ category.hours }}</td>
               {% endverbatim %}
               <td ng-show="category.editing">
-                Label<br>
                 <input type="text" ng-model="category.newLabel">
               </td>
               <td></td>
@@ -117,6 +118,7 @@
         </table>
       <nvd3 options="options" data="categories"></nvd3>
     </div>
+
     <div ng-controller="TagsCtrl as $ctrl">
       <h4 class="well">Tags - Cumulative</h4>
         <table class="table table-hover">
@@ -126,6 +128,7 @@
           </thead>
           <tbody>
             <tr ng-repeat="tag in tags">
+              <!-- TODO: Make textbox go the whole line -->
               {% verbatim %}
               <td ng-hide="tag.editing">{{ tag.label }}</td>
               <td ng-hide="tag.editing">{{ tag.hours }}</td>
