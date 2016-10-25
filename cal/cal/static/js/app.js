@@ -189,6 +189,7 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $
                           title: gevent.name,
                           start: gevent.start,
                           end: gevent.end,
+                          allDay: gevent.all_day_event,
                           backgroundColor: gevent.color.background,
                           textColor: gevent.color.foreground,
                           borderColor: gevent.color.foreground,

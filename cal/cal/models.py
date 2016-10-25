@@ -112,7 +112,7 @@ class Profile(models.Model):
             if qs.count() > 0:
                 create_category_if_nonexistent(color_index=key)
 
-        # Create cateogries for default event colors on separate calendars
+        # Create categories for default event colors on separate calendars
         for calendar in GCalendar.objects.filter(user=self.user):
             qs = GEvent.objects.filter(calendar__user=self.user, color_index="1")
             if qs.count() > 0:
@@ -126,13 +126,27 @@ class GCalendar(models.Model):
     the state of the User's Google Calendar.
     """
 
+    CALENDAR_COLORS_KEYS = sorted(GOOGLE_CALENDAR_COLORS['event'].keys(), key=lambda x: int(x))
+    CALENDAR_COLORS_TUPLES = [(k, GOOGLE_CALENDAR_COLORS['event'][k]['background']) for k in CALENDAR_COLORS_KEYS]
+
     user = models.ForeignKey(User, related_name='gcalendars')
+    color_index = models.CharField(max_length=10, blank=False, choices=CALENDAR_COLORS_TUPLES)
     calendar_id = models.CharField(max_length=250)
     summary = models.CharField(max_length=250, help_text="Title of the calendar")
     meta = JSONField(default="{}", blank=True)
 
     def __str__(self):
         return "{}'s calendar {}".format(self.user, self.calendar_id)
+
+    @property
+    def color(self):
+        color = GOOGLE_CALENDAR_COLORS['calendar'].get(self.color_index)
+        if color:
+            return color
+        else:
+            # This handles when data isn't consistent for some reason.
+            print "Warning: GEvent '{}' with id {} has an incorrect color_index value of '{}'".format(self.name, self.id, self.color_index)
+            return GOOGLE_CALENDAR_COLORS['calendar']['1']
 
     def api_event_to_gevent(self, event):
         if event.get('status', 'confirmed') in set(['confirmed', 'tentative']):
@@ -397,7 +411,12 @@ class GEvent(Event):
 
     @property
     def color(self):
-        color = GOOGLE_CALENDAR_COLORS['event'].get(self.color_index)
+        # For events with default color, use the calendar color instead
+        if self.color_index == "1":
+            color = GOOGLE_CALENDAR_COLORS['calendar'].get(self.calendar.color_index)
+        else:
+            color = GOOGLE_CALENDAR_COLORS['event'].get(self.color_index)
+
         if color:
             return color
         else:
@@ -717,17 +736,19 @@ class GoogleCredentials(models.Model):
         self.next_sync_token = result['nextSyncToken']
 
         for item in result['items']:
+            gcal, gcal_created = GCalendar.objects.get_or_create(user=self.user, calendar_id=item['id'])
+
+            # This is the primary calendar, save it as such
             if item.get('primary', False):
-                # This is the primary calendar, save it as such
-                gcal, gcal_created = GCalendar.objects.get_or_create(user=self.user, calendar_id=item['id'])
-                if gcal_created:
-                    gcal.update_meta()
                 profile, _ = Profile.get_or_create(self.user)
                 profile.main_calendar = gcal
                 profile.save()
-            elif not only_primary:
-                gcal, gcal_created = GCalendar.objects.get_or_create(user=self.user, calendar_id=item['id'])
-                if gcal_created:
-                    gcal.update_meta()
+
+            # Update fields for each calendar
+            gcal.summary = item.get('summary')
+            gcal.color_index = item.get('colorId', '1')
+            gcal.save()
+            if gcal_created:
+                gcal.update_meta()
 
         self.save()
