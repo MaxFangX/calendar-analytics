@@ -101,7 +101,7 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
     };
 });
 
-analyticsApp.controller('CategoriesCtrl', function($scope, $http){
+analyticsApp.controller('CategoriesCtrl', function($scope, $http, $filter){
   var categoryUrl = '/v1/colorcategories';
   $scope.categories = [];
   $scope.categoriesForChart = [];
@@ -124,6 +124,9 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
           include: true
         });
       }
+      // $scope.getFilteredCategories = $scope.categories.filter(function(category) {
+      //   return category.include;
+      // });
     });
 
   this.startEdit = function(categoryId) {
@@ -207,6 +210,9 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
       });
       category.include = false;
     }
+      // $scope.getFilteredCategories = $scope.categories.filter(function(data) {
+      //     return data.include;
+      // });
   };
 
   // categories pie chart

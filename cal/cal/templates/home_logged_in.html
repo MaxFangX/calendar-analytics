@@ -89,7 +89,7 @@
                 {{ category.hours }}
               </td>
               {% endverbatim %}
-              <td ng-show="category.editing" class="textbox">
+              <td ng-show="category.editing" class="cal-text-box">
                 <input type="text" ng-model="category.newLabel">
               </td>
               <td ng-show="category.editing"></td> <!-- Hacky way of making it even -->
@@ -117,6 +117,8 @@
             </tr>
           </tbody>
         </table>
+<!--       <nvd3 options="options" data="getFilteredCategories"></nvd3>-->
+<!--       <nvd3 options="options" data="categories | filter:category:include"></nvd3>-->
       <nvd3 options="options" data="categoriesForChart"></nvd3>
     </div>
 
@@ -133,11 +135,11 @@
               <td ng-hide="tag.editing">{{ tag.label }}</td>
               <td ng-hide="tag.editing">{{ tag.hours }}</td>
               {% endverbatim %}
-              <td ng-show="tag.editing" class="textbox">
+              <td ng-show="tag.editing" class="cal-text-box">
                 Label<br>
                 <input type="text" ng-model="tag.newLabel">
               </td>
-              <td ng-show="tag.editing" class="textbox">
+              <td ng-show="tag.editing" class="cal-text-box">
                 Keywords<br>
                 <input type="text" ng-model="tag.newKeywords">
               </td>
@@ -159,10 +161,10 @@
               </td>
             </tr>
             <tr>
-              <td class="textbox">Label<br>
+              <td class="cal-text-box">Label<br>
                 <input type="text" ng-model="tag.label">
               </td>
-              <td class="textbox">Keywords<br>
+              <td class="cal-text-box">Keywords<br>
                <input type="text" ng-model="tag.keywords">
               </td>
               <td class="text-right text-nowrap">

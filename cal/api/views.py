@@ -159,6 +159,15 @@ class ColorCategoryDetail(generics.RetrieveUpdateDestroyAPIView):
 
     serializer_class = ColorCategorySerializer
 
+    # def get_serializer_context(self, *args, **kwargs):
+    #     context = super(ColorCategoryList, self).get_serializer_context(*args, **kwargs)
+    #     context.update({
+    #                     'calendar_ids': self.request.query_params.get('calendar_ids'),
+    #                     'start': self.request.query_params.get('start'),
+    #                     'end': self.request.query_params.get('end')
+    #         })
+    #     return context
+
     def get_queryset(self):
         return ColorCategory.objects.filter(user=self.request.user)
 
