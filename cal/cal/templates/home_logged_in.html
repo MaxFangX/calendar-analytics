@@ -86,18 +86,18 @@
         <table class="table table-hover">
           <thead>
             <th>
-              <a ng-click="orderByField='label'; reverseSort = !reverseSort">
+              <a href="" ng-click="orderByField = 'label'; reverseSort = !reverseSort">
                 Label
               </a>
             </th>
             <th>
-              <a ng-click="orderByField='hours'; reverseSort = !reverseSort">
+              <a href="" ng-click="orderByField = 'hours'; reverseSort = !reverseSort">
                 Hours
               </a>
             </th>
           </thead>
           <tbody>
-            <tr ng-repeat="tag in tags|orderBy:orderByField:reverseSort">
+            <tr ng-repeat="tag in tags | orderBy:orderByField:reverseSort">
               {% verbatim %}
               <td ng-hide="tag.editing">{{ tag.label }}</td>
               <td ng-hide="tag.editing">{{ tag.hours }}</td>
