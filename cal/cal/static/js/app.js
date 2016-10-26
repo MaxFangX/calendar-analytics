@@ -213,7 +213,9 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $
         });
 
     };
-
+    $scope.alertOnEventClick = function(date, jsEvent, view){
+      $scope.alertMessage = date.title;
+    };
     $scope.uiConfig = {
       calendar:{
         defaultView: 'agendaWeek',
@@ -224,6 +226,7 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $
           right: 'agendaDay,agendaWeek,month today prev,next'
         },
         firstDay: 1,
+        eventClick: $scope.alertOnEventClick,
       }
     };
 
