@@ -19,6 +19,7 @@ button {
   font-size: 14px;
   background-color: #fff;
   border: 1px solid #000;
+  border-radius: 5px;
   padding: 10px;
   margin: auto;
   line-height: normal;
