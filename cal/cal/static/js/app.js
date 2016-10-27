@@ -193,6 +193,7 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $
                           backgroundColor: gevent.color.background,
                           textColor: gevent.color.foreground,
                           borderColor: gevent.color.foreground,
+                          description: gevent.description,
                       });
                   });
 
