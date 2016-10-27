@@ -7,6 +7,7 @@
     <meta charset="utf-8">
 
     {% block head_css %}
+      <link rel="stylesheet" href="http://cdn.jsdelivr.net/qtip2/3.0.3/jquery.qtip.min.css">
       <link rel="stylesheet" href="{% static "lib/css/bootstrap.min.css" %}">
       <link rel="stylesheet" href="{% static "css/calendaranalytics.css" %}">
       <link rel="stylesheet" href="{% static "bower_components/fullcalendar/dist/fullcalendar.min.css" %}"/>
@@ -46,6 +47,7 @@
     {% block content %}{% endblock %}
 
     {% block bottom_js %}
+      <script type="text/javascript" src="http://cdn.jsdelivr.net/qtip2/3.0.3/jquery.qtip.min.js"></script>
       <script type="text/javascript" src="{% static "lib/js/bootstrap.min.js" %}"></script>
       <script type="text/javascript" src="{% static "js/calendaranalytics.js" %}"></script>
       <script type="text/javascript" src="{% static "js/app.js" %}"></script>

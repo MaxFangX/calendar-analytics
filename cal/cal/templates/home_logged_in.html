@@ -44,9 +44,6 @@
   {% if request.user.profile.authed %}
 
   <div ng-controller="CalendarCtrl as $ctrl" class="cal-calendar col-md-8">
-    <div class="alert-success calAlert" ng-show="alertMessage !== undefined && alertMessage !== ''">
-      <h4>{{alertMessage}}</h4>
-    </div>
     <!-- Enable / disable calendars button -->
     <div id="select-calendar-button">
       <div class="btn-group" >

@@ -213,9 +213,25 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $
         });
 
     };
-    $scope.alertOnEventClick = function(date, jsEvent, view){
-      $scope.alertMessage = date.title;
-    };
+    $scope.eventRender = function(event, element, view) {
+      element.qtip({
+          content: '<b>' + event.title + '</b></br>' + event.description,
+          show: 'click',
+          hide: 'unfocus',
+          position: {
+              target: 'mouse',
+              viewport: $(window),
+              adjust: {
+                  mouse: false,
+                  method: 'flip shift'
+              }
+          },
+          style: {
+              classes: 'section-info'
+          },
+      });
+      return element
+    }
     $scope.uiConfig = {
       calendar:{
         defaultView: 'agendaWeek',
@@ -227,6 +243,7 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $
         },
         firstDay: 1,
         eventClick: $scope.alertOnEventClick,
+        eventRender: $scope.eventRender,
       }
     };
 
