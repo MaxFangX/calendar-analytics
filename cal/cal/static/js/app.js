@@ -194,6 +194,7 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $
                           textColor: gevent.color.foreground,
                           borderColor: gevent.color.foreground,
                           description: gevent.description,
+                          location: gevent.location,
                       });
                   });
 
@@ -215,8 +216,12 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $
 
     };
     $scope.eventRender = function(event, element, view) {
+      var location = ''
+      if (event.location !== '') {
+        location = '<i>' + event.location + '</i></br>'
+      }
       element.qtip({
-          content: '<b>' + event.title + '</b></br>' + event.description,
+          content: '<b>' + event.title + '</b></br>' + location + event.description,
           show: 'click',
           hide: 'unfocus',
           position: {
