@@ -6,6 +6,8 @@ analyticsApp.controller('LoggedInCtrl', function LoggedInController($scope) {
 analyticsApp.controller('TagsCtrl', function($scope, $http){
   var tagUrl = '/v1/tags';
   $scope.tags = [];
+  $scope.orderByField = 'label';
+  $scope.reverseSort = false;
 
   // Generate graph data
   $http({method: 'GET', url: tagUrl + '.json' }).
@@ -103,6 +105,8 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
 
 analyticsApp.controller('CategoriesCtrl', function($scope, $http){
   var url = '/v1/colorcategories.json';
+  $scope.orderByField = 'label';
+  $scope.reverseSort = false;
 
   // Generate graph data
   $http({ method: 'GET', url: url }).
