@@ -197,6 +197,8 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $
                           backgroundColor: gevent.color.background,
                           textColor: gevent.color.foreground,
                           borderColor: gevent.color.foreground,
+                          description: gevent.description,
+                          location: gevent.location,
                       });
                   });
 
@@ -217,7 +219,29 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $
         });
 
     };
-
+    $scope.eventRender = function(event, element, view) {
+      var location = ''
+      if (event.location !== '') {
+        location = '<i>' + event.location + '</i><br>'
+      }
+      element.qtip({
+          content: '<b>' + event.title + '</b><br>' + location + event.description,
+          show: 'click',
+          hide: 'unfocus',
+          position: {
+              target: 'mouse',
+              viewport: $(window),
+              adjust: {
+                  mouse: false,
+                  method: 'flip shift'
+              }
+          },
+          style: {
+              classes: 'cal-section-info'
+          },
+      });
+      return element
+    }
     $scope.uiConfig = {
       calendar:{
         defaultView: 'agendaWeek',
@@ -228,6 +252,8 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $
           right: 'agendaDay,agendaWeek,month today prev,next'
         },
         firstDay: 1,
+        eventClick: $scope.alertOnEventClick,
+        eventRender: $scope.eventRender,
       }
     };
 

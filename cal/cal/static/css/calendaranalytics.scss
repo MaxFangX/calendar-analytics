@@ -20,6 +20,21 @@ button {
   margin: 2px;
 }
 
+.cal-section-info {
+  font-size: 14px;
+  background-color: #fff;
+  border: 1px solid #000;
+  border-radius: 5px;
+  padding: 10px;
+  margin: auto;
+  line-height: normal;
+}
+
+/* For mouse hover on calendar events. */
+.fc-content {
+    cursor: pointer;
+}
+
 #select-calendar-button {
   float: right;
   padding: 0 5 5 5;
