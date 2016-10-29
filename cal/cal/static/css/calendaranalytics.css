@@ -22,12 +22,11 @@ button {
   border-radius: 5px;
   padding: 10px;
   margin: auto;
-  line-height: normal;
-}
+  line-height: normal; }
 
+/* For mouse hover on calendar events. */
 .fc-content {
-    cursor: pointer;
-}
+  cursor: pointer; }
 
 #select-calendar-button {
   float: right;
