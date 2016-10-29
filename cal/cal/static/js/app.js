@@ -218,10 +218,10 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $
     $scope.eventRender = function(event, element, view) {
       var location = ''
       if (event.location !== '') {
-        location = '<i>' + event.location + '</i></br>'
+        location = '<i>' + event.location + '</i><br>'
       }
       element.qtip({
-          content: '<b>' + event.title + '</b></br>' + location + event.description,
+          content: '<b>' + event.title + '</b><br>' + location + event.description,
           show: 'click',
           hide: 'unfocus',
           position: {
@@ -233,7 +233,7 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $
               }
           },
           style: {
-              classes: 'section-info'
+              classes: 'cal-section-info'
           },
       });
       return element
