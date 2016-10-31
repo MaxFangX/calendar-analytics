@@ -14,7 +14,7 @@ class GCalendarSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GCalendar
-        fields = ('calendar_id', 'meta', 'summary')
+        fields = ('id', 'calendar_id', 'meta', 'summary', 'enabled_by_default')
 
 
 class GEventSerializer(serializers.ModelSerializer):
@@ -25,7 +25,6 @@ class GEventSerializer(serializers.ModelSerializer):
                 'calendar', 'google_id', 'i_cal_uid', 'color_index', 'description',
                 'status', 'transparency', 'all_day_event', 'timezone',
                 'end_time_unspecified', 'recurring_event_id', 'color')
-        # color = serializers.SerializerMethodField()
 
     class GCalendarField(serializers.Field):
         def to_representation(self, obj):

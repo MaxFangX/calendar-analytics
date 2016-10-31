@@ -52,6 +52,29 @@ class GCalendarList(generics.ListAPIView):
         return GCalendar.objects.filter(user=self.request.user)
 
 
+class GCalendarToggleEnabled(generics.GenericAPIView):
+    """
+    API endpoint primarily used for toggling calendar defaults
+    """
+    serializer_class = GCalendarSerializer
+
+    def get_queryset(self):
+        return GCalendar.objects.filter(user=self.request.user)
+
+    def get(self, request, *args, **kwargs):
+        try:
+            calendar = GCalendar.objects.filter(user=request.user).get(id=kwargs['pk'])
+        except GCalendar.DoesNotExist:
+            raise Exception("Could not find your calendar with primary key {}"
+                    .format(kwargs['pk']))
+
+        isNowEnabled = False if calendar.enabled_by_default else True
+        calendar.enabled_by_default = isNowEnabled
+        calendar.save()
+
+        return Response("Calendar {} is now enabled? {}".format(calendar, isNowEnabled))
+
+
 class GEventList(generics.ListAPIView):
     """
     API endpoint to query for Google Calendar events, without pruning for duplicates

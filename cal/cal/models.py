@@ -143,6 +143,8 @@ class GCalendar(models.Model):
     summary = models.CharField(max_length=250, help_text="Title of the calendar")
     meta = JSONField(default="{}", blank=True)
 
+    enabled_by_default = models.BooleanField(default=True)
+
     def __str__(self):
         return "{}'s calendar {}".format(self.user, self.calendar_id)
 
