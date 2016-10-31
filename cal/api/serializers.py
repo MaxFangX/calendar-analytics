@@ -63,9 +63,9 @@ class ColorCategorySerializer(serializers.ModelSerializer):
         fields = ('id', 'color_index', 'label', 'hours', 'calendar')
 
     def get_hours(self, obj):
-        calendar_ids = self.context.get('calendar_ids')
-        start = self.context.get('start')
-        end = self.context.get('end')
+        calendar_ids = self.context['calendar_ids']
+        start = self.context['start']
+        end = self.context['end']
         return obj.hours(calendar_ids=calendar_ids, start=start, end=end)
 
 
@@ -78,7 +78,7 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ('id', 'label', 'keywords', 'hours')
 
     def get_hours(self, obj):
-        calendar_ids = self.context.get('calendar_ids')
-        start = self.context.get('start')
-        end = self.context.get('end')
+        calendar_ids = self.context['calendar_ids']
+        start = self.context['start']
+        end = self.context['end']
         return obj.hours(calendar_ids=calendar_ids, start=start, end=end)

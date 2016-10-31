@@ -145,10 +145,10 @@ class ColorCategoryList(generics.ListAPIView):
     def get_serializer_context(self, *args, **kwargs):
         context = super(ColorCategoryList, self).get_serializer_context(*args, **kwargs)
         context.update({
-                        'calendar_ids': self.request.query_params.get('calendar_ids'),
-                        'start': self.request.query_params.get('start'),
-                        'end': self.request.query_params.get('end')
-            })
+            'calendar_ids': self.request.query_params.get('calendar_ids'),
+            'start': self.request.query_params.get('start'),
+            'end': self.request.query_params.get('end')
+        })
         return context
 
     def get_queryset(self):
@@ -159,14 +159,14 @@ class ColorCategoryDetail(generics.RetrieveUpdateDestroyAPIView):
 
     serializer_class = ColorCategorySerializer
 
-    # def get_serializer_context(self, *args, **kwargs):
-    #     context = super(ColorCategoryList, self).get_serializer_context(*args, **kwargs)
-    #     context.update({
-    #                     'calendar_ids': self.request.query_params.get('calendar_ids'),
-    #                     'start': self.request.query_params.get('start'),
-    #                     'end': self.request.query_params.get('end')
-    #         })
-    #     return context
+    def get_serializer_context(self, *args, **kwargs):
+        context = super(ColorCategoryDetail, self).get_serializer_context(*args, **kwargs)
+        context.update({
+            'calendar_ids': self.request.query_params.get('calendar_ids'),
+            'start': self.request.query_params.get('start'),
+            'end': self.request.query_params.get('end')
+        })
+        return context
 
     def get_queryset(self):
         return ColorCategory.objects.filter(user=self.request.user)
@@ -178,10 +178,10 @@ class TagList(generics.ListCreateAPIView):
 
     def get_serializer_context(self):
         return {
-                    'calendar_ids': self.request.query_params.get('calendar_ids'),
-                    'start': self.request.query_params.get('start'),
-                    'end': self.request.query_params.get('end')
-            }
+            'calendar_ids': self.request.query_params.get('calendar_ids'),
+            'start': self.request.query_params.get('start'),
+            'end': self.request.query_params.get('end')
+        }
 
     def get_queryset(self):
         qs = Tag.objects.filter(user=self.request.user)
@@ -213,6 +213,13 @@ class TagList(generics.ListCreateAPIView):
 class TagDetail(generics.RetrieveUpdateDestroyAPIView):
 
     serializer_class = TagSerializer
+
+    def get_serializer_context(self):
+        return {
+            'calendar_ids': self.request.query_params.get('calendar_ids'),
+            'start': self.request.query_params.get('start'),
+            'end': self.request.query_params.get('end')
+        }
 
     def get_queryset(self):
         return Tag.objects.filter(user=self.request.user)

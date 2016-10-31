@@ -74,6 +74,9 @@
   <div class="col-md-4">
     <div ng-controller="CategoriesCtrl as $ctrl">
       <h4 class="well">Categories - Last Week</h4>
+<!--       <nvd3 options="options" data="getFilteredCategories"></nvd3>-->
+<!--       <nvd3 options="options" data="categories | filter:category:include"></nvd3>-->
+      <nvd3 options="options" data="categoriesForChart"></nvd3>
         <table class="table table-hover">
           <thead>
             <th>Label</th>
@@ -117,20 +120,25 @@
             </tr>
           </tbody>
         </table>
-<!--       <nvd3 options="options" data="getFilteredCategories"></nvd3>-->
-<!--       <nvd3 options="options" data="categories | filter:category:include"></nvd3>-->
-      <nvd3 options="options" data="categoriesForChart"></nvd3>
     </div>
 
     <div ng-controller="TagsCtrl as $ctrl">
       <h4 class="well">Tags - Cumulative</h4>
         <table class="table table-hover">
           <thead>
-            <th>Label</th>
-            <th>Hours</th>
+            <th>
+              <a href="" ng-click="orderByField = 'label'; reverseSort = !reverseSort">
+                Label
+              </a>
+            </th>
+            <th>
+              <a href="" ng-click="orderByField = 'hours'; reverseSort = !reverseSort">
+                Hours
+              </a>
+            </th>
           </thead>
           <tbody>
-            <tr ng-repeat="tag in tags">
+            <tr ng-repeat="tag in tags | orderBy:orderByField:reverseSort">
               {% verbatim %}
               <td ng-hide="tag.editing">{{ tag.label }}</td>
               <td ng-hide="tag.editing">{{ tag.hours }}</td>
