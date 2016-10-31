@@ -59,7 +59,8 @@
       <ul class="dropdown-menu">
         <li ng-repeat="cal in calendars">
           <a href="#">
-            <input type="checkbox" ng-model="cal.enabled" ng-click="$ctrl.refresh('panalytics')">
+            <input type="checkbox" ng-model="cal.enabled"
+                   ng-click="$ctrl.toggleEnabled(cal.id); $ctrl.refresh('panalytics');">
             {% verbatim %} {{ cal.summary }} {% endverbatim %}
           </a>
         </li>
@@ -155,11 +156,12 @@
     {% if request.user.is_staff %}
       <div>
         <h4 class="well">Options</h4>
-        <a href="/v1/sync"><button class="btn btn-primary pull-left">Sync</button></a>
-        <a href="/v1/sync?full_sync=true"><button class="btn btn-primary pull-left">Full Sync</button></a>
-        <a href="/v1/sync?sync_all=true"><button class="btn btn-primary pull-left">Sync All Calendars</button></a>
+        <a href="/v1/sync"><button class="btn btn-primary pull-left">Inc. Sync Main Calendar</button></a>
+        <a href="/v1/sync?full_sync=true"><button class="btn btn-primary pull-left">Full Sync Main Calendar</button></a>
+        <a href="/v1/sync?sync_all=true"><button class="btn btn-primary pull-left">Inc. Sync All Calendars</button></a>
         <a href="/v1/sync?full_sync=true&sync_all=true"><button class="btn btn-primary pull-left">Full Sync All Calendars</button></a>
         <a href="/auth/clear"><button class="btn btn-primary pull-left">Reset Credentials</button></a>
+        <a href="/admin/generate-categories"><button class="btn btn-primary pull-left" style="margin-bottom: 25px;">Generate Categories</button></a>
       </div>
     {% endif %}
   </div>

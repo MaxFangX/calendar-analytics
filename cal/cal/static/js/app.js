@@ -172,7 +172,7 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $
         // Initialize cached calendars
         if ($scope.calendars[gcal.calendar_id] === undefined) {
           $scope.calendars[gcal.calendar_id] = gcal;
-          $scope.calendars[gcal.calendar_id].enabled = true;
+          $scope.calendars[gcal.calendar_id].enabled = gcal.enabled_by_default;
         }
 
         return $http({
@@ -263,5 +263,14 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $
     }
   };
 
+  this.toggleEnabled = function(calendarPrimaryKey) {
+    $http({
+      method: 'GET',
+      url: "/v1/gcalendars/" + calendarPrimaryKey + "/toggle-enabled/"
+    }).then(function toggledSuccess(data) {}, function toggledFail(data) {
+      console.log("Could not save preferences for calendar " + calendarPrimaryKey);
+    });
+  };
+  
   this.eventSources = [this.events];
 });

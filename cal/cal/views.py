@@ -36,6 +36,11 @@ def clear_auth(request):
     return HttpResponseRedirect("/")
 
 @login_required
+def generate_categories(request):
+    request.user.profile.generate_categories()
+    return HttpResponseRedirect("/")
+
+@login_required
 def accounts_profile(request):
     """
     Shows the account information for a user
