@@ -77,7 +77,7 @@ def google_auth(request):
                                        scope=['https://www.googleapis.com/auth/calendar','profile','email'],
                                        redirect_uri=settings.BASE_URL + '/auth/google')
     default_flow.params['access_type'] = 'offline'
-    default_flow.params['include_granted_scopes'] = True
+    default_flow.params['include_granted_scopes'] = 'true'
 
     # Try to retrieve an existing flow, or create one if it doesn't exist
     gflow = GoogleFlow.objects.filter(id=request.user).last()
