@@ -14,7 +14,7 @@ class GCalendarSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = GCalendar
-        fields = ('calendar_id', 'meta', 'summary')
+        fields = ('id', 'calendar_id', 'meta', 'summary', 'enabled_by_default')
 
 
 class GEventSerializer(serializers.ModelSerializer):

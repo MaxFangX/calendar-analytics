@@ -331,5 +331,14 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $
       }
     };
 
-    this.eventSources = [this.events];
+  this.toggleEnabled = function(calendarPrimaryKey) {
+    $http({
+      method: 'GET',
+      url: "/v1/gcalendars/" + calendarPrimaryKey + "/toggle-enabled/"
+    }).then(function toggledSuccess(data) {}, function toggledFail(data) {
+      console.log("Could not save preferences for calendar " + calendarPrimaryKey);
+    });
+  };
+
+  this.eventSources = [this.events];
 });

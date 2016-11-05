@@ -7,6 +7,8 @@ urlpatterns = patterns(
     url(r'^$', 'cal.views.home', name='home'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^admin/', include('loginas.urls')),
+    url(r'^admin/generate-categories', 'cal.views.generate_categories',
+        name='generate_categories'),
     url(r'^logout$', 'cal.views.logout_view', name='logout_view'),
     url(r'^auth/google', 'cal.views.google_auth', name='google_auth'),
     url(r'^auth/clear', 'cal.views.clear_auth', name='clear_auth'),
