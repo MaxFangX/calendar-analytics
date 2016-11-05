@@ -124,9 +124,6 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http, $filter){
           include: true
         });
       }
-      // $scope.getFilteredCategories = $scope.categories.filter(function(category) {
-      //   return category.include;
-      // });
     });
 
   this.startEdit = function(categoryId) {
@@ -201,18 +198,13 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http, $filter){
         label: category.label,
         hours: category.hours,
       });
-      category.include = true;
 
     // when user unchecks a category
     } else {
       $scope.categoriesForChart = $scope.categoriesForChart.filter(function(category) {
         return category.id !== categoryId;
       });
-      category.include = false;
     }
-      // $scope.getFilteredCategories = $scope.categories.filter(function(data) {
-      //     return data.include;
-      // });
   };
 
   // categories pie chart

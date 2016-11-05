@@ -75,16 +75,23 @@
   <div class="col-md-4">
     <div ng-controller="CategoriesCtrl as $ctrl">
       <h4 class="well">Categories - Last Week</h4>
-<!--       <nvd3 options="options" data="getFilteredCategories"></nvd3>-->
-<!--       <nvd3 options="options" data="categories | filter:category:include"></nvd3>-->
+      <!-- <nvd3 options="options" data="categories | filter: {include: true}"></nvd3> -->
       <nvd3 options="options" data="categoriesForChart"></nvd3>
         <table class="table table-hover">
           <thead>
-            <th>Label</th>
-            <th>Hours</th>
+            <th>
+              <a href="" ng-click="orderByField = 'label'; reverseSort = !reverseSort">
+                Label
+              </a>
+            </th>
+            <th>
+              <a href="" ng-click="orderByField = 'hours'; reverseSort = !reverseSort">
+                Hours
+              </a>
+            </th>
           </thead>
           <tbody>
-            <tr ng-repeat="category in categories">
+            <tr ng-repeat="category in categories | orderBy:orderByField:reverseSort">
               {% verbatim %}
               <td ng-hide="category.editing">
                 <input type="checkbox" ng-model="category.include" ng-click="$ctrl.chartToggle(category.id)"> {{ category.label }}
@@ -112,11 +119,6 @@
                 <button class="btn btn-danger">
                   <span class="glyphicon glyphicon-trash" ng-click="$ctrl.remove(category.id)"></span>
                 </button>
-              </td>
-            </tr>
-            <tr>
-              <td class="text-nowrap">
-                <button class="btn btn-success">Generate Categories</button>
               </td>
             </tr>
           </tbody>
