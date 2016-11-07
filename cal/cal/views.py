@@ -34,7 +34,9 @@ def category_detail(request, pk):
 def tag_detail(request, pk):
     context = {}
     try:
-        context['tag'] = Tag.objects.get(user=request.user, id=pk)
+        tag = Tag.objects.get(user=request.user, id=pk)
+        context['tag'] = tag
+        context['events'] = tag.query()
     except Exception:
         # TODO gracefully handle this
         pass
