@@ -16,6 +16,8 @@ urlpatterns = patterns(
         'cal.views.complete_with_token', name='complete_with_token'),
     url(r'^accounts/profile', 'cal.views.accounts_profile', name='accounts_profile'),
 
+    url(r'categories/(?P<pk>[0-9]+)/?', 'cal.views.category_detail', name='category_detail'),
+
     # Django REST framework
     url(r'^', include('api.urls')),
 

@@ -1,4 +1,4 @@
-from cal.models import GoogleCredentials, GoogleFlow, Profile
+from cal.models import GoogleCredentials, GoogleFlow, Profile, ColorCategory
 
 from django.conf import settings
 from django.contrib.auth import login, logout
@@ -19,6 +19,18 @@ def home(request):
         return render(request, template_name='home_logged_in.html')
     else:
         return render(request, template_name='home_logged_out.html')
+
+@login_required
+def category_detail(request, pk):
+
+    context = {}
+    try:
+        context['category'] = ColorCategory.objects.get(user=request.user, id=pk)
+    except Exception:
+        # TODO gracefully handle this
+        pass
+
+    return render(request, template_name='category_detail.html', context=context)
 
 
 def logout_view(request):
