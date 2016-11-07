@@ -16,7 +16,7 @@
     <tbody>
       <tr ng-repeat="tag in tags | orderBy:orderByField:reverseSort">
         {% verbatim %}
-        <td ng-hide="tag.editing">{{ tag.label }}</td>
+        <td ng-hide="tag.editing"><a href="/tags/{{ tag.id }}/">{{ tag.label }}</a></td>
         <td ng-hide="tag.editing">{{ tag.hours }}</td>
         {% endverbatim %}
         <td ng-show="tag.editing">
