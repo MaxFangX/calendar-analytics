@@ -3,7 +3,7 @@ var analyticsApp = angular.module('analyticsApp', ['nvd3', 'ui.calendar']);
 analyticsApp.controller('LoggedInCtrl', function LoggedInController($scope) {
 });
 
-analyticsApp.controller('TagsCtrl', function($scope, $http){
+function TagsCtrl($scope, $http) {
   var tagUrl = '/v1/tags';
   $scope.tags = [];
   $scope.orderByField = 'label';
@@ -101,11 +101,11 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
       });
     });
   };
-});
+}
 
 analyticsApp.component('tags', {
     templateUrl: 'static/templates/tags.html',
-    controller: 'TagsCtrl',
+    controller: TagsCtrl,
     controllerAs: '$ctrl',
     bindings: {}
 });
