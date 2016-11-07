@@ -103,6 +103,13 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
   };
 });
 
+analyticsApp.component('tags', {
+    templateUrl: 'static/templates/tags.html',
+    controller: 'TagsCtrl',
+    controllerAs: '$ctrl',
+    bindings: {}
+});
+
 analyticsApp.controller('CategoriesCtrl', function($scope, $http){
   var url = '/v1/colorcategories.json';
   $scope.orderByField = 'label';

@@ -1,4 +1,4 @@
-<div ng-controller="TagsCtrl as $ctrl">
+<div>
   <h4 class="well">Tags - Cumulative</h4>
   <table class="table table-hover">
     <thead>
@@ -15,10 +15,8 @@
     </thead>
     <tbody>
       <tr ng-repeat="tag in tags | orderBy:orderByField:reverseSort">
-        {% verbatim %}
         <td ng-hide="tag.editing"><a href="/tags/{{ tag.id }}/">{{ tag.label }}</a></td>
         <td ng-hide="tag.editing">{{ tag.hours }}</td>
-        {% endverbatim %}
         <td ng-show="tag.editing">
           Label<br>
           <input type="text" ng-model="tag.newLabel">
