@@ -104,10 +104,10 @@ function TagsCtrl($scope, $http) {
 }
 
 analyticsApp.component('tags', {
-    templateUrl: 'static/templates/tags.html',
-    controller: TagsCtrl,
-    controllerAs: '$ctrl',
-    bindings: {}
+  templateUrl: 'static/templates/tags.html',
+  controller: TagsCtrl,
+  controllerAs: '$ctrl',
+  bindings: {}
 });
 
 analyticsApp.controller('CategoriesCtrl', function($scope, $http){
@@ -278,6 +278,6 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $
       console.log("Could not save preferences for calendar " + calendarPrimaryKey);
     });
   };
-  
+
   this.eventSources = [this.events];
 });
