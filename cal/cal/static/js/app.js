@@ -101,10 +101,9 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
     };
 });
 
-analyticsApp.controller('CategoriesCtrl', function($scope, $http, $filter){
+analyticsApp.controller('CategoriesCtrl', function($scope, $http){
   var categoryUrl = '/v1/colorcategories';
   $scope.categories = [];
-  $scope.categoriesForChart = [];
 
   // populate the categories pie chart
   $http({ method: 'GET', url: categoryUrl + '.json' }).
@@ -112,12 +111,6 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http, $filter){
       for (var i = 0; i < data.results.length; i++) {
         var category = data.results[i];
         $scope.categories.push({
-          id: category.id,
-          label: category.label,
-          hours: category.hours,
-          include: true
-        });
-        $scope.categoriesForChart.push({
           id: category.id,
           label: category.label,
           hours: category.hours,
@@ -183,28 +176,6 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http, $filter){
           return category.id !== categoryId;
         });
       });
-  };
-
-  // when category is checked, include in pie chart, if not don't include
-  this.chartToggle = function(categoryId) {
-    var category = $scope.categories.find(function(category, index, array) {
-      return category.id == categoryId;
-    });
-
-    // when user checks a category
-    if (category.include) {
-      $scope.categoriesForChart.push({
-        id: category.id,
-        label: category.label,
-        hours: category.hours,
-      });
-
-    // when user unchecks a category
-    } else {
-      $scope.categoriesForChart = $scope.categoriesForChart.filter(function(category) {
-        return category.id !== categoryId;
-      });
-    }
   };
 
   // categories pie chart
