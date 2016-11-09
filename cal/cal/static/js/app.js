@@ -6,64 +6,138 @@ analyticsApp.controller('LoggedInCtrl', function LoggedInController($scope) {
 analyticsApp.controller('TagsCtrl', function($scope, $http){
   var tagUrl = '/v1/tags';
   $scope.tags = [];
-  $scope.orderByField = 'label';
-  $scope.reverseSort = false;
 
-  // Generate graph data
+  // add all the tags
   $http({method: 'GET', url: tagUrl + '.json' }).
-  success(function successCallback(data) {
-    for (var i = 0; i < data.results.length; i++) {
-      var tag = data.results[i];
-      $scope.tags.push({
-        id: tag.id,
-        label: tag.label,
-        keywords: tag.keywords,
-        hours: tag.hours
-      });
-    }
-  });
-
-  this.create = function(tag) {
-    $http({
-      method: 'POST',
-      url: tagUrl + '.json',
-      data: $.param({
-        label: tag.label,
-        keywords: tag.keywords,
-        csrfmiddlewaretoken: getCookie('csrftoken')
-      }),
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
+    success(function successCallback(data) {
+      for (var i = 0; i < data.results.length; i++) {
+        var tag = data.results[i];
+        $scope.tags.push({
+          id: tag.id,
+          label: tag.label,
+          keywords: tag.keywords,
+          hours: tag.hours
+        });
       }
-    }).
-    success(function addToList(data) {
-      $scope.tags.push({
-        id: data.id,
-        label: data.label,
-        keywords: data.keywords,
-        hours: data.hours,
-        editing: false
-      });
     });
+
+    this.create = function(tag) {
+      $http({
+        method: 'POST',
+        url: tagUrl + '.json',
+        data: $.param({
+          label: tag.label,
+          keywords: tag.keywords,
+          csrfmiddlewaretoken: getCookie('csrftoken')
+        }),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }).
+        success(function addToList(data) {
+          $scope.tags.push({
+            id: data.id,
+            label: data.label,
+            keywords: data.keywords,
+            hours: data.hours,
+            editing: false
+          });
+        });
+    };
+
+    this.startEdit = function(tagId) {
+      var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
+      tag.newLabel = tag.label;
+      tag.newKeywords = tag.keywords;
+      tag.editing = true;
+    };
+
+    this.submit = function(tagId) {
+      var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
+      tag.editing = false;
+
+      $http({
+        method: 'POST',
+        url: tagUrl + '/' + tagId,
+        data: $.param({
+          label: tag.newLabel,
+          keywords: tag.newKeywords,
+          csrfmiddlewaretoken: getCookie('csrftoken'),
+          _method: 'PATCH'
+        }),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }).
+        success(function addToList(data) {
+          tag.label = data.label;
+          tag.keywords = data.keywords;
+          tag.hours = data.hours;
+        });
+    };
+
+    this.cancelEdit = function(tagId) {
+      var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
+      tag.editing = false;
+    };
+
+    this.delete = function(tagId) {
+      $http({
+        method: 'POST',
+        url: tagUrl + '/' + tagId,
+        data: $.param({
+          csrfmiddlewaretoken: getCookie('csrftoken'),
+          _method: 'DELETE'
+        }),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }).
+        success(function removeFromList(data) {
+          $scope.tags = $scope.tags.filter(function(tag) {
+            return tag.id !== tagId;
+          });
+        });
+    };
+});
+
+analyticsApp.controller('CategoriesCtrl', function($scope, $http){
+  var categoryUrl = '/v1/colorcategories';
+  $scope.categories = [];
+
+  // populate the categories pie chart
+  $http({ method: 'GET', url: categoryUrl + '.json' }).
+    success(function successCallback(data) {
+      for (var i = 0; i < data.results.length; i++) {
+        var category = data.results[i];
+        $scope.categories.push({
+          id: category.id,
+          label: category.label,
+          hours: category.hours,
+          include: true
+        });
+      }
+    });
+
+  this.startEdit = function(categoryId) {
+    var category = $scope.categories.find(function(category, index, array) {
+      return category.id == categoryId;
+    });
+    category.newLabel = category.label;
+    category.editing = true;
   };
 
-  this.startEdit = function(tagId) {
-    var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
-    tag.newLabel = tag.label;
-    tag.newKeywords = tag.keywords;
-    tag.editing = true;
-  };
-
-  this.submit = function(tagId) {
-    var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
-    tag.editing = false;
+  this.submit = function(categoryId) {
+    var category = $scope.categories.find(function(category, index, array) {
+      return category.id == categoryId;
+    });
+    category.editing = false;
 
     $http({
       method: 'POST',
-      url: tagUrl + '/' + tagId,
+      url: categoryUrl + '/' + categoryId,
       data: $.param({
-        label: tag.newLabel,
-        keywords: tag.newKeywords,
+        label: category.newLabel,
         csrfmiddlewaretoken: getCookie('csrftoken'),
         _method: 'PATCH'
       }),
@@ -71,22 +145,24 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     }).
-    success(function addToList(data) {
-      tag.label = data.label;
-      tag.keywords = data.keywords;
-      tag.hours = data.hours;
+      success(function addToList(data) {
+        category.label = data.label;
+        category.hours = data.hours;
+      });
+  };
+
+
+  this.cancelEdit = function(categoryId) {
+    var category = $scope.categories.find(function(category, index, array) {
+      return category.id == categoryId;
     });
+    category.editing = false;
   };
 
-  this.cancelEdit = function(tagId) {
-    var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
-    tag.editing = false;
-  };
-
-  this.delete = function(tagId) {
+  this.remove = function(categoryId) {
     $http({
       method: 'POST',
-      url: tagUrl + '/' + tagId,
+      url: categoryUrl + '/' + categoryId,
       data: $.param({
         csrfmiddlewaretoken: getCookie('csrftoken'),
         _method: 'DELETE'
@@ -95,44 +171,25 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     }).
-    success(function removeFromList(data) {
-      $scope.tags = $scope.tags.filter(function(tag) {
-        return tag.id !== tagId;
+      success(function removeFromList(data) {
+        $scope.categories = $scope.categories.filter(function(category) {
+          return category.id !== categoryId;
+        });
       });
-    });
   };
-});
 
-analyticsApp.controller('CategoriesCtrl', function($scope, $http){
-  var url = '/v1/colorcategories.json';
-  $scope.orderByField = 'label';
-  $scope.reverseSort = false;
-
-  // Generate graph data
-  $http({ method: 'GET', url: url }).
-  success(function (data) {
-    // set the data
-    $scope.categories = [];
-    for (var i = 0; i < data.results.length; i++) {
-      var category = data.results[i];
-      $scope.categories.push({
-        label: category.label,
-        hours: category.hours
-      });
-    }
-  });
-
+  // categories pie chart
   $scope.options = {
     chart: {
       type: 'pieChart',
       height: 400,
       x: function(d){return d.label;},
       y: function(d){return d.hours;},
-      showLabels: true,
+      showLabels: false,
       growOnHover: true,
       duration: 500,
       labelThreshold: 0.01,
-      labelSunbeamLayout: false,
+      labelSunbeamLayout: true,
       legend: {
         margin: {
           top: 5,
@@ -271,6 +328,6 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $
       console.log("Could not save preferences for calendar " + calendarPrimaryKey);
     });
   };
-  
+
   this.eventSources = [this.events];
 });

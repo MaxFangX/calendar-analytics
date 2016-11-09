@@ -25,7 +25,7 @@ def sync(request, format=None):
         return Response("Not logged in")
 
     profile = Profile.get_or_create(request.user)[0]
-    
+
     if request.query_params.get('sync_all'):
         profile.create_calendars(only_primary=False)
         calendars = GCalendar.objects.filter(user=request.user)
@@ -137,7 +137,7 @@ class GEventList(generics.ListAPIView):
                     time = timezone_util.make_aware(time, timezone)
                 else:
                     time = timezone_util.make_aware(time, timezone_util.get_default_timezone())
-            
+
             if timezone:
                 time = time.astimezone(timezone)
             else:
@@ -168,10 +168,27 @@ class ColorCategoryList(generics.ListAPIView):
     def get_serializer_context(self, *args, **kwargs):
         context = super(ColorCategoryList, self).get_serializer_context(*args, **kwargs)
         context.update({
-                'calendar_ids': self.request.query_params.get('calendar_ids'),
-                'start': self.request.query_params.get('start'),
-                'end': self.request.query_params.get('end')
-                })
+            'calendar_ids': self.request.query_params.get('calendar_ids'),
+            'start': self.request.query_params.get('start'),
+            'end': self.request.query_params.get('end')
+        })
+        return context
+
+    def get_queryset(self):
+        return ColorCategory.objects.filter(user=self.request.user)
+
+
+class ColorCategoryDetail(generics.RetrieveUpdateDestroyAPIView):
+
+    serializer_class = ColorCategorySerializer
+
+    def get_serializer_context(self, *args, **kwargs):
+        context = super(ColorCategoryDetail, self).get_serializer_context(*args, **kwargs)
+        context.update({
+            'calendar_ids': self.request.query_params.get('calendar_ids'),
+            'start': self.request.query_params.get('start'),
+            'end': self.request.query_params.get('end')
+        })
         return context
 
     def get_queryset(self):
@@ -179,15 +196,15 @@ class ColorCategoryList(generics.ListAPIView):
 
 
 class TagList(generics.ListCreateAPIView):
-    
+
     serializer_class = TagSerializer
 
     def get_serializer_context(self):
         return {
-                'calendar_ids': self.request.query_params.get('calendar_ids'),
-                'start': self.request.query_params.get('start'),
-                'end': self.request.query_params.get('end')
-                }
+            'calendar_ids': self.request.query_params.get('calendar_ids'),
+            'start': self.request.query_params.get('start'),
+            'end': self.request.query_params.get('end')
+        }
 
     def get_queryset(self):
         qs = Tag.objects.filter(user=self.request.user)
@@ -200,7 +217,7 @@ class TagList(generics.ListCreateAPIView):
 
         return qs
 
-    def post(self, request, *args, **kwargs): 
+    def post(self, request, *args, **kwargs):
         keywords = self.request.data.get('keywords')
         label = self.request.data.get('label')
         if not keywords or not label:
@@ -217,8 +234,15 @@ class TagList(generics.ListCreateAPIView):
 
 
 class TagDetail(generics.RetrieveUpdateDestroyAPIView):
-    
+
     serializer_class = TagSerializer
+
+    def get_serializer_context(self):
+        return {
+            'calendar_ids': self.request.query_params.get('calendar_ids'),
+            'start': self.request.query_params.get('start'),
+            'end': self.request.query_params.get('end')
+        }
 
     def get_queryset(self):
         return Tag.objects.filter(user=self.request.user)
