@@ -3,7 +3,7 @@ var analyticsApp = angular.module('analyticsApp', ['nvd3', 'ui.calendar']);
 analyticsApp.controller('LoggedInCtrl', function LoggedInController($scope) {
 });
 
-analyticsApp.controller('TagsCtrl', function($scope, $http){
+function TagsCtrl($scope, $http) {
   var tagUrl = '/v1/tags';
   $scope.tags = [];
 
@@ -99,6 +99,13 @@ analyticsApp.controller('TagsCtrl', function($scope, $http){
           });
         });
     };
+};
+
+analyticsApp.component('tags', {
+  templateUrl: 'static/templates/tags.html',
+  controller: TagsCtrl,
+  controllerAs: '$ctrl',
+  bindings: {}
 });
 
 analyticsApp.controller('CategoriesCtrl', function($scope, $http){
@@ -176,29 +183,6 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
           return category.id !== categoryId;
         });
       });
-  };
-
-  // categories pie chart
-  $scope.options = {
-    chart: {
-      type: 'pieChart',
-      height: 400,
-      x: function(d){return d.label;},
-      y: function(d){return d.hours;},
-      showLabels: false,
-      growOnHover: true,
-      duration: 500,
-      labelThreshold: 0.01,
-      labelSunbeamLayout: true,
-      legend: {
-        margin: {
-          top: 5,
-          right: 0,
-          bottom: 0,
-          left: 0
-        }
-      },
-    },
   };
 });
 

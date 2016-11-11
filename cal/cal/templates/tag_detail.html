@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1 class="well">Tag "{{ tag.label }}"</h1>
+  <h3 class="well">Keyword(s): "{{ tag.keywords }}"<h3>
+  <h3 class="well">Cumulative Hours: {{ tag.hours }}<h3>
+  <h3 class="well">Contained Events</h3>
+  <ul class="list-group">
+    {% for event in events %}
+    <li class="list-group-item">{{ event.start }}: {{ event.name }}</li>
+    {% endfor %}
+  </ul>
+  
+{% endblock %}
