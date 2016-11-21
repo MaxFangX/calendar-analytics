@@ -5,12 +5,15 @@ analyticsApp.controller('LoggedInCtrl', function LoggedInController($scope) {
 
 function TagsCtrl($http) {
   var tagUrl = '/v1/tags';
-  this.tags = [];
+  this.tags = {};
 
   var successCallback = function successCallback(data) {
+    if (!this.tags[this.timeRange]) {
+      this.tags[this.timeRange] = [];
+    }
     for (var i = 0; i < data.results.length; i++) {
       var tag = data.results[i];
-      this.tags.push({
+      this.tags[this.timeRange].push({
         id: tag.id,
         label: tag.label,
         keywords: tag.keywords,
@@ -20,89 +23,89 @@ function TagsCtrl($http) {
   }.bind(this);
 
   // add all the tags
-  $http({method: 'GET', url: tagUrl + '.json' }).
-    success(successCallback);
+  $http({method: 'GET', url: tagUrl + '.json' })
+    .success(successCallback);
 
-    this.create = function(tag) {
-      $http({
-        method: 'POST',
-        url: tagUrl + '.json',
-        data: $.param({
-          label: tag.label,
-          keywords: tag.keywords,
-          csrfmiddlewaretoken: getCookie('csrftoken')
-        }),
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).
-        success(function addToList(data) {
-          this.tags.push({
-            id: data.id,
-            label: data.label,
-            keywords: data.keywords,
-            hours: data.hours,
-            editing: false
-          });
+  this.create = function(tag) {
+    $http({
+      method: 'POST',
+      url: tagUrl + '.json',
+      data: $.param({
+        label: tag.label,
+        keywords: tag.keywords,
+        csrfmiddlewaretoken: getCookie('csrftoken')
+      }),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    }).
+      success(function addToList(data) {
+        this.tags[this.timeRange].push({
+          id: data.id,
+          label: data.label,
+          keywords: data.keywords,
+          hours: data.hours,
+          editing: false
         });
-    }.bind(this);
-
-    this.startEdit = function(tagId) {
-      var tag = this.tags.find(function(tag, index, array) { return tag.id == tagId; });
-      tag.newLabel = tag.label;
-      tag.newKeywords = tag.keywords;
-      tag.editing = true;
-    };
-
-    this.submit = function(tagId) {
-      var tag = this.tags.find(function(tag, index, array) { return tag.id == tagId; });
-      tag.editing = false;
-
-      var addToList = function addToList(data) {
-        tag.label = data.label;
-        tag.keywords = data.keywords;
-        tag.hours = data.hours;
-      }.bind(this);
-
-      $http({
-        method: 'POST',
-        url: tagUrl + '/' + tagId,
-        data: $.param({
-          label: tag.newLabel,
-          keywords: tag.newKeywords,
-          csrfmiddlewaretoken: getCookie('csrftoken'),
-          _method: 'PATCH'
-        }),
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).success(addToList);
-    }.bind(this);
-
-    this.cancelEdit = function(tagId) {
-      var tag = this.tags.find(function(tag, index, array) { return tag.id == tagId; });
-      tag.editing = false;
-    }.bind(this);
-
-    var removeFromList = function removeFromList(data) {
-      this.tags = this.tags.filter(function(tag) {
-        return tag.id !== tagId;
       });
+  }.bind(this);
+
+  this.startEdit = function(tagId) {
+    var tag = this.tags[this.timeRange].find(function(tag, index, array) { return tag.id == tagId; });
+    tag.newLabel = tag.label;
+    tag.newKeywords = tag.keywords;
+    tag.editing = true;
+  };
+
+  this.submit = function(tagId) {
+    var tag = this.tags[this.timeRange].find(function(tag, index, array) { return tag.id == tagId; });
+    tag.editing = false;
+
+    var addToList = function addToList(data) {
+      tag.label = data.label;
+      tag.keywords = data.keywords;
+      tag.hours = data.hours;
     }.bind(this);
 
-    this.delete = function(tagId) {
-      $http({
-        method: 'POST',
-        url: tagUrl + '/' + tagId,
-        data: $.param({
-          csrfmiddlewaretoken: getCookie('csrftoken'),
-          _method: 'DELETE'
-        }),
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).success(removeFromList);
-    }.bind(this);
+    $http({
+      method: 'POST',
+      url: tagUrl + '/' + tagId,
+      data: $.param({
+        label: tag.newLabel,
+        keywords: tag.newKeywords,
+        csrfmiddlewaretoken: getCookie('csrftoken'),
+        _method: 'PATCH'
+      }),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    }).success(addToList);
+  }.bind(this);
+
+  this.cancelEdit = function(tagId) {
+    var tag = this.tags[this.timeRange].find(function(tag, index, array) { return tag.id == tagId; });
+    tag.editing = false;
+  }.bind(this);
+
+  var removeFromList = function removeFromList(data) {
+    this.tags[this.timeRange] = this.tags[this.timeRange].filter(function(tag) {
+      return tag.id !== tagId;
+    });
+  }.bind(this);
+
+  this.delete = function(tagId) {
+    $http({
+      method: 'POST',
+      url: tagUrl + '/' + tagId,
+      data: $.param({
+        csrfmiddlewaretoken: getCookie('csrftoken'),
+        _method: 'DELETE'
+      }),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    }).success(removeFromList);
+  }.bind(this);
 };
 
 analyticsApp.component('tags', {
@@ -110,7 +113,7 @@ analyticsApp.component('tags', {
   controller: TagsCtrl,
   controllerAs: '$ctrl',
   bindings: {
-    timeScale: '@'
+    timeRange: '@'
   }
 });
 
