@@ -14,7 +14,7 @@
       </th>
     </thead>
     <tbody>
-      <tr ng-repeat="tag in tags | orderBy:orderByField:reverseSort">
+      <tr ng-repeat="tag in $ctrl.tags | orderBy:orderByField:reverseSort">
         <td ng-hide="tag.editing"><a href="/tags/{{ tag.id }}/">{{ tag.label }}</a></td>
         <td ng-hide="tag.editing">{{ tag.hours }}</td>
         <td ng-show="tag.editing">

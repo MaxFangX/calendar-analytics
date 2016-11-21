@@ -3,23 +3,25 @@ var analyticsApp = angular.module('analyticsApp', ['nvd3', 'ui.calendar']);
 analyticsApp.controller('LoggedInCtrl', function LoggedInController($scope) {
 });
 
-function TagsCtrl($scope, $http) {
+function TagsCtrl($http) {
   var tagUrl = '/v1/tags';
-  $scope.tags = [];
+  this.tags = [];
+
+  var successCallback = function successCallback(data) {
+    for (var i = 0; i < data.results.length; i++) {
+      var tag = data.results[i];
+      this.tags.push({
+        id: tag.id,
+        label: tag.label,
+        keywords: tag.keywords,
+        hours: tag.hours
+      });
+    }
+  }.bind(this);
 
   // add all the tags
   $http({method: 'GET', url: tagUrl + '.json' }).
-    success(function successCallback(data) {
-      for (var i = 0; i < data.results.length; i++) {
-        var tag = data.results[i];
-        $scope.tags.push({
-          id: tag.id,
-          label: tag.label,
-          keywords: tag.keywords,
-          hours: tag.hours
-        });
-      }
-    });
+    success(successCallback);
 
     this.create = function(tag) {
       $http({
@@ -35,7 +37,7 @@ function TagsCtrl($scope, $http) {
         }
       }).
         success(function addToList(data) {
-          $scope.tags.push({
+          this.tags.push({
             id: data.id,
             label: data.label,
             keywords: data.keywords,
@@ -43,18 +45,24 @@ function TagsCtrl($scope, $http) {
             editing: false
           });
         });
-    };
+    }.bind(this);
 
     this.startEdit = function(tagId) {
-      var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
+      var tag = this.tags.find(function(tag, index, array) { return tag.id == tagId; });
       tag.newLabel = tag.label;
       tag.newKeywords = tag.keywords;
       tag.editing = true;
     };
 
     this.submit = function(tagId) {
-      var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
+      var tag = this.tags.find(function(tag, index, array) { return tag.id == tagId; });
       tag.editing = false;
+
+      var addToList = function addToList(data) {
+        tag.label = data.label;
+        tag.keywords = data.keywords;
+        tag.hours = data.hours;
+      }.bind(this);
 
       $http({
         method: 'POST',
@@ -68,18 +76,19 @@ function TagsCtrl($scope, $http) {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
-      }).
-        success(function addToList(data) {
-          tag.label = data.label;
-          tag.keywords = data.keywords;
-          tag.hours = data.hours;
-        });
-    };
+      }).success(addToList);
+    }.bind(this);
 
     this.cancelEdit = function(tagId) {
-      var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
+      var tag = this.tags.find(function(tag, index, array) { return tag.id == tagId; });
       tag.editing = false;
-    };
+    }.bind(this);
+
+    var removeFromList = function removeFromList(data) {
+      this.tags = this.tags.filter(function(tag) {
+        return tag.id !== tagId;
+      });
+    }.bind(this);
 
     this.delete = function(tagId) {
       $http({
@@ -92,20 +101,17 @@ function TagsCtrl($scope, $http) {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
         }
-      }).
-        success(function removeFromList(data) {
-          $scope.tags = $scope.tags.filter(function(tag) {
-            return tag.id !== tagId;
-          });
-        });
-    };
+      }).success(removeFromList);
+    }.bind(this);
 };
 
 analyticsApp.component('tags', {
   templateUrl: 'static/templates/tags.html',
   controller: TagsCtrl,
   controllerAs: '$ctrl',
-  bindings: {}
+  bindings: {
+    timeScale: '@'
+  }
 });
 
 analyticsApp.controller('CategoriesCtrl', function($scope, $http){
