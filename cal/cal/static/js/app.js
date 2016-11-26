@@ -9,96 +9,96 @@ function TagsCtrl($scope, $http) {
 
   // add all the tags
   $http({method: 'GET', url: tagUrl + '.json' }).
-    success(function successCallback(data) {
-      for (var i = 0; i < data.results.length; i++) {
-        var tag = data.results[i];
-        $scope.tags.push({
-          id: tag.id,
-          label: tag.label,
-          keywords: tag.keywords,
-          hours: tag.hours
-        });
+  success(function successCallback(data) {
+    for (var i = 0; i < data.results.length; i++) {
+      var tag = data.results[i];
+      $scope.tags.push({
+        id: tag.id,
+        label: tag.label,
+        keywords: tag.keywords,
+        hours: tag.hours
+      });
+    }
+  });
+
+  this.create = function(tag) {
+    $http({
+      method: 'POST',
+      url: tagUrl + '.json',
+      data: $.param({
+        label: tag.label,
+        keywords: tag.keywords,
+        csrfmiddlewaretoken: getCookie('csrftoken')
+      }),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
       }
+    }).
+    success(function addToList(data) {
+      $scope.tags.push({
+        id: data.id,
+        label: data.label,
+        keywords: data.keywords,
+        hours: data.hours,
+        editing: false
+      });
     });
+  };
 
-    this.create = function(tag) {
-      $http({
-        method: 'POST',
-        url: tagUrl + '.json',
-        data: $.param({
-          label: tag.label,
-          keywords: tag.keywords,
-          csrfmiddlewaretoken: getCookie('csrftoken')
-        }),
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).
-        success(function addToList(data) {
-          $scope.tags.push({
-            id: data.id,
-            label: data.label,
-            keywords: data.keywords,
-            hours: data.hours,
-            editing: false
-          });
-        });
-    };
+  this.startEdit = function(tagId) {
+    var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
+    tag.newLabel = tag.label;
+    tag.newKeywords = tag.keywords;
+    tag.editing = true;
+  };
 
-    this.startEdit = function(tagId) {
-      var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
-      tag.newLabel = tag.label;
-      tag.newKeywords = tag.keywords;
-      tag.editing = true;
-    };
+  this.submit = function(tagId) {
+    var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
+    tag.editing = false;
 
-    this.submit = function(tagId) {
-      var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
-      tag.editing = false;
+    $http({
+      method: 'POST',
+      url: tagUrl + '/' + tagId,
+      data: $.param({
+        label: tag.newLabel,
+        keywords: tag.newKeywords,
+        csrfmiddlewaretoken: getCookie('csrftoken'),
+        _method: 'PATCH'
+      }),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    }).
+    success(function addToList(data) {
+      tag.label = data.label;
+      tag.keywords = data.keywords;
+      tag.hours = data.hours;
+    });
+  };
 
-      $http({
-        method: 'POST',
-        url: tagUrl + '/' + tagId,
-        data: $.param({
-          label: tag.newLabel,
-          keywords: tag.newKeywords,
-          csrfmiddlewaretoken: getCookie('csrftoken'),
-          _method: 'PATCH'
-        }),
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).
-        success(function addToList(data) {
-          tag.label = data.label;
-          tag.keywords = data.keywords;
-          tag.hours = data.hours;
-        });
-    };
+  this.cancelEdit = function(tagId) {
+    var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
+    tag.editing = false;
+  };
 
-    this.cancelEdit = function(tagId) {
-      var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
-      tag.editing = false;
-    };
-
-    this.delete = function(tagId) {
-      $http({
-        method: 'POST',
-        url: tagUrl + '/' + tagId,
-        data: $.param({
-          csrfmiddlewaretoken: getCookie('csrftoken'),
-          _method: 'DELETE'
-        }),
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).
-        success(function removeFromList(data) {
-          $scope.tags = $scope.tags.filter(function(tag) {
-            return tag.id !== tagId;
-          });
-        });
-    };
+  this.delete = function(tagId) {
+    $http({
+      method: 'POST',
+      url: tagUrl + '/' + tagId,
+      data: $.param({
+        csrfmiddlewaretoken: getCookie('csrftoken'),
+        _method: 'DELETE'
+      }),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    }).
+    success(function removeFromList(data) {
+      $scope.tags = $scope.tags.filter(function(tag) {
+        return tag.id !== tagId;
+      });
+    });
+  };
 };
 
 analyticsApp.component('tags', {
@@ -114,17 +114,17 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
 
   // populate the categories pie chart
   $http({ method: 'GET', url: categoryUrl + '.json' }).
-    success(function successCallback(data) {
-      for (var i = 0; i < data.results.length; i++) {
-        var category = data.results[i];
-        $scope.categories.push({
-          id: category.id,
-          label: category.label,
-          hours: category.hours,
-          include: true
-        });
-      }
-    });
+  success(function successCallback(data) {
+    for (var i = 0; i < data.results.length; i++) {
+      var category = data.results[i];
+      $scope.categories.push({
+        id: category.id,
+        label: category.label,
+        hours: category.hours,
+        include: true
+      });
+    }
+  });
 
   this.startEdit = function(categoryId) {
     var category = $scope.categories.find(function(category, index, array) {
@@ -152,10 +152,10 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     }).
-      success(function addToList(data) {
-        category.label = data.label;
-        category.hours = data.hours;
-      });
+    success(function addToList(data) {
+      category.label = data.label;
+      category.hours = data.hours;
+    });
   };
 
 
@@ -178,11 +178,11 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     }).
-      success(function removeFromList(data) {
-        $scope.categories = $scope.categories.filter(function(category) {
-          return category.id !== categoryId;
-        });
+    success(function removeFromList(data) {
+      $scope.categories = $scope.categories.filter(function(category) {
+        return category.id !== categoryId;
       });
+    });
   };
 
   // categories pie chart
