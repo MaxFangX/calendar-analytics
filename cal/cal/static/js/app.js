@@ -3,28 +3,71 @@ var analyticsApp = angular.module('analyticsApp', ['nvd3', 'ui.calendar']);
 analyticsApp.controller('LoggedInCtrl', function LoggedInController($scope) {
 });
 
-function TagsCtrl($http) {
+analyticsApp.factory('CalendarRangeService', ['$rootScope', function CalendarRangeService($rootScope) {
+  var rangeData =  {
+    start: undefined, // ISO String
+    end: undefined, // ISO String
+    timeRange: undefined,
+    type: undefined,
+  }
+
+  return {
+    getRange: function() {
+      return rangeData;
+    },
+    setRange: function(start, end, type) {
+      rangeData.start = start;
+      rangeData.end = end;
+      rangeData.type = type;
+      rangeData.timeRange = rangeData.start + " " + rangeData.end;
+      $rootScope.$broadcast('calendarRange:updated');
+    }
+  }
+}]);
+
+function TagsCtrl($scope, $http, CalendarRangeService) {
+
+  var _this = this;
   var tagUrl = '/v1/tags';
+
   this.tags = {};
 
-  var successCallback = function successCallback(data) {
-    if (!this.tags[this.timeRange]) {
-      this.tags[this.timeRange] = [];
+  $scope.$on('calendarRange:updated', function(event, data) {
+    var rangeData = CalendarRangeService.getRange();
+    var timeRange;
+    if (_this.isCumulative) {
+      _this.updateTags('cumulative', null, null);
+    } else {
+      _this.updateTags(rangeData.timeRange, rangeData.start, rangeData.end)
     }
-    for (var i = 0; i < data.results.length; i++) {
-      var tag = data.results[i];
-      this.tags[this.timeRange].push({
-        id: tag.id,
-        label: tag.label,
-        keywords: tag.keywords,
-        hours: tag.hours
-      });
-    }
-  }.bind(this);
+  });
 
-  // add all the tags
-  $http({method: 'GET', url: tagUrl + '.json' })
-    .success(successCallback);
+  this.updateTags = function updateTags(timeRange, start, end) {
+    _this.timeRange = timeRange;
+    $http({
+      method: 'GET',
+      url: tagUrl + '.json',
+      cache: true,
+      params: {
+        start: start,
+        end: end
+      }
+    })
+      .success(function successCallback(data) {
+        _this.tags[timeRange] = [];
+        for (var i = 0; i < data.results.length; i++) {
+          var tag = data.results[i];
+          _this.tags[timeRange].push({
+            id: tag.id,
+            label: tag.label,
+            keywords: tag.keywords,
+            hours: tag.hours
+          });
+        }
+      });
+  }
+  var initialTimeRange = CalendarRangeService.getRange()
+  this.updateTags(initialTimeRange.timeRange, initialTimeRange.start, initialTimeRange.end);
 
   this.create = function(tag) {
     $http({
@@ -39,15 +82,15 @@ function TagsCtrl($http) {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     }).
-      success(function addToList(data) {
-        this.tags[this.timeRange].push({
-          id: data.id,
-          label: data.label,
-          keywords: data.keywords,
-          hours: data.hours,
-          editing: false
-        });
+    success(function addToList(data) {
+      this.tags[this.timeRange].push({
+        id: data.id,
+        label: data.label,
+        keywords: data.keywords,
+        hours: data.hours,
+        editing: false
       });
+    });
   }.bind(this);
 
   this.startEdit = function(tagId) {
@@ -110,10 +153,11 @@ function TagsCtrl($http) {
 
 analyticsApp.component('tags', {
   templateUrl: 'static/templates/tags.html',
-  controller: TagsCtrl,
+  controller: ['$scope', '$http', 'CalendarRangeService', TagsCtrl],
   controllerAs: '$ctrl',
   bindings: {
-    timeRange: '@'
+    isCumulative: '<?',
+    displayName: '@'
   }
 });
 
@@ -195,7 +239,7 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
   };
 });
 
-analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $q, uiCalendarConfig) {
+analyticsApp.controller('CalendarCtrl', function CalendarCtrl($scope, $http, $q, uiCalendarConfig, CalendarRangeService) {
 
   $scope.calendars = {};
 
@@ -292,6 +336,11 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $
     });
     return element
   }
+
+  this.viewRender = function(view, element) {
+    CalendarRangeService.setRange(view.start.toISOString(), view.end.toISOString(), view.type);
+  }
+
   $scope.uiConfig = {
     calendar:{
       defaultView: 'agendaWeek',
@@ -304,6 +353,7 @@ analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $
       firstDay: 1,
       eventClick: $scope.alertOnEventClick,
       eventRender: $scope.eventRender,
+      viewRender: this.viewRender,
     }
   };
 
