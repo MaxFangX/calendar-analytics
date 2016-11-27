@@ -19,7 +19,7 @@ analyticsApp.factory('CalendarRangeService', ['$rootScope', function CalendarRan
       rangeData.start = start;
       rangeData.end = end;
       rangeData.type = type;
-      rangeData.timeRange = rangeData.start + " " + rangeData.end;
+      rangeData.timeRange = rangeData.start.toISOString() + " " + rangeData.end.toISOString();
       $rootScope.$broadcast('calendarRange:updated');
     }
   }
@@ -49,8 +49,8 @@ function TagsCtrl($scope, $http, CalendarRangeService) {
       url: tagUrl + '.json',
       cache: true,
       params: {
-        start: start,
-        end: end
+        start: (start)? start.toISOString() : null,
+        end: (end)? end.toISOString() : null,
       }
     })
       .success(function successCallback(data) {
@@ -371,7 +371,7 @@ analyticsApp.controller('CalendarCtrl', function CalendarCtrl($scope, $http, $q,
   }
 
   this.viewRender = function(view, element) {
-    CalendarRangeService.setRange(view.start.toISOString(), view.end.toISOString(), view.type);
+    CalendarRangeService.setRange(view.start, view.end, view.type);
   }
 
   $scope.uiConfig = {
