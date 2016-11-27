@@ -108,6 +108,32 @@ analyticsApp.component('tags', {
   bindings: {}
 });
 
+function TagsDetailCtrl($scope, $http) {
+  var tagUrl = '/v1/tags';
+  $scope.tags = [];
+
+  // add all the tags
+  $http({method: 'GET', url: tagUrl + '.json' }).
+  success(function successCallback(data) {
+    for (var i = 0; i < data.results.length; i++) {
+      var tag = data.results[i];
+      $scope.tags.push({
+        id: tag.id,
+        label: tag.label,
+        keywords: tag.keywords,
+        hours: tag.hours
+      });
+    }
+  });
+};
+
+analyticsApp.component('tagDetail', {
+  templateUrl: 'static/templates/tagDetails.html',
+  controller: TagsDetailCtrl,
+  controllerAs: '$ctrl',
+  bindings: {}
+});
+
 analyticsApp.controller('CategoriesCtrl', function($scope, $http){
   var categoryUrl = '/v1/colorcategories';
   $scope.categories = [];
