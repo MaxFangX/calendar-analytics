@@ -25,7 +25,7 @@ analyticsApp.factory('CalendarRangeService', ['$rootScope', function CalendarRan
   }
 }]);
 
-function TagsCtrl($scope, $http, CalendarRangeService) {
+function TagListCtrl($scope, $http, CalendarRangeService) {
 
   var _this = this;
   var tagUrl = '/v1/tags';
@@ -159,9 +159,9 @@ function TagsCtrl($scope, $http, CalendarRangeService) {
   }.bind(this);
 };
 
-analyticsApp.component('tags', {
-  templateUrl: 'static/templates/tags.html',
-  controller: ['$scope', '$http', 'CalendarRangeService', TagsCtrl],
+analyticsApp.component('tagList', {
+  templateUrl: 'static/templates/tag-list.html',
+  controller: ['$scope', '$http', 'CalendarRangeService', TagListCtrl],
   controllerAs: '$ctrl',
   bindings: {
     isCumulative: '<?',
