@@ -15,7 +15,9 @@
       </th>
     </thead>
     <tbody>
-      <tr ng-repeat="tag in $ctrl.tags[$ctrl.timeRange] | orderBy:orderByField:reverseSort">
+      <tr ng-repeat="tag in $ctrl.tags[$ctrl.timeRange]
+                    | filter : $ctrl.hideZeroHoursFilter
+                    | orderBy:orderByField:reverseSort">
         <td ng-hide="tag.editing"><a href="/tags/{{ tag.id }}/">{{ tag.label }}</a></td>
         <td ng-hide="tag.editing">{{ tag.hours }}</td>
         <td ng-show="tag.editing">

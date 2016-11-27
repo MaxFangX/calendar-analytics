@@ -69,6 +69,14 @@ function TagsCtrl($scope, $http, CalendarRangeService) {
   var initialTimeRange = CalendarRangeService.getRange()
   this.updateTags(initialTimeRange.timeRange, initialTimeRange.start, initialTimeRange.end);
 
+  this.hideZeroHoursFilter = function (value, index, array) {
+    if (this.hideZeroHours && value.hours === 0) {
+      return false;
+    } else {
+      return true;
+    }
+  }.bind(this);
+
   this.create = function(tag) {
     $http({
       method: 'POST',
@@ -157,7 +165,8 @@ analyticsApp.component('tags', {
   controllerAs: '$ctrl',
   bindings: {
     isCumulative: '<?',
-    displayName: '@'
+    displayName: '@',
+    hideZeroHours: '<?'
   }
 });
 
