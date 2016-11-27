@@ -247,16 +247,10 @@ class TagDetail(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         return Tag.objects.filter(user=self.request.user)
 
-class TagDetailEvents(generics.RetrieveUpdateDestroyAPIView):
+class TagDetailEvents(generics.ListAPIView):
 
-    serializer_class = TagSerializer
-
-    def get_serializer_context(self):
-        return {
-            'calendar_ids': self.request.query_params.get('calendar_ids'),
-            'start': self.request.query_params.get('start'),
-            'end': self.request.query_params.get('end')
-        }
+    serializer_class = GEventSerializer
 
     def get_queryset(self):
-        return Tag.objects.filter(user=self.request.user)
+        tag = Tag.objects.get(user=self.request.user, id=2) # Change this to be id of value
+        return tag.query()

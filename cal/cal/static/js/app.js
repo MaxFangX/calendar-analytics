@@ -109,26 +109,75 @@ analyticsApp.component('tags', {
 });
 
 function TagsDetailCtrl($scope, $http) {
-  var tagUrl = '/v1/tags';
-  $scope.tags = [];
+  var tagUrl = '/v1/tags/2/events';
+  var tagName = '/v1/tags/2'
+  $scope.tagDetails = [];
+  $scope.tagEvents = [];
 
-  // add all the tags
+  $http({method: 'GET', url: tagName + '.json' }).
+  success(function successCallback(data) {
+    $scope.tagData = data
+  });
+
   $http({method: 'GET', url: tagUrl + '.json' }).
   success(function successCallback(data) {
+    var events = [];
     for (var i = 0; i < data.results.length; i++) {
-      var tag = data.results[i];
-      $scope.tags.push({
-        id: tag.id,
-        label: tag.label,
-        keywords: tag.keywords,
-        hours: tag.hours
+      var event = data.results[i];
+      var start = new Date(event.start);
+      var end = new Date(event.end);
+      var hours = Math.abs(start - end) / 36e5;
+      events.push({
+        x: start,
+        y: hours
+      });
+      $scope.tagEvents.push({
+        start: event.start,
+        name: event.name,
       });
     }
+    $scope.tagDetails.push({
+      values: events,      //values - represents the array of {x,y} data points
+      key: 'Tag Graph', //key  - the name of the series.
+      color: '#003057',  //color - optional: choose your own line color.
+      strokeWidth: 2,
+    })
   });
+
+  // line graph
+  $scope.line = {
+    chart: {
+      type: 'lineChart',
+      height: 450,
+      margin : {
+        top: 20,
+        right: 20,
+        bottom: 40,
+        left: 55
+      },
+      x: function(d){ return d.x; },
+      y: function(d){ return d.y; },
+      useInteractiveGuideline: true,
+      xScale: d3.time.scale(),
+      xAxis: {
+        axisLabel: 'Date',
+        tickFormat: function(d) {
+                        return d3.time.format('%m/%d/%y')(d)
+                    }
+      },
+      yAxis: {
+        axisLabel: 'Hours',
+        tickFormat: function(d){
+          return d3.format('.02f')(d);
+        },
+        axisLabelDistance: -10
+      },
+    },
+  };
 };
 
 analyticsApp.component('tagDetail', {
-  templateUrl: 'static/templates/tagDetails.html',
+  templateUrl: '/static/templates/tagDetails.html',
   controller: TagsDetailCtrl,
   controllerAs: '$ctrl',
   bindings: {}
@@ -233,7 +282,6 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
       },
     },
   };
-
 });
 
 analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $q, uiCalendarConfig) {

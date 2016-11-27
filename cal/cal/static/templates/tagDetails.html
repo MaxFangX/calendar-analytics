@@ -1,8 +1,12 @@
 <div>
   <h1>Hello</h1>
   <h4 class="well">Tags - Cumulative</h4>
-  <ul ng-repeat="tag in tags">
-    <li>{{ tag.label }}</li>
-    <li>{{ tag.hours }}</li>
+  <h1 class="well">Tag {{ tagData.label }}</h1>
+  <h3 class="well">Keyword(s): {{ tagData.keywords }}<h3>
+  <h3 class="well">Cumulative Hours: {{ tagData.hours }}<h3>
+  <nvd3 options="line" data="tagDetails"></nvd3>
+  <h3 class="well">Contained Events</h3>
+  <ul class="list-group" ng-repeat="tag in tagEvents">
+    <li class="list-group-item">{{ tag.start }}: {{ tag.name }}</li>
   </ul>
 </div>
