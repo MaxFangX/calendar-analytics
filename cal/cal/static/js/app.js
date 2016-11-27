@@ -246,6 +246,30 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
         });
       });
   };
+
+  // categories pie chart
+  $scope.options = {
+    chart: {
+      type: 'pieChart',
+      height: 400,
+      x: function(d){return d.label;},
+      y: function(d){return d.hours;},
+      showLabels: false,
+      growOnHover: true,
+      duration: 500,
+      labelThreshold: 0.01,
+      labelSunbeamLayout: true,
+      legend: {
+        margin: {
+          top: 5,
+          right: 0,
+          bottom: 0,
+          left: 0
+        }
+      },
+    },
+  };
+
 });
 
 analyticsApp.controller('CalendarCtrl', function CalendarCtrl($scope, $http, $q, uiCalendarConfig, CalendarRangeService) {
