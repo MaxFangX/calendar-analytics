@@ -111,6 +111,8 @@ analyticsApp.component('tags', {
 analyticsApp.controller('CategoriesCtrl', function($scope, $http){
   var categoryUrl = '/v1/colorcategories';
   $scope.categories = [];
+  var categories = $scope.categories;
+  categories.dataLoaded = false;
 
   // populate the categories pie chart
   $http({ method: 'GET', url: categoryUrl + '.json' }).
@@ -124,6 +126,7 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
           include: true
         });
       }
+      categories.dataLoaded = true;
     });
 
   this.startEdit = function(categoryId) {
