@@ -650,6 +650,41 @@ class Tag(models.Model, EventCollection):
 
         return events_qs.order_by('start')
 
+    def queryWeek(self, calendar_ids=None, start=None, end=None):
+        """
+        Returns a QuerySet of events matching this Tag.
+        Does not truncate at the edges.
+        """
+        calendars = self.user.profile.get_calendars_for_calendarids(calendar_ids)
+
+        keywords = self.keywords.split(',')
+        if not keywords:
+            raise InvalidParameterException("No keywords defined for this tag")
+
+        querysets = [
+                GEvent.objects
+                .filter(calendar=calendar, name__icontains=keyword)
+                .exclude(all_day_event=True)
+                for keyword in keywords
+                for calendar in calendars
+                ]
+
+        # Union over the querysets
+        events_qs = reduce(lambda qs1, qs2: qs1 | qs2, querysets)
+
+        queryset = []
+        events = events_qs.order_by('start')
+        i = 0
+        start = events[0].start # We have to start with this outside for loop, seems sketch
+        while i < len(events):
+            end = start + timedelta(days=7)
+            total = 0
+            while i < len(events) and (end - events[i].start).total_seconds() >= 0:
+                total += (events[i].end - events[i].start).total_seconds() / 3600
+                i += 1
+            queryset.append((start, total))
+            start = end
+        return queryset
 
 class Statistic(models.Model):
 

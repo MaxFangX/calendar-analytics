@@ -109,31 +109,31 @@ analyticsApp.component('tags', {
 });
 
 function TagsDetailCtrl($scope, $http) {
-  var tagUrl = '/v1/tags/2/events';
-  var tagName = '/v1/tags/2'
+  var tagUrl = '/v1/tags/' + this.tagId + '/events';
+  var tagWeek = '/v1/tags/' + this.tagId + '/eventWeek';
   $scope.tagDetails = [];
   $scope.tagEvents = [];
 
-  $http({method: 'GET', url: tagName + '.json' }).
-  success(function successCallback(data) {
-    $scope.tagData = data
-  });
-
   $http({method: 'GET', url: tagUrl + '.json' }).
   success(function successCallback(data) {
-    var events = [];
     for (var i = 0; i < data.results.length; i++) {
-      var event = data.results[i];
-      var start = new Date(event.start);
-      var end = new Date(event.end);
-      var hours = Math.abs(start - end) / 36e5;
-      events.push({
-        x: start,
-        y: hours
-      });
+      var event = data.results[i]
       $scope.tagEvents.push({
         start: event.start,
         name: event.name,
+      });
+    }
+  });
+
+  $http({method: 'GET', url: tagWeek + '.json' }).
+  success(function successCallback(data) {
+    var events = [];
+    for (var i = 0; i < data.length; i++) {
+      var event = data[i];
+      var start = new Date(event[0]);
+      events.push({
+        x: start,
+        y: event[1]
       });
     }
     $scope.tagDetails.push({
@@ -180,7 +180,9 @@ analyticsApp.component('tagDetail', {
   templateUrl: '/static/templates/tagDetails.html',
   controller: TagsDetailCtrl,
   controllerAs: '$ctrl',
-  bindings: {}
+  bindings: {
+    tagId: '@'
+  }
 });
 
 analyticsApp.controller('CategoriesCtrl', function($scope, $http){

@@ -18,6 +18,7 @@ urlpatterns = patterns(
     url(r'^v1/tags/$', views.TagList.as_view()),
     url(r'^v1/tags/(?P<pk>[0-9]+)/?$', views.TagDetail.as_view()),
     url(r'^v1/tags/(?P<pk>[0-9]+)/events/?$', views.TagDetailEvents.as_view()),
+    url(r'^v1/tags/(?P<pk>[0-9]+)/eventWeek/?$', views.TagDetailEventsWeek.as_view()),
 
 )
 

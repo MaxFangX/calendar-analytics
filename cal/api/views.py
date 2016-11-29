@@ -8,6 +8,7 @@ from django.utils.dateparse import parse_date, parse_datetime
 from rest_framework import generics, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 import pytz
 
@@ -252,5 +253,11 @@ class TagDetailEvents(generics.ListAPIView):
     serializer_class = GEventSerializer
 
     def get_queryset(self):
-        tag = Tag.objects.get(user=self.request.user, id=2) # Change this to be id of value
+        tag = Tag.objects.get(user=self.request.user, id=self.kwargs['pk'])
         return tag.query()
+
+class TagDetailEventsWeek(APIView):
+
+    def get(self, request, *args, **kw):
+        tag = Tag.objects.get(user=self.request.user, id=self.kwargs['pk'])
+        return Response(tag.queryWeek())
