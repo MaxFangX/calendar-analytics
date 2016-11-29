@@ -584,6 +584,40 @@ class ColorCategory(models.Model, EventCollection):
         return events_qs
 
 
+    def queryWeek(self, calendar_ids=None, start=None, end=None):
+        if calendar_ids and self.calendar:
+            message = "Calendar ids can only be specified for ColorCategories without a calendar field attached."
+            raise InvalidParameterException(message)
+
+        if self.calendar:
+            calendars = [self.calendar]
+        else:
+            calendars = self.user.profile.get_calendars_for_calendarids(calendar_ids)
+
+        querysets = [
+                GEvent.objects
+                .filter(calendar__user=self.user, calendar=calendar, color_index=self.color_index)
+                .exclude(all_day_event=True)
+                for calendar in calendars
+                ]
+
+        # Union over the querysets
+        events_qs = reduce(lambda qs1, qs2: qs1 | qs2, querysets)
+
+        queryset = []
+        events = events_qs.order_by('start')
+        i = 0
+        start = events[0].start # We have to start with this outside for loop, seems sketch
+        while i < len(events):
+            end = start + timedelta(days=7)
+            total = 0
+            while i < len(events) and (end - events[i].start).total_seconds() >= 0:
+                total += (events[i].end - events[i].start).total_seconds() / 3600
+                i += 1
+            queryset.append((start, total))
+            start = end
+        return queryset
+
 class TagGroup(models.Model):
 
     user = models.ForeignKey(User, related_name='taggroups')

@@ -286,6 +286,83 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
   };
 });
 
+function CategoriesDetailCtrl($scope, $http){
+  var categoryUrl = '/v1/colorcategories/' + this.categoryId + '/events';
+  var categoryWeek = '/v1/colorcategories/' + this.categoryId + '/eventWeek';
+  $scope.categoryDetails = [];
+  $scope.categoryEvents = [];
+
+  $http({method: 'GET', url: categoryUrl + '.json' }).
+  success(function successCallback(data) {
+    for (var i = 0; i < data.results.length; i++) {
+      var event = data.results[i]
+      $scope.categoryEvents.push({
+        start: event.start,
+        name: event.name,
+      });
+    }
+  });
+
+  $http({method: 'GET', url: categoryWeek + '.json' }).
+  success(function successCallback(data) {
+    var events = [];
+    for (var i = 0; i < data.length; i++) {
+      var event = data[i];
+      var start = new Date(event[0]);
+      events.push({
+        x: start,
+        y: event[1]
+      });
+    }
+    $scope.categoryDetails.push({
+      values: events,      //values - represents the array of {x,y} data points
+      key: 'Category Graph', //key  - the name of the series.
+      color: '#003057',  //color - optional: choose your own line color.
+      strokeWidth: 2,
+    })
+  });
+
+  // line graph
+  $scope.categoryline = {
+    chart: {
+      type: 'lineChart',
+      height: 450,
+      margin : {
+        top: 20,
+        right: 20,
+        bottom: 40,
+        left: 55
+      },
+      x: function(d){ return d.x; },
+      y: function(d){ return d.y; },
+      useInteractiveGuideline: true,
+      xScale: d3.time.scale(),
+      xAxis: {
+        axisLabel: 'Date',
+        tickFormat: function(d) {
+                        return d3.time.format('%m/%d/%y')(d)
+                    }
+      },
+      yAxis: {
+        axisLabel: 'Hours',
+        tickFormat: function(d){
+          return d3.format('.02f')(d);
+        },
+        axisLabelDistance: -10
+      },
+    },
+  };
+};
+
+analyticsApp.component('categoryDetail', {
+  templateUrl: '/static/templates/categoryDetails.html',
+  controller: CategoriesDetailCtrl,
+  controllerAs: '$ctrl',
+  bindings: {
+    categoryId: '@'
+  }
+});
+
 analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $q, uiCalendarConfig) {
 
   $scope.calendars = {};

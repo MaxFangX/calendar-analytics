@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-  <h1>Category "{{ category.label }}"</h1>
-  <h3>Cumulative hours: {{ category.hours }}<h3>
+<h1 class="well">Category "{{ category.label }}"</h1>
+<h3 class="well">Cumulative hours: {{ category.hours }}<h3>
+<category-detail category-id="{{ category.id }}"></category-detail>
 {% endblock %}

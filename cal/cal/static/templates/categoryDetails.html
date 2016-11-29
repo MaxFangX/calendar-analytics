@@ -1,0 +1,7 @@
+<div>
+  <nvd3 options="categoryline" data="categoryDetails"></nvd3>
+  <h3 class="well">Contained Events</h3>
+  <ul class="list-group" ng-repeat="category in categoryEvents">
+    <li class="list-group-item">{{ category.start }}: {{ category.name }}</li>
+  </ul>
+</div>
