@@ -145,7 +145,7 @@ function TagsDetailCtrl($scope, $http) {
   });
 
   // line graph
-  $scope.line = {
+  $scope.tagLine = {
     chart: {
       type: 'lineChart',
       height: 450,
@@ -323,7 +323,7 @@ function CategoriesDetailCtrl($scope, $http){
   });
 
   // line graph
-  $scope.categoryline = {
+  $scope.categoryLine = {
     chart: {
       type: 'lineChart',
       height: 450,

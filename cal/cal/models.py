@@ -585,27 +585,8 @@ class ColorCategory(models.Model, EventCollection):
 
 
     def queryWeek(self, calendar_ids=None, start=None, end=None):
-        if calendar_ids and self.calendar:
-            message = "Calendar ids can only be specified for ColorCategories without a calendar field attached."
-            raise InvalidParameterException(message)
-
-        if self.calendar:
-            calendars = [self.calendar]
-        else:
-            calendars = self.user.profile.get_calendars_for_calendarids(calendar_ids)
-
-        querysets = [
-                GEvent.objects
-                .filter(calendar__user=self.user, calendar=calendar, color_index=self.color_index)
-                .exclude(all_day_event=True)
-                for calendar in calendars
-                ]
-
-        # Union over the querysets
-        events_qs = reduce(lambda qs1, qs2: qs1 | qs2, querysets)
-
         queryset = []
-        events = events_qs.order_by('start')
+        events = self.query().order_by('start')
         i = 0
         start = events[0].start # We have to start with this outside for loop, seems sketch
         while i < len(events):
@@ -689,25 +670,8 @@ class Tag(models.Model, EventCollection):
         Returns a QuerySet of events matching this Tag.
         Does not truncate at the edges.
         """
-        calendars = self.user.profile.get_calendars_for_calendarids(calendar_ids)
-
-        keywords = self.keywords.split(',')
-        if not keywords:
-            raise InvalidParameterException("No keywords defined for this tag")
-
-        querysets = [
-                GEvent.objects
-                .filter(calendar=calendar, name__icontains=keyword)
-                .exclude(all_day_event=True)
-                for keyword in keywords
-                for calendar in calendars
-                ]
-
-        # Union over the querysets
-        events_qs = reduce(lambda qs1, qs2: qs1 | qs2, querysets)
-
         queryset = []
-        events = events_qs.order_by('start')
+        events = self.query()
         i = 0
         start = events[0].start # We have to start with this outside for loop, seems sketch
         while i < len(events):
