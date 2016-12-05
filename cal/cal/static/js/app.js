@@ -3,18 +3,9 @@ var analyticsApp = angular.module('analyticsApp', ['nvd3', 'ui.calendar']);
 analyticsApp.controller('LoggedInCtrl', function LoggedInController($scope) {
 });
 
-analyticsApp.component('preloader', {
-  templateURL: '/static/templates/preloader.html',
-  controller: TagsCtrl,
-  controllerAs: '$ctrl',
-  bindings: {}
-});
-
 function TagsCtrl($scope, $http) {
   var tagUrl = '/v1/tags';
-  $scope.tagsList = [];
-  var tagsList = $scope.tagsList;
-  tagsList.dataLoaded = false;
+  $scope.tags = [];
 
   // add all the tags
   $http({method: 'GET', url: tagUrl + '.json' }).
@@ -28,7 +19,6 @@ function TagsCtrl($scope, $http) {
           hours: tag.hours
         });
       }
-      tagsList.dataLoaded = true;
     });
 
     this.create = function(tag) {
