@@ -66,8 +66,12 @@ function TagListCtrl($scope, $http, CalendarRangeService) {
         }
       });
   }
-  var initialTimeRange = CalendarRangeService.getRange()
-  this.updateTags(initialTimeRange.timeRange, initialTimeRange.start, initialTimeRange.end);
+  if (this.isCumulative) {
+    this.updateTags('cumulative', null, null);
+  } else {
+    var initialTimeRange = CalendarRangeService.getRange()
+    this.updateTags(initialTimeRange.timeRange, initialTimeRange.start, initialTimeRange.end);
+  }
 
   this.hideZeroHoursFilter = function (value, index, array) {
     if (this.hideZeroHours && value.hours === 0) {
@@ -138,12 +142,6 @@ function TagListCtrl($scope, $http, CalendarRangeService) {
     tag.editing = false;
   }.bind(this);
 
-  var removeFromList = function removeFromList(data) {
-    this.tags[this.timeRange] = this.tags[this.timeRange].filter(function(tag) {
-      return tag.id !== tagId;
-    });
-  }.bind(this);
-
   this.delete = function(tagId) {
     $http({
       method: 'POST',
@@ -155,12 +153,16 @@ function TagListCtrl($scope, $http, CalendarRangeService) {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
-    }).success(removeFromList);
+    }).success(function removeFromList(data) {
+      this.tags[this.timeRange] = this.tags[this.timeRange].filter(function(tag) {
+        return tag.id !== tagId;
+      });
+    });
   }.bind(this);
 };
 
 analyticsApp.component('tagList', {
-  templateUrl: 'static/templates/tag-list.html',
+  templateUrl: '/static/templates/tag-list.html',
   controller: ['$scope', '$http', 'CalendarRangeService', TagListCtrl],
   controllerAs: '$ctrl',
   bindings: {
