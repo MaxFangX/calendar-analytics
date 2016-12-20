@@ -583,21 +583,25 @@ class ColorCategory(models.Model, EventCollection):
 
         return events_qs
 
-
-    def queryWeek(self, calendar_ids=None, start=None, end=None):
-        queryset = []
+    def get_hours_per_week(self, calendar_ids=None, start=None, end=None):
+        """
+        Returns a list of week-hour tuples corresponding to the events in this ColorCategory.
+        Each week starts at the start time.
+        """
+        week_hours = []
         events = self.query().order_by('start')
         i = 0
-        start = events[0].start # We have to start with this outside for loop, seems sketch
+        start = events[0].start
         while i < len(events):
             end = start + timedelta(days=7)
             total = 0
             while i < len(events) and (end - events[i].start).total_seconds() >= 0:
                 total += (events[i].end - events[i].start).total_seconds() / 3600
                 i += 1
-            queryset.append((start, total))
+            week_hours.append((start, total))
             start = end
-        return queryset
+        return week_hours
+
 
 class TagGroup(models.Model):
 
@@ -665,24 +669,24 @@ class Tag(models.Model, EventCollection):
 
         return events_qs.order_by('start')
 
-    def queryWeek(self, calendar_ids=None, start=None, end=None):
+    def get_hours_per_week(self, calendar_ids=None, start=None, end=None):
         """
-        Returns a QuerySet of events matching this Tag.
-        Does not truncate at the edges.
+        Returns a list of week-hour tuples corresponding to the events in this Tag.
         """
-        queryset = []
+        week_hours = []
         events = self.query()
         i = 0
-        start = events[0].start # We have to start with this outside for loop, seems sketch
+        start = events[0].start
         while i < len(events):
             end = start + timedelta(days=7)
             total = 0
             while i < len(events) and (end - events[i].start).total_seconds() >= 0:
                 total += (events[i].end - events[i].start).total_seconds() / 3600
                 i += 1
-            queryset.append((start, total))
+            week_hours.append((start, total))
             start = end
-        return queryset
+        return week_hours
+
 
 class Statistic(models.Model):
 

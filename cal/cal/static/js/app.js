@@ -110,7 +110,7 @@ analyticsApp.component('tags', {
 
 function TagsDetailCtrl($scope, $http) {
   var tagUrl = '/v1/tags/' + this.tagId + '/events';
-  var tagWeek = '/v1/tags/' + this.tagId + '/eventWeek';
+  var eventweek = '/v1/tags/' + this.tagId + '/eventWeek';
   $scope.tagDetails = [];
   $scope.tagEvents = [];
 
@@ -125,7 +125,7 @@ function TagsDetailCtrl($scope, $http) {
     }
   });
 
-  $http({method: 'GET', url: tagWeek + '.json' }).
+  $http({method: 'GET', url: eventweek + '.json' }).
   success(function successCallback(data) {
     var events = [];
     for (var i = 0; i < data.length; i++) {
@@ -176,7 +176,7 @@ function TagsDetailCtrl($scope, $http) {
   };
 };
 
-analyticsApp.component('tagDetail', {
+analyticsApp.component('tagDetails', {
   templateUrl: '/static/templates/tagDetails.html',
   controller: TagsDetailCtrl,
   controllerAs: '$ctrl',
@@ -288,7 +288,7 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
 
 function CategoriesDetailCtrl($scope, $http){
   var categoryUrl = '/v1/colorcategories/' + this.categoryId + '/events';
-  var categoryWeek = '/v1/colorcategories/' + this.categoryId + '/eventWeek';
+  var eventweek = '/v1/colorcategories/' + this.categoryId + '/eventWeek';
   $scope.categoryDetails = [];
   $scope.categoryEvents = [];
 
@@ -303,7 +303,7 @@ function CategoriesDetailCtrl($scope, $http){
     }
   });
 
-  $http({method: 'GET', url: categoryWeek + '.json' }).
+  $http({method: 'GET', url: eventweek + '.json' }).
   success(function successCallback(data) {
     var events = [];
     for (var i = 0; i < data.length; i++) {
@@ -315,9 +315,9 @@ function CategoriesDetailCtrl($scope, $http){
       });
     }
     $scope.categoryDetails.push({
-      values: events,      //values - represents the array of {x,y} data points
+      values: events, //values - represents the array of {x,y} data points
       key: 'Category Graph', //key  - the name of the series.
-      color: '#003057',  //color - optional: choose your own line color.
+      color: '#003057', //color - optional: choose your own line color.
       strokeWidth: 2,
     })
   });
@@ -354,7 +354,7 @@ function CategoriesDetailCtrl($scope, $http){
   };
 };
 
-analyticsApp.component('categoryDetail', {
+analyticsApp.component('categoryDetails', {
   templateUrl: '/static/templates/categoryDetails.html',
   controller: CategoriesDetailCtrl,
   controllerAs: '$ctrl',

@@ -195,19 +195,22 @@ class ColorCategoryDetail(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         return ColorCategory.objects.filter(user=self.request.user)
 
+
 class ColorCategoryDetailEvents(generics.ListAPIView):
 
     serializer_class = GEventSerializer
 
     def get_queryset(self):
-        g_calendar = ColorCategory.objects.get(user=self.request.user, id=self.kwargs['pk'])
-        return g_calendar.query()
+        calendar = ColorCategory.objects.get(user=self.request.user, id=self.kwargs['pk'])
+        return calendar.query()
+
 
 class ColorCategoryDetailEventWeek(APIView):
 
-    def get(self, request, *args, **kw):
-        g_calendar = ColorCategory.objects.get(user=self.request.user, id=self.kwargs['pk'])
-        return Response(g_calendar.queryWeek())
+    def get(self, request, *args, **kwargs):
+        calendar = ColorCategory.objects.get(user=self.request.user, id=self.kwargs['pk'])
+        return Response(calendar.get_hours_per_week())
+
 
 class TagList(generics.ListCreateAPIView):
 
@@ -261,6 +264,7 @@ class TagDetail(generics.RetrieveUpdateDestroyAPIView):
     def get_queryset(self):
         return Tag.objects.filter(user=self.request.user)
 
+
 class TagDetailEvents(generics.ListAPIView):
 
     serializer_class = GEventSerializer
@@ -269,8 +273,9 @@ class TagDetailEvents(generics.ListAPIView):
         tag = Tag.objects.get(user=self.request.user, id=self.kwargs['pk'])
         return tag.query()
 
+
 class TagDetailEventWeek(APIView):
 
     def get(self, request, *args, **kw):
         tag = Tag.objects.get(user=self.request.user, id=self.kwargs['pk'])
-        return Response(tag.queryWeek())
+        return Response(tag.get_hours_per_week())
