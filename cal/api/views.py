@@ -201,15 +201,14 @@ class ColorCategoryDetailEvents(generics.ListAPIView):
     serializer_class = GEventSerializer
 
     def get_queryset(self):
-        calendar = ColorCategory.objects.get(user=self.request.user, id=self.kwargs['pk'])
-        return calendar.query()
+        return ColorCategory.objects.get(user=self.request.user, id=self.kwargs['pk']).query()
 
 
 class ColorCategoryDetailEventWeek(APIView):
 
     def get(self, request, *args, **kwargs):
-        calendar = ColorCategory.objects.get(user=self.request.user, id=self.kwargs['pk'])
-        return Response(calendar.get_hours_per_week())
+        category = ColorCategory.objects.get(user=self.request.user, id=self.kwargs['pk'])
+        return Response(category.get_hours_per_week())
 
 
 class TagList(generics.ListCreateAPIView):
