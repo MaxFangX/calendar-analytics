@@ -376,6 +376,7 @@ class GEvent(Event):
 
     """
     Represents a Google event.
+    
     Reference:
     https://developers.google.com/google-apps/calendar/v3/reference/events#resource-representations
     """
