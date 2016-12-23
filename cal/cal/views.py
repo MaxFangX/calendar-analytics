@@ -36,7 +36,6 @@ def tag_detail(request, pk):
     try:
         tag = Tag.objects.get(user=request.user, id=pk)
         context['tag'] = tag
-        context['events'] = tag.query()
     except Exception:
         # TODO gracefully handle this
         pass

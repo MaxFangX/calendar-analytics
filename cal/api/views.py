@@ -8,6 +8,7 @@ from django.utils.dateparse import parse_date, parse_datetime
 from rest_framework import generics, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 import pytz
 
@@ -195,6 +196,21 @@ class ColorCategoryDetail(generics.RetrieveUpdateDestroyAPIView):
         return ColorCategory.objects.filter(user=self.request.user)
 
 
+class ColorCategoryDetailEvents(generics.ListAPIView):
+
+    serializer_class = GEventSerializer
+
+    def get_queryset(self):
+        return ColorCategory.objects.get(user=self.request.user, id=self.kwargs['pk']).query()
+
+
+class ColorCategoryDetailEventWeek(APIView):
+
+    def get(self, request, *args, **kwargs):
+        category = ColorCategory.objects.get(user=self.request.user, id=self.kwargs['pk'])
+        return Response(category.get_hours_per_week())
+
+
 class TagList(generics.ListCreateAPIView):
 
     serializer_class = TagSerializer
@@ -246,3 +262,19 @@ class TagDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return Tag.objects.filter(user=self.request.user)
+
+
+class TagDetailEvents(generics.ListAPIView):
+
+    serializer_class = GEventSerializer
+
+    def get_queryset(self):
+        tag = Tag.objects.get(user=self.request.user, id=self.kwargs['pk'])
+        return tag.query()
+
+
+class TagDetailEventWeek(APIView):
+
+    def get(self, request, *args, **kw):
+        tag = Tag.objects.get(user=self.request.user, id=self.kwargs['pk'])
+        return Response(tag.get_hours_per_week())
