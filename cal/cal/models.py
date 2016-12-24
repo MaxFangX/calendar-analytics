@@ -580,8 +580,10 @@ class ColorCategory(models.Model, EventCollection):
         # Union over the querysets
         events_qs = reduce(lambda qs1, qs2: qs1 | qs2, querysets)
 
-        # Exclude future events
-        events_qs = events_qs.filter(start__lt=ensure_timezone_awareness(datetime.now()))
+        if end:
+            events_qs = events_qs.filter(start__lt=end)
+        else:
+            events_qs = events_qs.filter(start__lt=datetime.utcnow())
 
         return events_qs
 
@@ -666,8 +668,10 @@ class Tag(models.Model, EventCollection):
 
         if start:
             events_qs = events_qs.filter(end__gt=start)
-        if not end:
-            events_qs = events_qs.filter(start__lt=ensure_timezone_awareness(datetime.now()))
+        if end:
+            events_qs = events_qs.filter(start__lt=end)
+        else:
+            events_qs = events_qs.filter(start__lt=datetime.utcnow())
 
         return events_qs.order_by('start')
 
