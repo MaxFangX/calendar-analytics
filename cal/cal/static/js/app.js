@@ -116,12 +116,6 @@ function TagListCtrl($scope, $http, CalendarRangeService) {
     var tag = this.tags[this.timeRange].find(function(tag, index, array) { return tag.id == tagId; });
     tag.editing = false;
 
-    var addToList = function addToList(data) {
-      tag.label = data.label;
-      tag.keywords = data.keywords;
-      tag.hours = data.hours;
-    }.bind(this);
-
     $http({
       method: 'POST',
       url: tagUrl + '/' + tagId,
@@ -134,7 +128,11 @@ function TagListCtrl($scope, $http, CalendarRangeService) {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
-    }).success(addToList);
+    }).success(function addToList(data) {
+      tag.label = data.label;
+      tag.keywords = data.keywords;
+      tag.hours = data.hours;
+    });
   }.bind(this);
 
   this.cancelEdit = function(tagId) {
