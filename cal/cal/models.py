@@ -376,7 +376,6 @@ class GEvent(Event):
 
     """
     Represents a Google event.
-
     Reference:
     https://developers.google.com/google-apps/calendar/v3/reference/events#resource-representations
     """
@@ -581,6 +580,9 @@ class ColorCategory(models.Model, EventCollection):
         # Union over the querysets
         events_qs = reduce(lambda qs1, qs2: qs1 | qs2, querysets)
 
+        # Exclude future events
+        events_qs = events_qs.filter(start__lt=ensure_timezone_awareness(datetime.now()))
+
         return events_qs
 
     def get_hours_per_week(self, calendar_ids=None, start=None, end=None):
@@ -664,8 +666,8 @@ class Tag(models.Model, EventCollection):
 
         if start:
             events_qs = events_qs.filter(end__gt=start)
-        if end:
-            events_qs = events_qs.filter(start__lt=end)
+        if not end:
+            events_qs = events_qs.filter(start__lt=ensure_timezone_awareness(datetime.now()))
 
         return events_qs.order_by('start')
 
