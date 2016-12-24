@@ -4,9 +4,12 @@ blessed==1.9.5
 botocore==1.4.43
 cement==2.8.2
 colorama==0.3.7
+csscompressor==0.9.4
 decorator==4.0.9
 Django==1.8.4
+django-appconf==1.0.2
 django-bower==5.1.0
+django-compressor==2.1
 django-filter==0.11.0
 django-loginas==0.2.2
 djangorestframework==3.2.4
@@ -40,8 +43,10 @@ python-openid==2.2.5
 python-social-auth==0.2.14
 pytz==2015.7
 PyYAML==3.11
+rcssmin==1.0.6
 requests==2.9.1
 requests-oauthlib==0.6.1
+rjsmin==1.0.12
 rsa==3.2
 semantic-version==2.5.0
 simplegeneric==0.8.1
