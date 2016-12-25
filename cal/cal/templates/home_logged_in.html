@@ -75,7 +75,9 @@
   <div class="col-md-4">
     <div ng-controller="CategoriesCtrl as $ctrl">
       <h4 class="well">Categories - Last Week</h4>
-      <nvd3 options="options" data="categories"></nvd3>
+      <div ng-hide="categories.dataLoaded" class="preloader"></div>
+      <div ng-if="categories.dataLoaded">
+        <nvd3 options="categoryPie" data="categories"></nvd3>
         <table class="table table-hover">
           <thead>
             <th>
@@ -122,6 +124,7 @@
             </tr>
           </tbody>
         </table>
+      </div>
     </div>
 
     <tags></tags>

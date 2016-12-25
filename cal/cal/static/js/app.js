@@ -8,18 +8,18 @@ function TagsCtrl($scope, $http) {
   $scope.tags = [];
 
   // add all the tags
-  $http({method: 'GET', url: tagUrl + '.json' }).
-  success(function successCallback(data) {
-    for (var i = 0; i < data.results.length; i++) {
-      var tag = data.results[i];
-      $scope.tags.push({
-        id: tag.id,
-        label: tag.label,
-        keywords: tag.keywords,
-        hours: tag.hours
-      });
-    }
-  });
+  $http({method: 'GET', url: tagUrl + '.json' })
+    .success(function successCallback(data) {
+      for (var i = 0; i < data.results.length; i++) {
+        var tag = data.results[i];
+        $scope.tags.push({
+          id: tag.id,
+          label: tag.label,
+          keywords: tag.keywords,
+          hours: tag.hours
+        });
+      }
+    });
 
   this.create = function(tag) {
     $http({
@@ -33,8 +33,8 @@ function TagsCtrl($scope, $http) {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
-    }).
-    success(function addToList(data) {
+    })
+    .success(function addToList(data) {
       $scope.tags.push({
         id: data.id,
         label: data.label,
@@ -188,20 +188,22 @@ analyticsApp.component('tagDetails', {
 analyticsApp.controller('CategoriesCtrl', function($scope, $http){
   var categoryUrl = '/v1/colorcategories';
   $scope.categories = [];
+  $scope.categories.dataLoaded = false;
 
   // populate the categories pie chart
   $http({ method: 'GET', url: categoryUrl + '.json' }).
-  success(function successCallback(data) {
-    for (var i = 0; i < data.results.length; i++) {
-      var category = data.results[i];
-      $scope.categories.push({
-        id: category.id,
-        label: category.label,
-        hours: category.hours,
-        include: true
-      });
-    }
-  });
+    success(function successCallback(data) {
+      for (var i = 0; i < data.results.length; i++) {
+        var category = data.results[i];
+        $scope.categories.push({
+          id: category.id,
+          label: category.label,
+          hours: category.hours,
+          include: true
+        });
+      }
+      $scope.categories.dataLoaded = true;
+    });
 
   this.startEdit = function(categoryId) {
     var category = $scope.categories.find(function(category, index, array) {
@@ -263,7 +265,7 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
   };
 
   // categories pie chart
-  $scope.options = {
+  $scope.categoryPie = {
     chart: {
       type: 'pieChart',
       height: 400,
