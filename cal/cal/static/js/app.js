@@ -8,8 +8,8 @@ function TagsCtrl($scope, $http) {
   $scope.tags = [];
 
   // add all the tags
-  $http({method: 'GET', url: tagUrl + '.json' }).
-    success(function successCallback(data) {
+  $http({method: 'GET', url: tagUrl + '.json' })
+    .success(function successCallback(data) {
       for (var i = 0; i < data.results.length; i++) {
         var tag = data.results[i];
         $scope.tags.push({
@@ -21,91 +21,168 @@ function TagsCtrl($scope, $http) {
       }
     });
 
-    this.create = function(tag) {
-      $http({
-        method: 'POST',
-        url: tagUrl + '.json',
-        data: $.param({
-          label: tag.label,
-          keywords: tag.keywords,
-          csrfmiddlewaretoken: getCookie('csrftoken')
-        }),
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).
-        success(function addToList(data) {
-          $scope.tags.push({
-            id: data.id,
-            label: data.label,
-            keywords: data.keywords,
-            hours: data.hours,
-            editing: false
-          });
-        });
-    };
+  this.create = function(tag) {
+    $http({
+      method: 'POST',
+      url: tagUrl + '.json',
+      data: $.param({
+        label: tag.label,
+        keywords: tag.keywords,
+        csrfmiddlewaretoken: getCookie('csrftoken')
+      }),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    })
+    .success(function addToList(data) {
+      $scope.tags.push({
+        id: data.id,
+        label: data.label,
+        keywords: data.keywords,
+        hours: data.hours,
+        editing: false
+      });
+    });
+  };
 
-    this.startEdit = function(tagId) {
-      var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
-      tag.newLabel = tag.label;
-      tag.newKeywords = tag.keywords;
-      tag.editing = true;
-    };
+  this.startEdit = function(tagId) {
+    var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
+    tag.newLabel = tag.label;
+    tag.newKeywords = tag.keywords;
+    tag.editing = true;
+  };
 
-    this.submit = function(tagId) {
-      var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
-      tag.editing = false;
+  this.submit = function(tagId) {
+    var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
+    tag.editing = false;
 
-      $http({
-        method: 'POST',
-        url: tagUrl + '/' + tagId,
-        data: $.param({
-          label: tag.newLabel,
-          keywords: tag.newKeywords,
-          csrfmiddlewaretoken: getCookie('csrftoken'),
-          _method: 'PATCH'
-        }),
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).
-        success(function addToList(data) {
-          tag.label = data.label;
-          tag.keywords = data.keywords;
-          tag.hours = data.hours;
-        });
-    };
+    $http({
+      method: 'POST',
+      url: tagUrl + '/' + tagId,
+      data: $.param({
+        label: tag.newLabel,
+        keywords: tag.newKeywords,
+        csrfmiddlewaretoken: getCookie('csrftoken'),
+        _method: 'PATCH'
+      }),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    }).
+    success(function addToList(data) {
+      tag.label = data.label;
+      tag.keywords = data.keywords;
+      tag.hours = data.hours;
+    });
+  };
 
-    this.cancelEdit = function(tagId) {
-      var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
-      tag.editing = false;
-    };
+  this.cancelEdit = function(tagId) {
+    var tag = $scope.tags.find(function(tag, index, array) { return tag.id == tagId; });
+    tag.editing = false;
+  };
 
-    this.delete = function(tagId) {
-      $http({
-        method: 'POST',
-        url: tagUrl + '/' + tagId,
-        data: $.param({
-          csrfmiddlewaretoken: getCookie('csrftoken'),
-          _method: 'DELETE'
-        }),
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).
-        success(function removeFromList(data) {
-          $scope.tags = $scope.tags.filter(function(tag) {
-            return tag.id !== tagId;
-          });
-        });
-    };
-}
+  this.delete = function(tagId) {
+    $http({
+      method: 'POST',
+      url: tagUrl + '/' + tagId,
+      data: $.param({
+        csrfmiddlewaretoken: getCookie('csrftoken'),
+        _method: 'DELETE'
+      }),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    }).
+    success(function removeFromList(data) {
+      $scope.tags = $scope.tags.filter(function(tag) {
+        return tag.id !== tagId;
+      });
+    });
+  };
+};
 
 analyticsApp.component('tags', {
   templateUrl: 'static/templates/tags.html',
   controller: TagsCtrl,
   controllerAs: '$ctrl',
   bindings: {}
+});
+
+function TagsDetailCtrl($scope, $http) {
+  var tagUrl = '/v1/tags/' + this.tagId + '/events';
+  var eventweek = '/v1/tags/' + this.tagId + '/eventWeek';
+  $scope.tagDetails = [];
+  $scope.tagEvents = [];
+
+  $http({method: 'GET', url: tagUrl + '.json' }).
+  success(function successCallback(data) {
+    for (var i = 0; i < data.results.length; i++) {
+      var event = data.results[i]
+      $scope.tagEvents.push({
+        start: event.start,
+        name: event.name,
+      });
+    }
+  });
+
+  $http({method: 'GET', url: eventweek + '.json' }).
+  success(function successCallback(data) {
+    var events = [];
+    for (var i = 0; i < data.length; i++) {
+      var event = data[i];
+      var start = new Date(event[0]);
+      events.push({
+        x: start,
+        y: event[1]
+      });
+    }
+    $scope.tagDetails.push({
+      values: events,      //values - represents the array of {x,y} data points
+      key: 'Tag Graph', //key  - the name of the series.
+      color: '#003057',  //color - optional: choose your own line color.
+      strokeWidth: 2,
+    })
+  });
+
+  // line graph
+  $scope.tagLine = {
+    chart: {
+      type: 'lineChart',
+      height: 450,
+      margin : {
+        top: 20,
+        right: 20,
+        bottom: 40,
+        left: 55
+      },
+      x: function(d){ return d.x; },
+      y: function(d){ return d.y; },
+      useInteractiveGuideline: true,
+      xScale: d3.time.scale(),
+      xAxis: {
+        axisLabel: 'Date',
+        tickFormat: function(d) {
+                        return d3.time.format('%m/%d/%y')(d)
+                    }
+      },
+      yAxis: {
+        axisLabel: 'Hours',
+        tickFormat: function(d){
+          return d3.format('.02f')(d);
+        },
+        axisLabelDistance: -10
+      },
+    },
+  };
+};
+
+analyticsApp.component('tagDetails', {
+  templateUrl: '/static/templates/tagDetails.html',
+  controller: TagsDetailCtrl,
+  controllerAs: '$ctrl',
+  bindings: {
+    tagId: '@'
+  }
 });
 
 analyticsApp.controller('CategoriesCtrl', function($scope, $http){
@@ -154,10 +231,10 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     }).
-      success(function addToList(data) {
-        category.label = data.label;
-        category.hours = data.hours;
-      });
+    success(function addToList(data) {
+      category.label = data.label;
+      category.hours = data.hours;
+    });
   };
 
 
@@ -180,11 +257,11 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     }).
-      success(function removeFromList(data) {
-        $scope.categories = $scope.categories.filter(function(category) {
-          return category.id !== categoryId;
-        });
+    success(function removeFromList(data) {
+      $scope.categories = $scope.categories.filter(function(category) {
+        return category.id !== categoryId;
       });
+    });
   };
 
   // categories pie chart
@@ -209,7 +286,83 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
       },
     },
   };
+});
 
+function CategoriesDetailCtrl($scope, $http){
+  var categoryUrl = '/v1/colorcategories/' + this.categoryId + '/events';
+  var eventweek = '/v1/colorcategories/' + this.categoryId + '/eventWeek';
+  $scope.categoryDetails = [];
+  $scope.categoryEvents = [];
+
+  $http({method: 'GET', url: categoryUrl + '.json' }).
+  success(function successCallback(data) {
+    for (var i = 0; i < data.results.length; i++) {
+      var event = data.results[i]
+      $scope.categoryEvents.push({
+        start: event.start,
+        name: event.name,
+      });
+    }
+  });
+
+  $http({method: 'GET', url: eventweek + '.json' }).
+  success(function successCallback(data) {
+    var events = [];
+    for (var i = 0; i < data.length; i++) {
+      var event = data[i];
+      var start = new Date(event[0]);
+      events.push({
+        x: start,
+        y: event[1]
+      });
+    }
+    $scope.categoryDetails.push({
+      values: events, //values - represents the array of {x,y} data points
+      key: 'Category Graph', //key  - the name of the series.
+      color: '#003057', //color - optional: choose your own line color.
+      strokeWidth: 2,
+    })
+  });
+
+  // line graph
+  $scope.categoryLine = {
+    chart: {
+      type: 'lineChart',
+      height: 450,
+      margin : {
+        top: 20,
+        right: 20,
+        bottom: 40,
+        left: 55
+      },
+      x: function(d){ return d.x; },
+      y: function(d){ return d.y; },
+      useInteractiveGuideline: true,
+      xScale: d3.time.scale(),
+      xAxis: {
+        axisLabel: 'Date',
+        tickFormat: function(d) {
+                        return d3.time.format('%m/%d/%y')(d)
+                    }
+      },
+      yAxis: {
+        axisLabel: 'Hours',
+        tickFormat: function(d){
+          return d3.format('.02f')(d);
+        },
+        axisLabelDistance: -10
+      },
+    },
+  };
+};
+
+analyticsApp.component('categoryDetails', {
+  templateUrl: '/static/templates/categoryDetails.html',
+  controller: CategoriesDetailCtrl,
+  controllerAs: '$ctrl',
+  bindings: {
+    categoryId: '@'
+  }
 });
 
 analyticsApp.controller('CalendarCtrl', function UiCalendarCtrl($scope, $http, $q, uiCalendarConfig) {
