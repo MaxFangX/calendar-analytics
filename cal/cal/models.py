@@ -583,7 +583,7 @@ class ColorCategory(models.Model, EventCollection):
         if end:
             events_qs = events_qs.filter(start__lt=end)
         else:
-            events_qs = events_qs.filter(start__lt=datetime.utcnow())
+            events_qs = events_qs.filter(start__lt=datetime.now(pytz.utc))
 
         return events_qs
 
@@ -671,7 +671,7 @@ class Tag(models.Model, EventCollection):
         if end:
             events_qs = events_qs.filter(start__lt=end)
         else:
-            events_qs = events_qs.filter(start__lt=datetime.utcnow())
+            events_qs = events_qs.filter(start__lt=datetime.now(pytz.utc))
 
         return events_qs.order_by('start')
 
