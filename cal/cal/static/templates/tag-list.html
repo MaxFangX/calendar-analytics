@@ -15,7 +15,7 @@
       </th>
     </thead>
     <tbody>
-      <tr ng-repeat="tag in $ctrl.tags[$ctrl.timeRange]
+      <tr ng-repeat="tag in $ctrl.tags
                     | filter : $ctrl.hideZeroHoursFilter
                     | orderBy:orderByField:reverseSort">
         <td ng-hide="tag.editing"><a href="/tags/{{ tag.id }}/">{{ tag.label }}</a></td>
@@ -30,7 +30,7 @@
         </td>
         <td class="text-right text-nowrap" ng-show="tag.editing">
           <button class="btn btn-success">
-            <span class="glyphicon glyphicon-ok" ng-click="$ctrl.submit(tag.id)"></span>
+            <span class="glyphicon glyphicon-ok" ng-click="$ctrl.submitEdit(tag.id)"></span>
           </button>
           <button class="btn btn-warning">
             <span class="glyphicon glyphicon-remove" ng-click="$ctrl.cancelEdit(tag.id)"></span>
