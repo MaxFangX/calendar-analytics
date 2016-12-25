@@ -128,12 +128,17 @@ function TagsDetailCtrl($scope, $http) {
   $http({method: 'GET', url: eventweek + '.json' }).
   success(function successCallback(data) {
     var events = [];
+    var max_hour = 0;
     for (var i = 0; i < data.length; i++) {
       var event = data[i];
       var start = new Date(event[0]);
+      var hour = event[1];
+      if (hour > max_hour) {
+        max_hour = hour;
+      }
       events.push({
         x: start,
-        y: event[1]
+        y: hour
       });
     }
     $scope.tagDetails.push({
@@ -142,38 +147,38 @@ function TagsDetailCtrl($scope, $http) {
       color: '#003057',  //color - optional: choose your own line color.
       strokeWidth: 2,
     })
-  });
-
-  // line graph
-  $scope.tagLine = {
-    chart: {
-      type: 'lineChart',
-      height: 450,
-      margin : {
-        top: 20,
-        right: 20,
-        bottom: 40,
-        left: 55
-      },
-      x: function(d){ return d.x; },
-      y: function(d){ return d.y; },
-      useInteractiveGuideline: true,
-      xScale: d3.time.scale(),
-      xAxis: {
-        axisLabel: 'Date',
-        tickFormat: function(d) {
-                        return d3.time.format('%m/%d/%y')(d)
-                    }
-      },
-      yAxis: {
-        axisLabel: 'Hours',
-        tickFormat: function(d){
-          return d3.format('.02f')(d);
+    // line graph
+    $scope.tagLine = {
+      chart: {
+        type: 'lineChart',
+        height: 450,
+        margin : {
+          top: 20,
+          right: 20,
+          bottom: 40,
+          left: 55
         },
-        axisLabelDistance: -10
+        x: function(d){ return d.x; },
+        y: function(d){ return d.y; },
+        useInteractiveGuideline: true,
+        xScale: d3.time.scale(),
+        xAxis: {
+          axisLabel: 'Date',
+          tickFormat: function(d) {
+                          return d3.time.format('%m/%d/%y')(d)
+                      }
+        },
+        yAxis: {
+          axisLabel: 'Hours',
+          tickFormat: function(d){
+            return d3.format('.02f')(d);
+          },
+          axisLabelDistance: -10,
+        },
+        forceY: [0, max_hour + 1],
       },
-    },
-  };
+    };
+  });
 };
 
 analyticsApp.component('tagDetails', {
@@ -306,12 +311,17 @@ function CategoriesDetailCtrl($scope, $http){
   $http({method: 'GET', url: eventweek + '.json' }).
   success(function successCallback(data) {
     var events = [];
+    var max_hour = 0;
     for (var i = 0; i < data.length; i++) {
       var event = data[i];
       var start = new Date(event[0]);
+      var hour = event[1];
+      if (hour > max_hour) {
+        max_hour = hour;
+      }
       events.push({
         x: start,
-        y: event[1]
+        y: hour
       });
     }
     $scope.categoryDetails.push({
@@ -320,38 +330,39 @@ function CategoriesDetailCtrl($scope, $http){
       color: '#003057', //color - optional: choose your own line color.
       strokeWidth: 2,
     })
+    // line graph
+    $scope.categoryLine = {
+      chart: {
+        type: 'lineChart',
+        height: 450,
+        margin : {
+          top: 20,
+          right: 20,
+          bottom: 40,
+          left: 55
+        },
+        x: function(d){ return d.x; },
+        y: function(d){ return d.y; },
+        useInteractiveGuideline: true,
+        xScale: d3.time.scale(),
+        xAxis: {
+          axisLabel: 'Date',
+          tickFormat: function(d) {
+                          return d3.time.format('%m/%d/%y')(d)
+                      }
+        },
+        yAxis: {
+          axisLabel: 'Hours',
+          tickFormat: function(d){
+            return d3.format('.02f')(d);
+          },
+          axisLabelDistance: -10,
+        },
+        forceY: [0, max_hour + 1],
+      },
+    };
   });
 
-  // line graph
-  $scope.categoryLine = {
-    chart: {
-      type: 'lineChart',
-      height: 450,
-      margin : {
-        top: 20,
-        right: 20,
-        bottom: 40,
-        left: 55
-      },
-      x: function(d){ return d.x; },
-      y: function(d){ return d.y; },
-      useInteractiveGuideline: true,
-      xScale: d3.time.scale(),
-      xAxis: {
-        axisLabel: 'Date',
-        tickFormat: function(d) {
-                        return d3.time.format('%m/%d/%y')(d)
-                    }
-      },
-      yAxis: {
-        axisLabel: 'Hours',
-        tickFormat: function(d){
-          return d3.format('.02f')(d);
-        },
-        axisLabelDistance: -10
-      },
-    },
-  };
 };
 
 analyticsApp.component('categoryDetails', {

@@ -2,6 +2,7 @@ from apiclient.discovery import build
 from cal.constants import GOOGLE_CALENDAR_COLORS
 from cal.helpers import EventCollection, TimeNode, TimeNodeChain, ensure_timezone_awareness
 from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
@@ -591,9 +592,11 @@ class ColorCategory(models.Model, EventCollection):
         week_hours = []
         events = self.query().order_by('start')
         i = 0
-        start = events[0].start
+        print events[0].start
+        start = ensure_timezone_awareness(events[0].start)
+        print start
         while i < len(events):
-            end = start + timedelta(days=7)
+            end = start + relativedelta(days=7)
             total = 0
             while i < len(events) and (end - events[i].start).total_seconds() >= 0:
                 total += (events[i].end - events[i].start).total_seconds() / 3600
