@@ -1,4 +1,4 @@
-var analyticsApp = angular.module('analyticsApp', ['nvd3', 'ui.calendar']);
+var analyticsApp = window.angular.module('analyticsApp', ['nvd3', 'ui.calendar']);
 
 analyticsApp.controller('LoggedInCtrl', function LoggedInController($scope) {
 });
