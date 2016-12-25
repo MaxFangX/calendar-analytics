@@ -657,7 +657,7 @@ class Tag(models.Model, EventCollection):
 
         querysets = [
                 GEvent.objects
-                .filter(calendar=calendar, name__regex=r'\b(?i)'+keyword+r'\b')
+                .filter(calendar=calendar, name__regex=r'\b(?i)[#]?'+keyword+r'\b')
                 .exclude(all_day_event=True)
                 for keyword in keywords
                 for calendar in calendars
