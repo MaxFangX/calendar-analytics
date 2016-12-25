@@ -11,6 +11,7 @@ from oauth2client.django_orm import CredentialsField, FlowField
 from oauth2client.client import AccessTokenRefreshError
 
 import httplib2
+import pytz
 import sys
 
 
@@ -583,7 +584,7 @@ class ColorCategory(models.Model, EventCollection):
         if end:
             events_qs = events_qs.filter(start__lt=end)
         else:
-            events_qs = events_qs.filter(start__lt=datetime.utcnow())
+            events_qs = events_qs.filter(start__lt=datetime.now(pytz.utc))
 
         return events_qs
 
@@ -671,7 +672,7 @@ class Tag(models.Model, EventCollection):
         if end:
             events_qs = events_qs.filter(start__lt=end)
         else:
-            events_qs = events_qs.filter(start__lt=datetime.utcnow())
+            events_qs = events_qs.filter(start__lt=datetime.now(pytz.utc))
 
         return events_qs.order_by('start')
 
