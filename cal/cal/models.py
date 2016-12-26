@@ -584,8 +584,6 @@ class ColorCategory(models.Model, EventCollection):
             events_qs = events_qs.filter(start__lt=end)
         else:
             events_qs = events_qs.filter(start__lt=datetime.now(pytz.utc))
-        # print events_qs[0].color
-        # print len(events_qs)
         return events_qs
 
     def get_hours_per_week(self, calendar_ids=None, start=None, end=None):
