@@ -199,7 +199,8 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
           id: category.id,
           label: category.label,
           hours: category.hours,
-          include: true
+          include: true,
+          color: category.category_color,
         });
       }
       $scope.categories.dataLoaded = true;
