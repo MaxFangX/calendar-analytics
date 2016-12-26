@@ -199,20 +199,22 @@ analyticsApp.component('tagDetails', {
 analyticsApp.controller('CategoriesCtrl', function($scope, $http){
   var categoryUrl = '/v1/colorcategories';
   $scope.categories = [];
+  $scope.categories.dataLoaded = false;
 
   // populate the categories pie chart
   $http({ method: 'GET', url: categoryUrl + '.json' }).
-  success(function successCallback(data) {
-    for (var i = 0; i < data.results.length; i++) {
-      var category = data.results[i];
-      $scope.categories.push({
-        id: category.id,
-        label: category.label,
-        hours: category.hours,
-        include: true
-      });
-    }
-  });
+    success(function successCallback(data) {
+      for (var i = 0; i < data.results.length; i++) {
+        var category = data.results[i];
+        $scope.categories.push({
+          id: category.id,
+          label: category.label,
+          hours: category.hours,
+          include: true
+        });
+      }
+      $scope.categories.dataLoaded = true;
+    });
 
   this.startEdit = function(categoryId) {
     var category = $scope.categories.find(function(category, index, array) {
@@ -277,7 +279,7 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
   };
 
   // categories pie chart
-  $scope.options = {
+  $scope.categoryPie = {
     chart: {
       type: 'pieChart',
       height: 400,
