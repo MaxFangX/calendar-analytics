@@ -1,6 +1,4 @@
-/*jslint devel: true */
-/*jslint browser: true */
-/*jslint jquery: true */
+/*jslint devel: true, browser: true, jquery: true */
 /*global d3 */
 /*global getCookie */
 /*global moment */
