@@ -1,6 +1,6 @@
 from apiclient.discovery import build
 from cal.constants import GOOGLE_CALENDAR_COLORS
-from cal.helpers import EventCollection, TimeNode, TimeNodeChain, ensure_timezone_awareness
+from cal.helpers import EventCollection, TimeNode, TimeNodeChain, ensure_timezone_awareness, handle_time_string
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.models import User
@@ -10,6 +10,7 @@ from django.utils.dateparse import parse_date, parse_datetime
 from jsonfield import JSONField
 from oauth2client.django_orm import CredentialsField, FlowField
 from oauth2client.client import AccessTokenRefreshError
+from dateutil.tz import tzlocal
 
 import httplib2
 import sys
@@ -592,9 +593,12 @@ class ColorCategory(models.Model, EventCollection):
         week_hours = []
         events = self.query().order_by('start')
         i = 0
-        print events[0].start
-        start = ensure_timezone_awareness(events[0].start)
-        print start
+        start = events[0].start
+        # TODO replace with start date of local time
+        start = start.replace(hour=0, minute=0, second=0, microsecond=0)
+        # Change start date to be Monday beginning of week
+        while start.weekday() != 0:
+            start = start - relativedelta(days=1)
         while i < len(events):
             end = start + relativedelta(days=7)
             total = 0
