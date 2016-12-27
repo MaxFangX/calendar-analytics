@@ -113,6 +113,7 @@ function TagsDetailCtrl($scope, $http) {
   var eventweek = '/v1/tags/' + this.tagId + '/eventWeek';
   $scope.tagDetails = [];
   $scope.tagEvents = [];
+  $scope.tagHours = this.tagHours;
 
   $http({method: 'GET', url: tagUrl + '.json' }).
   success(function successCallback(data) {
@@ -124,9 +125,9 @@ function TagsDetailCtrl($scope, $http) {
       });
     }
   });
-
   $http({method: 'GET', url: eventweek + '.json' }).
   success(function successCallback(data) {
+    $scope.tagHours = $scope.tagHours/data.length;
     var events = [];
     var max_hour = 0;
     for (var i = 0; i < data.length; i++) {
@@ -186,7 +187,8 @@ analyticsApp.component('tagDetails', {
   controller: TagsDetailCtrl,
   controllerAs: '$ctrl',
   bindings: {
-    tagId: '@'
+    tagId: '@',
+    tagHours: '@'
   }
 });
 
@@ -296,6 +298,7 @@ function CategoriesDetailCtrl($scope, $http){
   var eventweek = '/v1/colorcategories/' + this.categoryId + '/eventWeek';
   $scope.categoryDetails = [];
   $scope.categoryEvents = [];
+  $scope.categoryHours = this.categoryHours;
 
   $http({method: 'GET', url: categoryUrl + '.json' }).
   success(function successCallback(data) {
@@ -310,6 +313,7 @@ function CategoriesDetailCtrl($scope, $http){
 
   $http({method: 'GET', url: eventweek + '.json' }).
   success(function successCallback(data) {
+    $scope.categoryHours = $scope.categoryHours/data.length;
     var events = [];
     var max_hour = 0;
     for (var i = 0; i < data.length; i++) {
@@ -370,7 +374,8 @@ analyticsApp.component('categoryDetails', {
   controller: CategoriesDetailCtrl,
   controllerAs: '$ctrl',
   bindings: {
-    categoryId: '@'
+    categoryId: '@',
+    categoryHours: '@'
   }
 });
 
