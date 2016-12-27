@@ -1,10 +1,7 @@
 from api.serializers import GCalendarSerializer, GEventSerializer, StatisticSerializer, ColorCategorySerializer, TagSerializer
-from cal.helpers import truncated_queryset
+from cal.helpers import truncated_queryset, handle_time_string
 from cal.models import ColorCategory, GCalendar, GEvent, Statistic, Profile, Tag
-from datetime import datetime
 from django.http import HttpResponseRedirect
-from django.utils import timezone as timezone_util
-from django.utils.dateparse import parse_date, parse_datetime
 from rest_framework import generics, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -124,30 +121,8 @@ class GEventList(generics.ListAPIView):
             except pytz.UnknownTimeZoneError:
                 raise Exception("{} could not be parsed into a timezone".format(timezone_str))
 
-        def handle_time_string(time_str):
-            time = parse_datetime(time_str)
-            if not time:
-                # Parse the date and create a datetime at the zeroth hour
-                date = parse_date(time_str)
-                if not date:
-                    raise Exception("{} couldn't be parsed as date or datetime".format(time_str))
-                time = datetime.combine(date, datetime.min.time())
-
-            if timezone_util.is_naive(time):
-                if timezone:
-                    time = timezone_util.make_aware(time, timezone)
-                else:
-                    time = timezone_util.make_aware(time, timezone_util.get_default_timezone())
-
-            if timezone:
-                time = time.astimezone(timezone)
-            else:
-                time = time.astimezone(timezone_util.utc)
-
-            return time
-
-        start = handle_time_string(start_str)
-        end = handle_time_string(end_str)
+        start = handle_time_string(start_str, timezone)
+        end = handle_time_string(end_str, timezone)
 
         qs = truncated_queryset(qs, edge_str, start, end)
 

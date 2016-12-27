@@ -1,7 +1,10 @@
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
 from django.utils import timezone
+from django.utils.dateparse import parse_date, parse_datetime
+from django.utils import timezone as timezone_util
 from datetime import timedelta
+from datetime import datetime
 
 import json
 import pytz
@@ -26,6 +29,29 @@ def ensure_timezone_awareness(dt, optional_timezone=None):
     # Remove seconds and microseconds
     dt = dt.replace(second=0, microsecond=0)
     return dt
+
+
+def handle_time_string(time_str, timezone):
+    time = parse_datetime(time_str)
+    if not time:
+        # Parse the date and create a datetime at the zeroth hour
+        date = parse_date(time_str)
+        if not date:
+            raise Exception("{} couldn't be parsed as date or datetime".format(time_str))
+        time = datetime.combine(date, datetime.min.time())
+
+    if timezone_util.is_naive(time):
+        if timezone:
+            time = timezone_util.make_aware(time, timezone)
+        else:
+            time = timezone_util.make_aware(time, timezone_util.get_default_timezone())
+
+    if timezone:
+        time = time.astimezone(timezone)
+    else:
+        time = time.astimezone(timezone_util.utc)
+
+    return time
 
 
 EDGE_OPTIONS = set(['inclusive', 'exclusive', 'truncated'])
@@ -79,7 +105,7 @@ class EventCollection:
         Returns a set of events.
         """
         return self._events_func()
-    
+
     def intersection(self, other):
 
         def lazy_get_events():
@@ -107,7 +133,7 @@ class EventCollection:
             total += e.end - e.start
 
         return int(total.total_seconds())
-        
+
 
 class TimeNodeChain(EventCollection):
 
@@ -165,7 +191,7 @@ class TimeNodeChain(EventCollection):
                 current = current.next
 
             self._total_time = total.total_seconds()
-        
+
         return self._total_time
 
     def insert(self, timenode, return_overwrites=False):
@@ -249,7 +275,7 @@ class TimeNodeChain(EventCollection):
             current = current.next
 
         return chain
-    
+
     def __str__(self):
         if not self.head:
             return "<Empty TimeNodeChain>"
@@ -343,7 +369,7 @@ class TimeNode:
             inserted, next_node = try_insert(next_node)
 
         return timenode
-                    
+
     def old_insert(self, timenode):
         """
         Inserts a single TimeNode in O(n) time and returns the current node.
@@ -406,5 +432,5 @@ class TimeNode:
                 self.next.insert(timenode)
             elif self.prev:
                 self.prev.insert(timenode)
-            
+
             return timenode
