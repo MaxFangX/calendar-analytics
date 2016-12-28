@@ -89,6 +89,7 @@ class ColorCategoryTimeSeriesSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('timezone')
 
+
 class TagTimeSeriesSerializer(serializers.ModelSerializer):
 
     class Meta:

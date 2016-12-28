@@ -33,7 +33,9 @@ def ensure_timezone_awareness(dt, optional_timezone=None):
 
 def handle_time_string(time_str, timezone_str):
     """
-    Converts UTC 'time_str' to timezone represented by 'timezone_str'
+    If timezone_str exists get the corresponding timezone. Parses time_str
+    and if there is no time, create an event at 0th hour.
+    Makes timezone aware if unaware then converts to corresponding timezone.
     """
     timezone = None
     if timezone_str:
@@ -66,8 +68,9 @@ def handle_time_string(time_str, timezone_str):
 
 def get_time_series(model, timezone='UTC', time_range='Weekly', start=None, end=None):
     """
-    Returns a list of week-hour tuples corresponding to the events in this ColorCategory.
-    Each week starts at the start time.
+    Returns a list of week-hour tuples corresponding to the events in the `model`. Takes in
+    timezone in order to accurately aggregate events. Includes time_range input either `Daily`,
+    `Weekly`, or `Monthly` which will aggregate accordingly. Splices events that overlap times.
     """
     week_hours = []
     events = model.query().order_by('start')
