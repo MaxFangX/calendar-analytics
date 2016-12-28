@@ -169,6 +169,7 @@ analyticsApp.service("CategoryService", ['$http', '$q', function($http, $q) {
           label: category.label,
           hours: category.hours,
           include: true
+          color: category.category_color
         });
       }
       return _this.categories[timeRange];
