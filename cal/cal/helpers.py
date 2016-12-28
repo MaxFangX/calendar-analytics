@@ -31,7 +31,14 @@ def ensure_timezone_awareness(dt, optional_timezone=None):
     return dt
 
 
-def handle_time_string(time_str, timezone):
+def handle_time_string(time_str, timezone_str):
+    timezone = None
+    if timezone_str:
+        try:
+            timezone = pytz.timezone(timezone_str)
+        except pytz.UnknownTimeZoneError:
+            raise Exception("{} could not be parsed into a timezone".format(timezone_str))
+
     time = parse_datetime(time_str)
     if not time:
         # Parse the date and create a datetime at the zeroth hour
@@ -52,6 +59,10 @@ def handle_time_string(time_str, timezone):
         time = time.astimezone(timezone_util.utc)
 
     return time
+
+
+def local_to_UTC(time, timezone):
+    return time.astimezone(pytz.utc)
 
 
 EDGE_OPTIONS = set(['inclusive', 'exclusive', 'truncated'])

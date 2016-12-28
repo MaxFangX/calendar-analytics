@@ -1,4 +1,4 @@
-from api.serializers import GCalendarSerializer, GEventSerializer, StatisticSerializer, ColorCategorySerializer, TagSerializer
+from api.serializers import GCalendarSerializer, GEventSerializer, StatisticSerializer, ColorCategorySerializer, TagSerializer, ColorCategoryList
 from cal.helpers import truncated_queryset, handle_time_string
 from cal.models import ColorCategory, GCalendar, GEvent, Statistic, Profile, Tag
 from django.http import HttpResponseRedirect
@@ -114,15 +114,8 @@ class GEventList(generics.ListAPIView):
         if not start_str or not end_str:
             raise Exception("Missing query parameter `start` or `end`")
 
-        timezone = None
-        if timezone_str:
-            try:
-                timezone = pytz.timezone(timezone_str)
-            except pytz.UnknownTimeZoneError:
-                raise Exception("{} could not be parsed into a timezone".format(timezone_str))
-
-        start = handle_time_string(start_str, timezone)
-        end = handle_time_string(end_str, timezone)
+        start = handle_time_string(start_str, timezone_str)
+        end = handle_time_string(end_str, timezone_str)
 
         qs = truncated_queryset(qs, edge_str, start, end)
 
@@ -182,9 +175,11 @@ class ColorCategoryDetailEvents(generics.ListAPIView):
 
 class ColorCategoryDetailEventWeek(APIView):
 
+    serializer_class = ColorCategoryList
+
     def get(self, request, *args, **kwargs):
         category = ColorCategory.objects.get(user=self.request.user, id=self.kwargs['pk'])
-        return Response(category.get_hours_per_week())
+        return Response(category.get_hours_per_week(self.request.query_params.get('timezone')))
 
 
 class TagList(generics.ListCreateAPIView):
