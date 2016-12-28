@@ -1,7 +1,5 @@
 /*jslint devel: true, browser: true, jquery: true */
-/*global d3 */
-/*global getCookie */
-/*global moment */
+/*global d3, getCookie, moment */
 
 var analyticsApp = window.angular.module('analyticsApp', ['analyticsApp.services', 'nvd3', 'ui.calendar']);
 
