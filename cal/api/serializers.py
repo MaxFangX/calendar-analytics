@@ -84,7 +84,7 @@ class TagSerializer(serializers.ModelSerializer):
         return obj.hours(calendar_ids=calendar_ids, start=start, end=end)
 
 
-class ColorCategoryList(serializers.ModelSerializer):
+class ColorCategoryTimeSeriesSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = ('timezone')

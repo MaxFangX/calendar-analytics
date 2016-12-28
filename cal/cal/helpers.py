@@ -3,8 +3,8 @@ from django.http import HttpResponse
 from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_datetime
 from django.utils import timezone as timezone_util
-from datetime import timedelta
-from datetime import datetime
+from datetime import timedelta, datetime
+from dateutil.relativedelta import relativedelta
 
 import json
 import pytz
@@ -64,8 +64,55 @@ def handle_time_string(time_str, timezone_str):
     return time
 
 
-def local_to_UTC(time, timezone):
-    return time.astimezone(pytz.utc)
+def get_time_series(model, timezone='UTC', time_range='Weekly', start=None, end=None):
+    """
+    Returns a list of week-hour tuples corresponding to the events in this ColorCategory.
+    Each week starts at the start time.
+    """
+    week_hours = []
+    events = model.query().order_by('start')
+    i = 0
+    # Convert start to local time
+    start = handle_time_string(str(events[0].start), timezone)
+    if time_range == 'Daily':
+        # To indicate do nothing if Daily is passed in
+        pass
+    if time_range == 'Weekly':
+        # Change start date to be Monday beginning of week
+        while start.weekday() != 0:
+            start = start - timedelta(days=1)
+    if time_range == 'Monthly':
+        # Change start date to beginning of month
+        while start.day != 1:
+            start = start - timedelta(days=1)
+    start = start.replace(hour=0, minute=0, second=0, microsecond=0)
+    # Convert back to UTC
+    start = start.astimezone(pytz.utc)
+    # Rollover takes care of events that overlap time periods
+    rollover = 0
+    while i < len(events):
+        if time_range == 'Daily':
+            end = start + relativedelta(days=1)
+        if time_range == 'Weekly':
+            end = start + relativedelta(days=7)
+        if time_range == 'Monthly':
+            end = start + relativedelta(months=1)
+        # Deal with daylight savings time
+        if handle_time_string(str(end), timezone).hour != 0:
+            end = end + timedelta(hours=1)
+        total = rollover
+        rollover = 0
+        while i < len(events) and (end - events[i].start).total_seconds() >= 0:
+            # Overlapping events
+            if (end - events[i].end).total_seconds() < 0:
+                total += (end - events[i].start).total_seconds() / 3600
+                rollover = (events[i].end - end).total_seconds() / 3600
+            else:
+                total += (events[i].end - events[i].start).total_seconds() / 3600
+            i += 1
+        week_hours.append((start, total))
+        start = end
+    return week_hours
 
 
 EDGE_OPTIONS = set(['inclusive', 'exclusive', 'truncated'])
