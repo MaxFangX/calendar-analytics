@@ -296,6 +296,7 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
 function CategoriesDetailCtrl($scope, $http){
   var categoryUrl = '/v1/colorcategories/' + this.categoryId + '/events';
   var eventweek = '/v1/colorcategories/' + this.categoryId + '/eventWeek';
+  var query_timezone = moment.tz.guess();
   $scope.categoryDetails = [];
   $scope.categoryEvents = [];
   $scope.categoryHours = this.categoryHours;
@@ -305,13 +306,18 @@ function CategoriesDetailCtrl($scope, $http){
     for (var i = 0; i < data.results.length; i++) {
       var event = data.results[i]
       $scope.categoryEvents.push({
-        start: event.start,
+        start: (new Date(event.start)).toString(),
         name: event.name,
       });
     }
   });
 
-  $http({method: 'GET', url: eventweek + '.json' }).
+  $http({method: 'GET',
+         url: eventweek + '.json',
+         params: {
+           timezone: query_timezone,
+         }
+       }).
   success(function successCallback(data) {
     $scope.categoryHours = $scope.categoryHours/data.length;
     var events = [];
