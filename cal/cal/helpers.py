@@ -1,3 +1,4 @@
+from cal.constants import GOOGLE_CALENDAR_COLORS
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
 from django.utils import timezone
@@ -61,6 +62,17 @@ def truncated_queryset(queryset, edge, start, end):
     return queryset
 
 
+def get_color(calendar, color_index):
+    """
+    Takes in a calendar and a color_index and returns the associated color codes
+    from constants.py.
+    """
+    if color_index == "1":
+        return GOOGLE_CALENDAR_COLORS['calendar'].get(calendar.color_index)
+    else:
+        return GOOGLE_CALENDAR_COLORS['event'].get(color_index)
+
+
 class EventCollection:
     """
     Represents a Set of events
@@ -79,7 +91,7 @@ class EventCollection:
         Returns a set of events.
         """
         return self._events_func()
-    
+
     def intersection(self, other):
 
         def lazy_get_events():
@@ -107,7 +119,7 @@ class EventCollection:
             total += e.end - e.start
 
         return int(total.total_seconds())
-        
+
 
 class TimeNodeChain(EventCollection):
 
@@ -165,7 +177,7 @@ class TimeNodeChain(EventCollection):
                 current = current.next
 
             self._total_time = total.total_seconds()
-        
+
         return self._total_time
 
     def insert(self, timenode, return_overwrites=False):
@@ -249,7 +261,7 @@ class TimeNodeChain(EventCollection):
             current = current.next
 
         return chain
-    
+
     def __str__(self):
         if not self.head:
             return "<Empty TimeNodeChain>"
@@ -343,7 +355,7 @@ class TimeNode:
             inserted, next_node = try_insert(next_node)
 
         return timenode
-                    
+
     def old_insert(self, timenode):
         """
         Inserts a single TimeNode in O(n) time and returns the current node.
@@ -406,5 +418,5 @@ class TimeNode:
                 self.next.insert(timenode)
             elif self.prev:
                 self.prev.insert(timenode)
-            
+
             return timenode
