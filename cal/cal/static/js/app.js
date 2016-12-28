@@ -6,6 +6,8 @@ analyticsApp.controller('LoggedInCtrl', function LoggedInController($scope) {
 function TagsCtrl($scope, $http) {
   var tagUrl = '/v1/tags';
   $scope.tags = [];
+  $scope.tags.dataLoaded = false;
+
 
   // add all the tags
   $http({method: 'GET', url: tagUrl + '.json' })
@@ -19,6 +21,7 @@ function TagsCtrl($scope, $http) {
           hours: tag.hours
         });
       }
+      $scope.tags.dataLoaded = true;
     });
 
   this.create = function(tag) {
@@ -73,6 +76,7 @@ function TagsCtrl($scope, $http) {
       tag.label = data.label;
       tag.keywords = data.keywords;
       tag.hours = data.hours;
+      $scope.tags.dataLoaded = true;
     });
   };
 
@@ -97,6 +101,7 @@ function TagsCtrl($scope, $http) {
       $scope.tags = $scope.tags.filter(function(tag) {
         return tag.id !== tagId;
       });
+      $scope.tags.dataLoaded = true;
     });
   };
 };
@@ -113,6 +118,7 @@ function TagsDetailCtrl($scope, $http) {
   var eventweek = '/v1/tags/' + this.tagId + '/eventWeek';
   $scope.tagDetails = [];
   $scope.tagEvents = [];
+  $scope.tagEvents.dataLoaded = false;
 
   $http({method: 'GET', url: tagUrl + '.json' }).
   success(function successCallback(data) {
@@ -123,6 +129,7 @@ function TagsDetailCtrl($scope, $http) {
         name: event.name,
       });
     }
+    $scope.tagEvents.dataLoaded = true;
   });
 
   $http({method: 'GET', url: eventweek + '.json' }).
@@ -293,6 +300,7 @@ function CategoriesDetailCtrl($scope, $http){
   var eventweek = '/v1/colorcategories/' + this.categoryId + '/eventWeek';
   $scope.categoryDetails = [];
   $scope.categoryEvents = [];
+  $scope.categoryEvents.dataLoaded = false;
 
   $http({method: 'GET', url: categoryUrl + '.json' }).
   success(function successCallback(data) {
@@ -303,6 +311,7 @@ function CategoriesDetailCtrl($scope, $http){
         name: event.name,
       });
     }
+  $scope.categoryEvents.dataLoaded = true;
   });
 
   $http({method: 'GET', url: eventweek + '.json' }).
