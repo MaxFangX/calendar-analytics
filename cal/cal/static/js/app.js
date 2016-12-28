@@ -194,11 +194,27 @@ analyticsApp.component('tagDetails', {
   }
 });
 
-analyticsApp.controller('CategoriesCtrl', function($scope, $http){
-  var categoryUrl = '/v1/colorcategories';
+function CategoryListCtrl($scope, $http, CalendarRangeService){
+
+  var _this = this;
+
   $scope.categories = [];
   $scope.categories.dataLoaded = false;
 
+  $scope.$on('calendarRange:updated', function(event, data) {
+    /* jshint unused:vars */
+    var rangeData = CalendarRangeService.getRange();
+    var timeRange = rangeData.timeRange;
+    if (!_this.isCumulative) {
+      _this.getTags('cumulative', null, null)
+        .then(function(tags) {
+          _this.tags = tags;
+          _this.timeRange = timeRange;
+        });
+    }
+  });
+
+  var categoryUrl = '/v1/colorcategories';
   // populate the categories pie chart
   $http({ method: 'GET', url: categoryUrl + '.json' }).
     success(function successCallback(data) {
@@ -298,6 +314,17 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
       },
     },
   };
+}
+
+analyticsApp.component('categoryList', {
+  templateUrl: '/static/templates/category-list.html',
+  controller: ['$scope', '$http', CategoryListCtrl],
+  controllerAs: '$ctrl',
+  bindings: {
+    isCumulative: '<?',
+    displayName: '@',
+    hideZeroHours: '<?'
+  }
 });
 
 function CategoriesDetailCtrl($scope, $http){
