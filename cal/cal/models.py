@@ -1,6 +1,5 @@
 from apiclient.discovery import build
 from cal.constants import GOOGLE_CALENDAR_COLORS
-from cal.helpers import EventCollection, TimeNode, TimeNodeChain, ensure_timezone_awareness
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 from django.db import models
@@ -10,6 +9,7 @@ from jsonfield import JSONField
 from oauth2client.django_orm import CredentialsField, FlowField
 from oauth2client.client import AccessTokenRefreshError
 
+import cal.helpers as helpers
 import httplib2
 import pytz
 import sys
@@ -246,7 +246,7 @@ class GCalendar(models.Model):
                 }
         list_args_with_constraints = {
                 # Only sync up to two months in the future
-                'timeMax': ensure_timezone_awareness(datetime.now() + timedelta(days=60)).isoformat(),
+                'timeMax': helpers.ensure_timezone_awareness(datetime.now() + timedelta(days=60)).isoformat(),
                 }
         list_args_with_constraints.update(default_list_args)
 
@@ -327,9 +327,9 @@ class GCalendar(models.Model):
 
     def time_log(self):
         """
-        Forms a TimeNodeChain based off events in this Calendar
+        Forms a helpers.TimeNodeChain based off events in this Calendar
         """
-        return TimeNodeChain(GEvent.objects.filter(calendar=self).order_by('updated'))
+        return helpers.TimeNodeChain(GEvent.objects.filter(calendar=self).order_by('updated'))
 
     def update_meta(self):
         service = self.user.googlecredentials.get_service()
@@ -354,7 +354,7 @@ class GCalendar(models.Model):
         self.meta = result
         self.save()
 
-class Event(models.Model, TimeNode):
+class Event(models.Model, helpers.TimeNode):
 
     name = models.CharField(max_length=150, default="(No title)", blank=True)
     start = models.DateTimeField(help_text="When the event started. 12AM for all day events")
@@ -368,7 +368,7 @@ class Event(models.Model, TimeNode):
 
     def __init__(self, *args, **kwargs):
 
-        TimeNode.__init__(self, start=kwargs.get('start'), end=kwargs.get('end'), id=kwargs.get('id'))
+        helpers.TimeNode.__init__(self, start=kwargs.get('start'), end=kwargs.get('end'), id=kwargs.get('id'))
 
         super(Event, self).__init__(*args, **kwargs)
 
@@ -455,8 +455,8 @@ class GEvent(Event):
         if timezone.is_naive(self.start):
             made_aware = True
 
-        self.start = ensure_timezone_awareness(self.start, self.timezone)
-        self.end = ensure_timezone_awareness(self.end, self.timezone)
+        self.start = helpers.ensure_timezone_awareness(self.start, self.timezone)
+        self.end = helpers.ensure_timezone_awareness(self.end, self.timezone)
 
         super(GEvent, self).save(*args, **kwargs)
 
@@ -492,8 +492,8 @@ class GRecurrence(models.Model):
 
     def save(self, *args, **kwargs):
 
-        self.start = ensure_timezone_awareness(self.start)
-        self.end = ensure_timezone_awareness(self.end)
+        self.start = helpers.ensure_timezone_awareness(self.start)
+        self.end = helpers.ensure_timezone_awareness(self.end)
 
         return super(GRecurrence, self).save(*args, **kwargs)
 
@@ -539,7 +539,7 @@ class DeletedEvent(models.Model):
             event.delete()
 
 
-class ColorCategory(models.Model, EventCollection):
+class ColorCategory(models.Model, helpers.EventCollection):
 
     calendar = models.ForeignKey(GCalendar, null=True, related_name='colorcategories')
     user = models.ForeignKey(User, related_name='colorcategories')
@@ -555,7 +555,7 @@ class ColorCategory(models.Model, EventCollection):
     def hours(self, calendar_ids=None, start=None, end=None):
         events = self.get_events(calendar_ids=calendar_ids, start=start, end=end)
 
-        return EventCollection(lambda: events).total_time() / 3600
+        return helpers.EventCollection(lambda: events).total_time() / 3600
 
     def get_events(self, calendar_ids=None, start=None, end=None):
         qs = self.query(calendar_ids, start, end)
@@ -586,26 +586,19 @@ class ColorCategory(models.Model, EventCollection):
         else:
             events_qs = events_qs.filter(start__lt=datetime.now(pytz.utc))
 
-        return events_qs
+        return events_qs.order_by('start')
+
+    def get_hours_per_day(self, calendar_ids=None, start=None, end=None):
+        return helpers.get_event_hours_per_day(self, calendar_ids=calendar_ids, start=start, end=end)
 
     def get_hours_per_week(self, calendar_ids=None, start=None, end=None):
         """
-        Returns a list of week-hour tuples corresponding to the events in this ColorCategory.
-        Each week starts at the start time.
+        Returns a list of week-hour tuples corresponding to the events in this Tag.
         """
-        week_hours = []
-        events = self.query().order_by('start')
-        i = 0
-        start = events[0].start
-        while i < len(events):
-            end = start + timedelta(days=7)
-            total = 0
-            while i < len(events) and (end - events[i].start).total_seconds() >= 0:
-                total += (events[i].end - events[i].start).total_seconds() / 3600
-                i += 1
-            week_hours.append((start, total))
-            start = end
-        return week_hours
+        return helpers.get_event_hours_per_week(self, calendar_ids=calendar_ids, start=start, end=end)
+
+    def get_hours_per_month(self, calendar_ids=None, start=None, end=None):
+        return helpers.get_event_hours_per_month(self, calendar_ids=calendar_ids, start=start, end=end)
 
 
 class TagGroup(models.Model):
@@ -614,7 +607,7 @@ class TagGroup(models.Model):
     label = models.CharField(max_length=100, help_text="The name of this tag family")
 
 
-class Tag(models.Model, EventCollection):
+class Tag(models.Model, helpers.EventCollection):
 
     user = models.ForeignKey(User, related_name='tags')
     label = models.CharField(max_length=100, help_text="The name of this tag")
@@ -633,11 +626,11 @@ class Tag(models.Model, EventCollection):
     def hours(self, calendar_ids=None, start=None, end=None):
         events = self.get_events(calendar_ids=calendar_ids, start=start, end=end)
 
-        return EventCollection(lambda: events).total_time() / 3600
+        return helpers.EventCollection(lambda: events).total_time() / 3600
 
     def get_events(self, calendar_ids=None, start=None, end=None):
         """
-        Overrides EventCollection.get_events
+        Overrides helpers.EventCollection.get_events
         """
 
         # TODO handle edges here
@@ -676,23 +669,17 @@ class Tag(models.Model, EventCollection):
 
         return events_qs.order_by('start')
 
+    def get_hours_per_day(self, calendar_ids=None, start=None, end=None):
+        return helpers.get_event_hours_per_day(self, calendar_ids=calendar_ids, start=start, end=end)
+
     def get_hours_per_week(self, calendar_ids=None, start=None, end=None):
         """
         Returns a list of week-hour tuples corresponding to the events in this Tag.
         """
-        week_hours = []
-        events = self.query()
-        i = 0
-        start = events[0].start
-        while i < len(events):
-            end = start + timedelta(days=7)
-            total = 0
-            while i < len(events) and (end - events[i].start).total_seconds() >= 0:
-                total += (events[i].end - events[i].start).total_seconds() / 3600
-                i += 1
-            week_hours.append((start, total))
-            start = end
-        return week_hours
+        return helpers.get_event_hours_per_week(self, calendar_ids=calendar_ids, start=start, end=end)
+
+    def get_hours_per_month(self, calendar_ids=None, start=None, end=None):
+        return helpers.get_event_hours_per_month(self, calendar_ids=calendar_ids, start=start, end=end)
 
 
 class Statistic(models.Model):

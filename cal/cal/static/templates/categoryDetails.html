@@ -1,5 +1,8 @@
 <div>
-  <nvd3 options="categoryLine" data="categoryDetails"></nvd3>
+  <button ng-click='showDaily()'>Daily</buton>
+  <button ng-click='showWeekly()'>Weekly</button>
+  <button ng-click='showMonthly()'>Monthly</button>
+  <nvd3 options="categoryLine" data="ctrlDetails"></nvd3>
   <h3 class="well">Contained Events</h3>
   <ul class="list-group" ng-repeat="category in categoryEvents">
     <li class="list-group-item">{{ category.start }}: {{ category.name }}</li>

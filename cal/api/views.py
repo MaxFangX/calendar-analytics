@@ -211,6 +211,20 @@ class ColorCategoryDetailEventWeek(APIView):
         return Response(category.get_hours_per_week())
 
 
+class ColorCategoryDetailEventMonth(APIView):
+
+    def get(self, request, *args, **kwargs):
+        category = ColorCategory.objects.get(user=self.request.user, id=self.kwargs['pk'])
+        return Response(category.get_hours_per_month())
+
+
+class ColorCategoryDetailEventDay(APIView):
+
+    def get(self, request, *args, **kwargs):
+        category = ColorCategory.objects.get(user=self.request.user, id=self.kwargs['pk'])
+        return Response(category.get_hours_per_day())
+
+
 class TagList(generics.ListCreateAPIView):
 
     serializer_class = TagSerializer
@@ -278,3 +292,17 @@ class TagDetailEventWeek(APIView):
     def get(self, request, *args, **kw):
         tag = Tag.objects.get(user=self.request.user, id=self.kwargs['pk'])
         return Response(tag.get_hours_per_week())
+
+
+class TagDetailEventMonth(APIView):
+
+    def get(self, request, *args, **kw):
+        tag = Tag.objects.get(user=self.request.user, id=self.kwargs['pk'])
+        return Response(tag.get_hours_per_month())
+
+
+class TagDetailEventDay(APIView):
+
+    def get(self, request, *args, **kw):
+        tag = Tag.objects.get(user=self.request.user, id=self.kwargs['pk'])
+        return Response(tag.get_hours_per_day())

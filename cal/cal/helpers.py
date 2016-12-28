@@ -60,6 +60,53 @@ def truncated_queryset(queryset, edge, start, end):
 
     return queryset
 
+def get_event_hours_per_day(model, calendar_ids=None, start=None, end=None):
+    events = model.query()
+    daily_events = []
+    events_seen = set()
+    hours = 0
+    for i in range(len(events)):
+        event = events[i]
+        difference = (event.end - event.start).total_seconds() / 3600
+        hours += difference
+        if event not in events_seen:
+            daily_events.append((event.start, hours))
+            events_seen.add(event)
+            hours = 0
+    return daily_events
+
+def get_event_hours_per_week(model, calendar_ids=None, start=None, end=None):
+    """
+    Returns a list of week-hour tuples corresponding to the events in this Tag.
+    """
+    week_hours = []
+    events = model.query()
+    i = 0
+    start = events[0].start
+    while i < len(events):
+        end = start + timedelta(days=7)
+        total = 0
+        while i < len(events) and (end - events[i].start).total_seconds() >= 0:
+            total += (events[i].end - events[i].start).total_seconds() / 3600
+            i += 1
+        week_hours.append((start, total))
+        start = end
+    return week_hours
+
+def get_event_hours_per_month(model, calendar_ids=None, start=None, end=None):
+    month_hours = []
+    week_hours = model.get_hours_per_week(calendar_ids=calendar_ids, start=start, end=end)
+    curr_date = week_hours[0][0]
+    total_hours = week_hours[0][1]
+    for i in range(0, len(week_hours)):
+        start, hours = week_hours[i]
+        if start.month != curr_date.month:
+            month_hours.append((curr_date, total_hours))
+            curr_date = start
+        else:
+            total_hours += hours
+    month_hours.append((curr_date, total_hours))
+    return month_hours
 
 class EventCollection:
     """
@@ -79,7 +126,7 @@ class EventCollection:
         Returns a set of events.
         """
         return self._events_func()
-    
+
     def intersection(self, other):
 
         def lazy_get_events():
@@ -107,7 +154,7 @@ class EventCollection:
             total += e.end - e.start
 
         return int(total.total_seconds())
-        
+
 
 class TimeNodeChain(EventCollection):
 
@@ -165,7 +212,7 @@ class TimeNodeChain(EventCollection):
                 current = current.next
 
             self._total_time = total.total_seconds()
-        
+
         return self._total_time
 
     def insert(self, timenode, return_overwrites=False):
@@ -249,7 +296,7 @@ class TimeNodeChain(EventCollection):
             current = current.next
 
         return chain
-    
+
     def __str__(self):
         if not self.head:
             return "<Empty TimeNodeChain>"
@@ -343,7 +390,7 @@ class TimeNode:
             inserted, next_node = try_insert(next_node)
 
         return timenode
-                    
+
     def old_insert(self, timenode):
         """
         Inserts a single TimeNode in O(n) time and returns the current node.
@@ -406,5 +453,5 @@ class TimeNode:
                 self.next.insert(timenode)
             elif self.prev:
                 self.prev.insert(timenode)
-            
+
             return timenode
