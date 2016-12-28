@@ -32,6 +32,9 @@ def ensure_timezone_awareness(dt, optional_timezone=None):
 
 
 def handle_time_string(time_str, timezone_str):
+    """
+    Converts UTC 'time_str' to timezone represented by 'timezone_str'
+    """
     timezone = None
     if timezone_str:
         try:

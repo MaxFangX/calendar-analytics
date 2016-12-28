@@ -597,12 +597,16 @@ class ColorCategory(models.Model, EventCollection):
         # Change start date to be Monday beginning of week
         while start.weekday() != 0:
             start = start - relativedelta(days=1)
+        start = start.replace(hour=0, minute=0, second=0, microsecond=0)
         # Convert back to UTC
         start = local_to_UTC(start, timezone)
         # Rollover takes care of events that overlap time periods
         rollover = 0
         while i < len(events):
             end = start + relativedelta(days=7)
+            # Deal with daylight savings time
+            if handle_time_string(str(end), timezone).hour != 0:
+                end = end + relativedelta(hours=1)
             total = rollover
             rollover = 0
             while i < len(events) and (end - events[i].start).total_seconds() >= 0:
