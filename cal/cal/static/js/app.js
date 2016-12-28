@@ -15,21 +15,18 @@ function TagListCtrl($scope, $http, CalendarRangeService, TagService) {
   $scope.$on('calendarRange:updated', function(event, data) {
     /* jshint unused:vars */
     var rangeData = CalendarRangeService.getRange();
-    var timeRange = rangeData.timeRange;
     if (!_this.isCumulative) {
-      _this.getTags('cumulative', null, null)
+      TagService.getTags(rangeData.timeRange, rangeData.start, rangeData.end)
         .then(function(tags) {
           _this.tags = tags;
-          _this.timeRange = timeRange;
+          _this.timeRange = rangeData.timeRange;
         });
     }
   });
 
   // Initialization
   this.initialize = function() {
-
     var tagsPromise;
-
     if (this.isCumulative) {
       tagsPromise = TagService.getTags('cumulative', null, null);
     } else {
@@ -40,6 +37,7 @@ function TagListCtrl($scope, $http, CalendarRangeService, TagService) {
       _this.tags = tags;
     });
   }.bind(this);
+
   this.initialize();
 
   this.hideZeroHoursFilter = function (value, index, array) {
@@ -204,12 +202,12 @@ function CategoryListCtrl($scope, $http, CalendarRangeService, CategoryService) 
   $scope.$on('calendarRange:updated', function(event, data) {
     /* jshint unused:vars */
     var rangeData = CalendarRangeService.getRange();
-    var timeRange = rangeData.timeRange;
     if (!_this.isCumulative) {
-      _this.getCategories('cumulative', null, null)
-        .then(function(tags) {
-          _this.tags = tags;
-          _this.timeRange = timeRange;
+      CategoryService.getCategories(rangeData.timeRange, rangeData.start, rangeData.end)
+        .then(function(categories) {
+          _this.categories = categories;
+          _this.timeRange = rangeData.timeRange;
+          _this.categories.dataLoaded = true;
         });
     }
   });
@@ -227,6 +225,7 @@ function CategoryListCtrl($scope, $http, CalendarRangeService, CategoryService) 
     }
     categoriesPromise.then(function(categories) {
       _this.categories = categories;
+      _this.timeRange = initialTimeRange.timeRange;
       _this.categories.dataLoaded = true;
     });
   }.bind(this);

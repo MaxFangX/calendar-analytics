@@ -25,7 +25,7 @@ analyticsApp.factory('CalendarRangeService', ['$rootScope', function CalendarRan
   };
 }]);
 
-analyticsApp.service("TagService", ['$http', function($http) {
+analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
 
   var _this = this;
 
@@ -46,7 +46,7 @@ analyticsApp.service("TagService", ['$http', function($http) {
 
     // Attempt to return cached tags
     if (_this.tags[timeRange]) {
-      return _this.tags[timeRange];
+      return $q.when(_this.tags[timeRange]);
     }
 
     // Request the tags and return a promise
@@ -128,7 +128,7 @@ analyticsApp.service("TagService", ['$http', function($http) {
 
 }]);
 
-analyticsApp.service("CategoryService", ['$http', function($http) {
+analyticsApp.service("CategoryService", ['$http', '$q', function($http, $q) {
 
   var _this = this;
 
@@ -148,7 +148,7 @@ analyticsApp.service("CategoryService", ['$http', function($http) {
 
     // Attempt to return cached categories
     if (_this.categories[timeRange]) {
-      return _this.categories[timeRange];
+      return $q.when(_this.categories[timeRange]);
     }
 
     // Request the categories and return a promise

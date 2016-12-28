@@ -224,14 +224,6 @@ class TagList(generics.ListCreateAPIView):
 
     def get_queryset(self):
         qs = Tag.objects.filter(user=self.request.user)
-        start = self.request.query_params.get('start')
-        end = self.request.query_params.get('end')
-
-        if start:
-            qs = qs.filter(start__gte=start)
-        if end:
-            qs = qs.filter(end__lte=end)
-
         return qs
 
     def post(self, request, *args, **kwargs):
