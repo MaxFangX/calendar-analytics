@@ -111,6 +111,7 @@ analyticsApp.component('tags', {
 function TagsDetailCtrl($scope, $http) {
   var tagUrl = '/v1/tags/' + this.tagId + '/events';
   var eventweek = '/v1/tags/' + this.tagId + '/eventWeek';
+  var query_timezone = moment.tz.guess();
   $scope.tagDetails = [];
   $scope.tagEvents = [];
   $scope.tagHours = this.tagHours;
@@ -120,12 +121,17 @@ function TagsDetailCtrl($scope, $http) {
     for (var i = 0; i < data.results.length; i++) {
       var event = data.results[i]
       $scope.tagEvents.push({
-        start: event.start,
+        start: (new Date(event.start)).toString(),
         name: event.name,
       });
     }
   });
-  $http({method: 'GET', url: eventweek + '.json' }).
+  $http({method: 'GET',
+         url: eventweek + '.json',
+         params: {
+           timezone: query_timezone,
+         }
+       }).
   success(function successCallback(data) {
     $scope.tagHours = $scope.tagHours/data.length;
     var events = [];

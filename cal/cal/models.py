@@ -1,6 +1,6 @@
 from apiclient.discovery import build
 from cal.constants import GOOGLE_CALENDAR_COLORS
-from cal.helpers import EventCollection, TimeNode, TimeNodeChain, ensure_timezone_awareness, handle_time_string, get_time_series
+from cal.helpers import EventCollection, TimeNode, TimeNodeChain, ensure_timezone_awareness, get_time_series
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 from django.db import models

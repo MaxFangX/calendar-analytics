@@ -1,4 +1,5 @@
-from api.serializers import GCalendarSerializer, GEventSerializer, StatisticSerializer, ColorCategorySerializer, TagSerializer, ColorCategoryTimeSeriesSerializer
+from api.serializers import GCalendarSerializer, GEventSerializer, StatisticSerializer, ColorCategorySerializer, TagSerializer, ColorCategoryTimeSeriesSerializer, TagTimeSeriesSerializer
+from cal.helpers import handle_time_string, truncated_queryset
 from cal.models import ColorCategory, GCalendar, GEvent, Statistic, Profile, Tag
 from django.http import HttpResponseRedirect
 from rest_framework import generics, status
@@ -244,6 +245,8 @@ class TagDetailEvents(generics.ListAPIView):
 
 class TagDetailEventWeek(APIView):
 
+    serializer_class = TagTimeSeriesSerializer
+
     def get(self, request, *args, **kw):
         tag = Tag.objects.get(user=self.request.user, id=self.kwargs['pk'])
-        return Response(tag.get_time_series())
+        return Response(tag.get_time_series(self.request.query_params.get('timezone')))
