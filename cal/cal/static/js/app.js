@@ -198,8 +198,8 @@ function CategoryListCtrl($scope, $http, CalendarRangeService){
 
   var _this = this;
 
-  $scope.categories = [];
-  $scope.categories.dataLoaded = false;
+  this.categories = [];
+  this.categories.dataLoaded = false;
 
   $scope.$on('calendarRange:updated', function(event, data) {
     /* jshint unused:vars */
@@ -220,18 +220,18 @@ function CategoryListCtrl($scope, $http, CalendarRangeService){
     success(function successCallback(data) {
       for (var i = 0; i < data.results.length; i++) {
         var category = data.results[i];
-        $scope.categories.push({
+        _this.categories.push({
           id: category.id,
           label: category.label,
           hours: category.hours,
           include: true
         });
       }
-      $scope.categories.dataLoaded = true;
+      _this.categories.dataLoaded = true;
     });
 
   this.startEdit = function(categoryId) {
-    var category = $scope.categories.find(function(category, index, array) {
+    var category = _this.categories.find(function(category, index, array) {
       /* jshint unused:vars */
       return category.id == categoryId;
     });
@@ -240,7 +240,7 @@ function CategoryListCtrl($scope, $http, CalendarRangeService){
   };
 
   this.submit = function(categoryId) {
-    var category = $scope.categories.find(function(category, index, array) {
+    var category = _this.categories.find(function(category, index, array) {
       /* jshint unused:vars */
       return category.id == categoryId;
     });
@@ -265,7 +265,7 @@ function CategoryListCtrl($scope, $http, CalendarRangeService){
   };
 
   this.cancelEdit = function(categoryId) {
-    var category = $scope.categories.find(function(category, index, array) {
+    var category = _this.categories.find(function(category, index, array) {
       /* jshint unused:vars */
       return category.id == categoryId;
     });
@@ -286,7 +286,7 @@ function CategoryListCtrl($scope, $http, CalendarRangeService){
     }).
     success(function removeFromList(data) {
       /* jshint unused:vars */
-      $scope.categories = $scope.categories.filter(function(category) {
+      _this.categories = _this.categories.filter(function(category) {
         return category.id !== categoryId;
       });
     });
