@@ -581,6 +581,8 @@ class ColorCategory(models.Model, EventCollection):
         # Union over the querysets
         events_qs = reduce(lambda qs1, qs2: qs1 | qs2, querysets)
 
+        if start:
+            events_qs = events_qs.filter(end__gt=start)
         if end:
             events_qs = events_qs.filter(start__lt=end)
         else:
