@@ -595,15 +595,24 @@ class ColorCategory(models.Model, EventCollection):
         i = 0
         start = events[0].start
         # TODO replace with start date of local time
-        start = start.replace(hour=0, minute=0, second=0, microsecond=0)
+        start = start.replace(hour=8, minute=0, second=0, microsecond=0)
         # Change start date to be Monday beginning of week
         while start.weekday() != 0:
             start = start - relativedelta(days=1)
+        # Rollover takes care of events that overlap time periods
+        rollover = 0
         while i < len(events):
             end = start + relativedelta(days=7)
-            total = 0
+            total = rollover
+            rollover = 0
             while i < len(events) and (end - events[i].start).total_seconds() >= 0:
-                total += (events[i].end - events[i].start).total_seconds() / 3600
+                # Overlapping events
+                if (end - events[i].end).total_seconds() < 0:
+                    print events[i], events[i].start, events[i].end
+                    total += (end - events[i].start).total_seconds() / 3600
+                    rollover = (end - events[i].end).total_seconds() / 3600
+                else:
+                    total += (events[i].end - events[i].start).total_seconds() / 3600
                 i += 1
             week_hours.append((start, total))
             start = end

@@ -176,7 +176,8 @@ class ColorCategoryDetailEvents(generics.ListAPIView):
     serializer_class = GEventSerializer
 
     def get_queryset(self):
-        return ColorCategory.objects.get(user=self.request.user, id=self.kwargs['pk']).query()
+        category = ColorCategory.objects.get(user=self.request.user, id=self.kwargs['pk'])
+        return category.query()
 
 
 class ColorCategoryDetailEventWeek(APIView):
