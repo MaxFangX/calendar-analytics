@@ -127,3 +127,94 @@ analyticsApp.service("TagService", ['$http', function($http) {
   };
 
 }]);
+
+analyticsApp.service("CategoryService", ['$http', function($http) {
+
+  var _this = this;
+
+  this.categories = {};
+
+  this.getCategories = function(timeRange, start, end) {
+    if (!timeRange) {
+      throw "timeRange must always be supplied";
+    }
+
+    if (start || end) {
+      // If the start and end time match the given timeRange
+      if (timeRange !== start.toISOString() + " " + end.toISOString()) {
+        throw "timeRange doesn't match given start and end times";
+      }
+    }
+
+    // Attempt to return cached categories
+    if (_this.categories[timeRange]) {
+      return _this.categories[timeRange];
+    }
+
+    // Request the categories and return a promise
+    return $http({
+      method: 'GET',
+      url: '/v1/colorcategories.json',
+      cache: true,
+      params: {
+        start: (start)? start.toISOString() : null,
+        end: (end)? end.toISOString() : null,
+      }
+    }).then(function successCallback(response) {
+      _this.categories[timeRange] = [];
+      for (var i = 0; i < response.data.results.length; i++) {
+        var category = response.data.results[i];
+        _this.categories[timeRange].push({
+          id: category.id,
+          label: category.label,
+          hours: category.hours,
+          include: true
+        });
+      }
+      return _this.categories[timeRange];
+    }, function errorCallback(response) {
+      /* jshint unused:vars */
+      console.log("Failed to get categories");
+    });
+  };
+
+  this.createCategory = function(label, keywords) {
+    /* jshint unused:vars */
+    // TODO this was never implemented
+  };
+
+  this.editCategory = function(categoryId, newLabel) {
+    return $http({
+      method: 'POST',
+      url: '/v1/colorcategories/' + categoryId,
+      data: $.param({
+        label: newLabel,
+        csrfmiddlewaretoken: getCookie('csrftoken'),
+        _method: 'PATCH'
+      }),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    }).then(function successCallback(response) {
+      return response.data;
+    }, function errorCallback() {
+      console.log("Failed to edit category with id " + categoryId);
+      return null;
+    });
+  };
+
+  this.deleteCategory = function(categoryId) {
+    return $http({
+      method: 'POST',
+      url: '/v1/colorcategories/' + categoryId,
+      data: $.param({
+        csrfmiddlewaretoken: getCookie('csrftoken'),
+        _method: 'DELETE'
+      }),
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
+    });
+  };
+
+}]);
