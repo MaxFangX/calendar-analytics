@@ -1,7 +1,8 @@
 <div>
-  <h4 class="well">Tags - Cumulative</h4>
-  <div ng-hide="tags.dataLoaded" class="preloader"></div>
-  <div ng-if="tags.dataLoaded">
+  <h4 class="well">Tags - {{ $ctrl.displayName }}</h4>
+  <h3>{{ $ctrl.rangeService.type }}</h3>
+  <div ng-hide="$ctrl.tags.dataLoaded" class="preloader"></div>
+  <div ng-if="$ctrl.tags.dataLoaded">
     <table class="table table-hover">
       <thead>
         <th>
@@ -16,8 +17,10 @@
         </th>
       </thead>
       <tbody>
-        <tr ng-repeat="tag in tags | orderBy:orderByField:reverseSort">
-          <td ng-hide="tag.editing"><a href="/tags/{{ tag.id }}/events/">{{ tag.label }}</a></td>
+        <tr ng-repeat="tag in $ctrl.tags
+                      | filter : $ctrl.hideZeroHoursFilter
+                      | orderBy:orderByField:reverseSort">
+          <td ng-hide="tag.editing"><a href="/tags/{{ tag.id }}/">{{ tag.label }}</a></td>
           <td ng-hide="tag.editing">{{ tag.hours }}</td>
           <td ng-show="tag.editing">
             Label<br>
@@ -29,7 +32,7 @@
           </td>
           <td class="text-right text-nowrap" ng-show="tag.editing">
             <button class="btn btn-success">
-              <span class="glyphicon glyphicon-ok" ng-click="$ctrl.submit(tag.id)"></span>
+              <span class="glyphicon glyphicon-ok" ng-click="$ctrl.submitEdit(tag.id)"></span>
             </button>
             <button class="btn btn-warning">
               <span class="glyphicon glyphicon-remove" ng-click="$ctrl.cancelEdit(tag.id)"></span>

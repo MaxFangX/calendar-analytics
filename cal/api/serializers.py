@@ -52,6 +52,7 @@ class StatisticSerializer(serializers.ModelSerializer):
 class ColorCategorySerializer(serializers.ModelSerializer):
 
     hours = serializers.SerializerMethodField()
+    category_color = serializers.SerializerMethodField()
 
     def get_fields(self, *args, **kwargs):
         fields = super(ColorCategorySerializer, self).get_fields(*args, **kwargs)
@@ -60,13 +61,16 @@ class ColorCategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ColorCategory
-        fields = ('id', 'color_index', 'label', 'hours', 'calendar')
+        fields = ('id', 'label', 'hours', 'calendar', 'category_color')
 
     def get_hours(self, obj):
         calendar_ids = self.context['calendar_ids']
         start = self.context['start']
         end = self.context['end']
         return obj.hours(calendar_ids=calendar_ids, start=start, end=end)
+
+    def get_category_color(self, obj):
+        return obj.category_color()
 
 
 class TagSerializer(serializers.ModelSerializer):
