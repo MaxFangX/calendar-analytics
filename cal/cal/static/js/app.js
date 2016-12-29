@@ -222,10 +222,10 @@ function CategoryListCtrl($scope, $http, CalendarRangeService, CategoryService) 
     } else {
       var initialTimeRange = CalendarRangeService.getRange();
       categoriesPromise = CategoryService.getCategories(initialTimeRange.timeRange, initialTimeRange.start, initialTimeRange.end);
+      _this.timeRange = initialTimeRange.timeRange;
     }
     categoriesPromise.then(function(categories) {
       _this.categories = categories;
-      _this.timeRange = initialTimeRange.timeRange;
       _this.categories.dataLoaded = true;
     });
   }.bind(this);

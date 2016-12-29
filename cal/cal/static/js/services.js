@@ -168,8 +168,8 @@ analyticsApp.service("CategoryService", ['$http', '$q', function($http, $q) {
           id: category.id,
           label: category.label,
           hours: category.hours,
-          include: true
-          color: category.category_color
+          include: true,
+          color: category.category_color,
         });
       }
       return _this.categories[timeRange];
