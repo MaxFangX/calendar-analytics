@@ -126,16 +126,17 @@ function TagsDetailCtrl($scope, $http) {
       });
     }
   });
-  $http({method: 'GET',
-         url: eventweek + '.json',
-         params: {
-           timezone: query_timezone,
-         }
-       }).
+  $http({
+    method: 'GET',
+    url: eventweek + '.json',
+    params: {
+      timezone: query_timezone,
+    }
+  }).
   success(function successCallback(data) {
-    $scope.tagHours = $scope.tagHours/data.length;
+    $scope.tagHours = $scope.tagHours / data.length;
     var events = [];
-    var max_hour = 0;
+    var max_hour = 0; // Used to calculate max hour across events. Used in line graph for max y-axis.
     for (var i = 0; i < data.length; i++) {
       var event = data[i];
       var start = new Date(event[0]);
@@ -172,12 +173,12 @@ function TagsDetailCtrl($scope, $http) {
         xAxis: {
           axisLabel: 'Date',
           tickFormat: function(d) {
-                          return d3.time.format('%m/%d/%y')(d)
-                      }
+            return d3.time.format('%m/%d/%y')(d)
+          }
         },
         yAxis: {
           axisLabel: 'Hours',
-          tickFormat: function(d){
+          tickFormat: function(d) {
             return d3.format('.02f')(d);
           },
           axisLabelDistance: -10,
@@ -318,16 +319,17 @@ function CategoriesDetailCtrl($scope, $http){
     }
   });
 
-  $http({method: 'GET',
-         url: eventweek + '.json',
-         params: {
-           timezone: query_timezone,
-         }
-       }).
+  $http({
+    method: 'GET',
+    url: eventweek + '.json',
+    params: {
+      timezone: query_timezone,
+    }
+  }).
   success(function successCallback(data) {
-    $scope.categoryHours = $scope.categoryHours/data.length;
+    $scope.categoryHours = $scope.categoryHours / data.length;
     var events = [];
-    var max_hour = 0;
+    var max_hour = 0; // Used to calculate max hour across events. Used in line graph for max y-axis.
     for (var i = 0; i < data.length; i++) {
       var event = data[i];
       var start = new Date(event[0]);
@@ -364,12 +366,12 @@ function CategoriesDetailCtrl($scope, $http){
         xAxis: {
           axisLabel: 'Date',
           tickFormat: function(d) {
-                          return d3.time.format('%m/%d/%y')(d)
-                      }
+            return d3.time.format('%m/%d/%y')(d)
+          }
         },
         yAxis: {
           axisLabel: 'Hours',
-          tickFormat: function(d){
+          tickFormat: function(d) {
             return d3.format('.02f')(d);
           },
           axisLabelDistance: -10,

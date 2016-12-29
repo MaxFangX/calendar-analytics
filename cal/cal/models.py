@@ -13,7 +13,6 @@ from oauth2client.client import AccessTokenRefreshError
 import httplib2
 import sys
 
-
 class InvalidParameterException(Exception):
     pass
 
@@ -583,12 +582,12 @@ class ColorCategory(models.Model, EventCollection):
 
         return events_qs.order_by('start')
 
-    def get_time_series(self, timezone='UTC', time_range='Weekly', start=None, end=None):
+    def get_time_series(self, timezone='UTC', time_step='weekly', calendar_ids=None, start=None, end=None):
         """
         Returns a list of week-hour tuples corresponding to the events in this ColorCategory.
         Each week starts at the start time.
         """
-        return get_time_series(self, timezone, time_range, start, end)
+        return get_time_series(self, timezone, time_step, calendar_ids, start, end)
 
 
 class TagGroup(models.Model):
@@ -657,11 +656,11 @@ class Tag(models.Model, EventCollection):
 
         return events_qs.order_by('start')
 
-    def get_time_series(self, timezone='UTC', time_range='Weekly', start=None, end=None):
+    def get_time_series(self, timezone='UTC', time_step='weekly', calendar_ids=None, start=None, end=None):
         """
         Returns a list of week-hour tuples corresponding to the events in this Tag.
         """
-        return get_time_series(self, timezone, time_range, start, end)
+        return get_time_series(self, timezone, time_step, calendar_ids, start, end)
 
 
 class Statistic(models.Model):

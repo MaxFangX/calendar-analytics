@@ -1,6 +1,5 @@
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
-from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_datetime
 from django.utils import timezone as timezone_util
 from datetime import timedelta, datetime
@@ -20,12 +19,12 @@ def ensure_timezone_awareness(dt, optional_timezone=None):
     `dt`: the datetime
     `optional_timezone`: string representation of a timezone
     """
-    if timezone.is_naive(dt):
+    if timezone_util.is_naive(dt):
         if optional_timezone:
-            dt = timezone.make_aware(dt, pytz.timezone(optional_timezone))
+            dt = timezone_util.make_aware(dt, pytz.timezone(optional_timezone))
         else:
-            dt = timezone.make_aware(dt, timezone.get_default_timezone())
-    dt = dt.astimezone(timezone.utc)
+            dt = timezone_util.make_aware(dt, timezone_util.get_default_timezone())
+    dt = dt.astimezone(timezone_util.utc)
     # Remove seconds and microseconds
     dt = dt.replace(second=0, microsecond=0)
     return dt
@@ -66,25 +65,25 @@ def handle_time_string(time_str, timezone_str):
     return time
 
 
-def get_time_series(model, timezone='UTC', time_range='Weekly', start=None, end=None):
+def get_time_series(model, timezone='UTC', time_step='weekly', calendar_ids=None, start=None, end=None):
     """
     Returns a list of week-hour tuples corresponding to the events in the `model`. Takes in
-    timezone in order to accurately aggregate events. Includes time_range input either `Daily`,
-    `Weekly`, or `Monthly` which will aggregate accordingly. Splices events that overlap times.
+    timezone in order to accurately aggregate events. Includes time_step input either `daily`,
+    `weekly`, or `monthly` which will aggregate accordingly. Splices events that overlap times.
     """
     week_hours = []
     events = model.query().order_by('start')
     i = 0
     # Convert start to local time
-    start = handle_time_string(str(events[0].start), timezone)
-    if time_range == 'Daily':
+    start = events[0].start.astimezone(pytz.timezone(timezone))
+    if time_step == 'daily':
         # To indicate do nothing if Daily is passed in
         pass
-    if time_range == 'Weekly':
+    if time_step == 'weekly':
         # Change start date to be Monday beginning of week
         while start.weekday() != 0:
             start = start - timedelta(days=1)
-    if time_range == 'Monthly':
+    if time_step == 'monthly':
         # Change start date to beginning of month
         while start.day != 1:
             start = start - timedelta(days=1)
@@ -94,14 +93,14 @@ def get_time_series(model, timezone='UTC', time_range='Weekly', start=None, end=
     # Rollover takes care of events that overlap time periods
     rollover = 0
     while i < len(events):
-        if time_range == 'Daily':
+        if time_step == 'daily':
             end = start + relativedelta(days=1)
-        if time_range == 'Weekly':
+        if time_step == 'weekly':
             end = start + relativedelta(days=7)
-        if time_range == 'Monthly':
+        if time_step == 'monthly':
             end = start + relativedelta(months=1)
         # Deal with daylight savings time
-        if handle_time_string(str(end), timezone).hour != 0:
+        if end.astimezone(pytz.timezone(timezone)).hour != 0:
             end = end + timedelta(hours=1)
         total = rollover
         rollover = 0

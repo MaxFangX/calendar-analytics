@@ -172,7 +172,7 @@ class ColorCategoryDetailEvents(generics.ListAPIView):
         return ColorCategory.objects.get(user=self.request.user, id=self.kwargs['pk']).query()
 
 
-class ColorCategoryDetailEventWeek(APIView):
+class ColorCategoryDetailEventTimeSeries(APIView):
 
     serializer_class = ColorCategoryTimeSeriesSerializer
 
@@ -243,7 +243,7 @@ class TagDetailEvents(generics.ListAPIView):
         return tag.query()
 
 
-class TagDetailEventWeek(APIView):
+class TagDetailEventTimeSeries(APIView):
 
     serializer_class = TagTimeSeriesSerializer
 
