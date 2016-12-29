@@ -26,6 +26,15 @@
         }
       });
     });
+    function runFullSync() {
+      // console.log("{{request.user.profile.first_time_authed}}")
+      if ("{{request.user.profile.first_time_authed}}") {
+        // console.log("CAME HERE")
+        "{{request.user.profile.resetFirstTimeAuth}}"
+        window.location = "/v1/sync?full_sync=true&sync_all=true"
+      }
+    }
+    window.onload = runFullSync;
   </script>
   <!-- END PSA G+ Logout -->
 

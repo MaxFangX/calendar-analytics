@@ -126,6 +126,7 @@ def google_auth(request):
         storage.put(credential)
         profile, _ = Profile.get_or_create(user=request.user)
         profile.authed = True
+        profile.first_time_authed = True
         profile.save()
 
         # TODO improve the latency over here

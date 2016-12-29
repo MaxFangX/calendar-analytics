@@ -28,6 +28,7 @@ class Profile(models.Model):
     main_calendar = models.ForeignKey("GCalendar", null=True)
     authed = models.BooleanField(default=False, help_text="If the user's oauth credentials are currently valid")
     analysis_start = models.DateTimeField(null=True, blank=True, help_text="When the analysis of the user's calendar will start")
+    first_time_authed = models.BooleanField(default=False, help_text="If it's the first time the user's oauth credentials are authenticated")
 
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
@@ -127,6 +128,9 @@ class Profile(models.Model):
             if qs.count() > 0:
                 create_category_if_nonexistent(color_index="1", gcalendar=calendar)
 
+    def resetFirstTimeAuth(self):
+        self.first_time_authed = False
+        self.save()
 
 class GCalendar(models.Model):
 
