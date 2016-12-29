@@ -26,10 +26,8 @@
         }
       });
     });
-    function runFullSync() {
-      // console.log("{{request.user.profile.first_time_authed}}")
-      if ("{{request.user.profile.first_time_authed}}") {
-        // console.log("CAME HERE")
+    function runFullSync(callback) {
+      if ("{{request.user.profile.first_time_authed}}" == "True") {
         "{{request.user.profile.resetFirstTimeAuth}}"
         window.location = "/v1/sync?full_sync=true&sync_all=true"
       }
