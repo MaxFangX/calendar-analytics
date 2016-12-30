@@ -1,5 +1,5 @@
 /*jslint devel: true, browser: true, jquery: true */
-/*global d3, getCookie, moment */
+/*global d3, moment */
 
 var analyticsApp = window.angular.module('analyticsApp', ['analyticsApp.services', 'nvd3', 'ui.calendar']);
 
@@ -15,21 +15,18 @@ function TagListCtrl($scope, $http, CalendarRangeService, TagService) {
   $scope.$on('calendarRange:updated', function(event, data) {
     /* jshint unused:vars */
     var rangeData = CalendarRangeService.getRange();
-    var timeRange = rangeData.timeRange;
     if (!_this.isCumulative) {
-      _this.getTags('cumulative', null, null)
+      TagService.getTags(rangeData.timeRange, rangeData.start, rangeData.end)
         .then(function(tags) {
           _this.tags = tags;
-          _this.timeRange = timeRange;
+          _this.timeRange = rangeData.timeRange;
         });
     }
   });
 
   // Initialization
   this.initialize = function() {
-
     var tagsPromise;
-
     if (this.isCumulative) {
       tagsPromise = TagService.getTags('cumulative', null, null);
     } else {
@@ -40,6 +37,7 @@ function TagListCtrl($scope, $http, CalendarRangeService, TagService) {
       _this.tags = tags;
     });
   }.bind(this);
+
   this.initialize();
 
   this.hideZeroHoursFilter = function (value, index, array) {
@@ -194,29 +192,56 @@ analyticsApp.component('tagDetails', {
   }
 });
 
-analyticsApp.controller('CategoriesCtrl', function($scope, $http){
-  var categoryUrl = '/v1/colorcategories';
-  $scope.categories = [];
-  $scope.categories.dataLoaded = false;
+function CategoryListCtrl($scope, $http, CalendarRangeService, CategoryService) {
 
-  // populate the categories pie chart
-  $http({ method: 'GET', url: categoryUrl + '.json' }).
-    success(function successCallback(data) {
-      for (var i = 0; i < data.results.length; i++) {
-        var category = data.results[i];
-        $scope.categories.push({
-          id: category.id,
-          label: category.label,
-          hours: category.hours,
-          include: true,
-          color: category.category_color
+  var _this = this;
+
+  this.categories = [];
+  this.categories.dataLoaded = false;
+
+  $scope.$on('calendarRange:updated', function(event, data) {
+    /* jshint unused:vars */
+    var rangeData = CalendarRangeService.getRange();
+    if (!_this.isCumulative) {
+      CategoryService.getCategories(rangeData.timeRange, rangeData.start, rangeData.end)
+        .then(function(categories) {
+          _this.categories = categories;
+          _this.timeRange = rangeData.timeRange;
+          _this.categories.dataLoaded = true;
         });
-      }
-      $scope.categories.dataLoaded = true;
+    }
+  });
+
+  // Initialization
+  this.initialize = function() {
+
+    var categoriesPromise;
+
+    if (this.isCumulative) {
+      categoriesPromise = CategoryService.getCategories('cumulative', null, null);
+    } else {
+      var initialTimeRange = CalendarRangeService.getRange();
+      categoriesPromise = CategoryService.getCategories(initialTimeRange.timeRange, initialTimeRange.start, initialTimeRange.end);
+      _this.timeRange = initialTimeRange.timeRange;
+    }
+    categoriesPromise.then(function(categories) {
+      _this.categories = categories;
+      _this.categories.dataLoaded = true;
     });
+  }.bind(this);
+  this.initialize();
+
+  this.hideZeroHoursFilter = function (value, index, array) {
+    /* jshint unused:vars */
+    if (this.hideZeroHours && value.hours === 0) {
+      return false;
+    } else {
+      return true;
+    }
+  }.bind(this);
 
   this.startEdit = function(categoryId) {
-    var category = $scope.categories.find(function(category, index, array) {
+    var category = _this.categories.find(function(category, index, array) {
       /* jshint unused:vars */
       return category.id == categoryId;
     });
@@ -224,61 +249,40 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
     category.editing = true;
   };
 
-  this.submit = function(categoryId) {
-    var category = $scope.categories.find(function(category, index, array) {
+  this.submitEdit = function(categoryId) {
+    var category = _this.categories.find(function(category, index, array) {
       /* jshint unused:vars */
       return category.id == categoryId;
     });
     category.editing = false;
 
-    $http({
-      method: 'POST',
-      url: categoryUrl + '/' + categoryId,
-      data: $.param({
-        label: category.newLabel,
-        csrfmiddlewaretoken: getCookie('csrftoken'),
-        _method: 'PATCH'
-      }),
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
-    }).
-    success(function addToList(data) {
-      category.label = data.label;
-      category.hours = data.hours;
-    });
+    CategoryService.editCategory(categoryId, category.newLabel)
+      .then(function(returnedCategory) {
+        category.label = returnedCategory.label;
+        category.hours = returnedCategory.hours;
+      });
   };
 
   this.cancelEdit = function(categoryId) {
-    var category = $scope.categories.find(function(category, index, array) {
+    var category = this.categories.find(function(category, index, array) {
       /* jshint unused:vars */
       return category.id == categoryId;
     });
     category.editing = false;
-  };
+  }.bind(this);
 
-  this.remove = function(categoryId) {
-    $http({
-      method: 'POST',
-      url: categoryUrl + '/' + categoryId,
-      data: $.param({
-        csrfmiddlewaretoken: getCookie('csrftoken'),
-        _method: 'DELETE'
-      }),
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
-    }).
-    success(function removeFromList(data) {
-      /* jshint unused:vars */
-      $scope.categories = $scope.categories.filter(function(category) {
-        return category.id !== categoryId;
+  this.delete = function(categoryId) {
+    CategoryService.deleteCategory(categoryId)
+      .success(function removeFromList(data) {
+        /* jshint unused:vars */
+        _this.categories = _this.categories.filter(function(category) {
+          return category.id !== categoryId;
+        });
       });
-    });
   };
 
   // categories pie chart
-  $scope.categoryPie = {
+  this.categoryPie = {
     chart: {
       type: 'pieChart',
       height: 400,
@@ -299,6 +303,17 @@ analyticsApp.controller('CategoriesCtrl', function($scope, $http){
       },
     },
   };
+}
+
+analyticsApp.component('categoryList', {
+  templateUrl: '/static/templates/category-list.html',
+  controller: ['$scope', '$http', 'CalendarRangeService', 'CategoryService', CategoryListCtrl],
+  controllerAs: '$ctrl',
+  bindings: {
+    isCumulative: '<?',
+    displayName: '@',
+    hideZeroHours: '<?'
+  }
 });
 
 function CategoriesDetailCtrl($scope, $http){

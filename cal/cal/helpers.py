@@ -67,7 +67,7 @@ def get_color(calendar, color_index):
     Takes in a calendar and a color_index and returns the associated color codes
     from constants.py.
     """
-    if color_index == "1":
+    if color_index == "1" and calendar:
         return GOOGLE_CALENDAR_COLORS['calendar'].get(calendar.color_index)
     else:
         return GOOGLE_CALENDAR_COLORS['event'].get(color_index)

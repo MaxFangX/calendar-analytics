@@ -1,0 +1,51 @@
+<div>
+  <h4 class="well">Categories - {{ $ctrl.displayName }}</h4>
+  <div ng-hide="$ctrl.categories.dataLoaded" class="preloader"></div>
+  <div ng-if="$ctrl.categories.dataLoaded">
+    <nvd3 options="$ctrl.categoryPie" data="$ctrl.categories"></nvd3>
+    <table class="table table-hover">
+      <thead>
+        <th>
+          <a href="" ng-click="orderByField = 'label'; reverseSort = !reverseSort">
+            Label
+          </a>
+        </th>
+        <th>
+          <a href="" ng-click="orderByField = 'hours'; reverseSort = !reverseSort">
+            Hours
+          </a>
+        </th>
+      </thead>
+      <tbody>
+        <tr ng-repeat="category in $ctrl.categories | orderBy:orderByField:reverseSort">
+          <td ng-hide="category.editing">
+            <a href="/categories/{{ category.id }}/">{{ category.label }}</a>
+          </td>
+          <td ng-hide="category.editing">
+            {{ category.hours }}
+          </td>
+          <td ng-show="category.editing" class="cal-text-box">
+            <input type="text" ng-model="category.newLabel">
+          </td>
+          <td ng-show="category.editing"></td> <!-- Hacky way of making it even -->
+          <td class="text-right text-nowrap" ng-show="category.editing">
+            <button class="btn btn-success">
+              <span class="glyphicon glyphicon-ok" ng-click="$ctrl.submitEdit(category.id)"></span>
+            </button>
+            <button class="btn btn-warning">
+              <span class="glyphicon glyphicon-remove" ng-click="$ctrl.cancelEdit(category.id)"></span>
+            </button>
+          </td>
+          <td class="text-right text-nowrap" ng-hide="category.editing">
+            <button class="btn btn-info">
+              <span class="glyphicon glyphicon-edit" ng-click="$ctrl.startEdit(category.id)"></span>
+            </button>
+            <button class="btn btn-danger">
+              <span class="glyphicon glyphicon-trash" ng-click="$ctrl.delete(category.id)"></span>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

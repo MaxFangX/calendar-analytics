@@ -73,61 +73,12 @@
 
   <!-- Lists and other info on the side -->
   <div class="col-md-4">
-    <div ng-controller="CategoriesCtrl as $ctrl">
-      <h4 class="well">Categories - Last Week</h4>
-      <div ng-hide="categories.dataLoaded" class="preloader"></div>
-      <div ng-if="categories.dataLoaded">
-        <nvd3 options="categoryPie" data="categories"></nvd3>
-        <table class="table table-hover">
-          <thead>
-            <th>
-              <a href="" ng-click="orderByField = 'label'; reverseSort = !reverseSort">
-                Label
-              </a>
-            </th>
-            <th>
-              <a href="" ng-click="orderByField = 'hours'; reverseSort = !reverseSort">
-                Hours
-              </a>
-            </th>
-          </thead>
-          <tbody>
-            <tr ng-repeat="category in categories | orderBy:orderByField:reverseSort">
-              {% verbatim %}
-              <td ng-hide="category.editing">
-                <a href="/categories/{{ category.id }}/">{{ category.label }}</a>
-              </td>
-              <td ng-hide="category.editing">
-                {{ category.hours }}
-              </td>
-              {% endverbatim %}
-              <td ng-show="category.editing" class="cal-text-box">
-                <input type="text" ng-model="category.newLabel">
-              </td>
-              <td ng-show="category.editing"></td> <!-- Hacky way of making it even -->
-              <td class="text-right text-nowrap" ng-show="category.editing">
-                <button class="btn btn-success">
-                  <span class="glyphicon glyphicon-ok" ng-click="$ctrl.submit(category.id)"></span>
-                </button>
-                <button class="btn btn-warning">
-                  <span class="glyphicon glyphicon-remove" ng-click="$ctrl.cancelEdit(category.id)"></span>
-                </button>
-              </td>
-              <td class="text-right text-nowrap" ng-hide="category.editing">
-                <button class="btn btn-info">
-                  <span class="glyphicon glyphicon-edit" ng-click="$ctrl.startEdit(category.id)"></span>
-                </button>
-                <button class="btn btn-danger">
-                  <span class="glyphicon glyphicon-trash" ng-click="$ctrl.remove(category.id)"></span>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+
+    <category-list is-cumulative="false" display-name="Weekly" hide-zero-hours="true"></category-list>
 
     <tag-list is-cumulative="false" display-name="Weekly" hide-zero-hours="true"></tag-list>
+
+    <category-list is-cumulative="true" display-name="Cumulative"></category-list>
     <tag-list is-cumulative="true" display-name="Cumulative"></tag-list>
 
     <!-- For new users, needing to connect their calendars -->
