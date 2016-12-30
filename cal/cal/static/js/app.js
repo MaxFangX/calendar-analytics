@@ -240,11 +240,6 @@ function CategoryListCtrl($scope, $http, CalendarRangeService, CategoryService) 
     }
   }.bind(this);
 
-  this.create = function(category) {
-    // TODO this was never implemented
-    /* jshint unused:vars */
-  };
-
   this.startEdit = function(categoryId) {
     var category = _this.categories.find(function(category, index, array) {
       /* jshint unused:vars */

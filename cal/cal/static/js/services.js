@@ -179,11 +179,6 @@ analyticsApp.service("CategoryService", ['$http', '$q', function($http, $q) {
     });
   };
 
-  this.createCategory = function(label, keywords) {
-    /* jshint unused:vars */
-    // TODO this was never implemented
-  };
-
   this.editCategory = function(categoryId, newLabel) {
     return $http({
       method: 'POST',
