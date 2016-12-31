@@ -1,11 +1,11 @@
 <div>
-  <h3 class="well">Average hours per {{timeStep}}: {{ averageHours }}<h3>
-  <button ng-click='showDaily()'>Daily</buton>
-  <button ng-click='showWeekly()'>Weekly</button>
-  <button ng-click='showMonthly()'>Monthly</button>
-  <nvd3 options="categoryLine" data="ctrlDetails"></nvd3>
+  <h3 class="well">Average hours per {{$ctrl.timeStep}}: {{ $ctrl.averageHours }}<h3>
+  <button ng-click='$ctrl.showDaily()'>Daily</buton>
+  <button ng-click='$ctrl.showWeekly()'>Weekly</button>
+  <button ng-click='$ctrl.showMonthly()'>Monthly</button>
+  <nvd3 options="$ctrl.categoryLine" data="ctrlDetails"></nvd3>
   <h3 class="well">Contained Events</h3>
-  <ul class="list-group" ng-repeat="category in categoryEvents">
+  <ul class="list-group" ng-repeat="category in $ctrl.categoryEvents">
     <li class="list-group-item">{{ category.start }}: {{ category.name }}</li>
   </ul>
 </div>
