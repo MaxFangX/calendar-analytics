@@ -1,8 +1,10 @@
 from cal.constants import GOOGLE_CALENDAR_COLORS
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
-from django.utils import timezone
-from datetime import timedelta
+from django.utils.dateparse import parse_date, parse_datetime
+from django.utils import timezone as timezone_util
+from datetime import timedelta, datetime
+from dateutil.relativedelta import relativedelta
 
 import json
 import pytz
@@ -18,15 +20,102 @@ def ensure_timezone_awareness(dt, optional_timezone=None):
     `dt`: the datetime
     `optional_timezone`: string representation of a timezone
     """
-    if timezone.is_naive(dt):
+    if timezone_util.is_naive(dt):
         if optional_timezone:
-            dt = timezone.make_aware(dt, pytz.timezone(optional_timezone))
+            dt = timezone_util.make_aware(dt, pytz.timezone(optional_timezone))
         else:
-            dt = timezone.make_aware(dt, timezone.get_default_timezone())
-    dt = dt.astimezone(timezone.utc)
+            dt = timezone_util.make_aware(dt, timezone_util.get_default_timezone())
+    dt = dt.astimezone(timezone_util.utc)
     # Remove seconds and microseconds
     dt = dt.replace(second=0, microsecond=0)
     return dt
+
+
+def handle_time_string(time_str, timezone_str):
+    """
+    If timezone_str exists get the corresponding timezone. Parses time_str
+    and if there is no time, create an event at 0th hour.
+    Makes timezone aware if unaware then converts to corresponding timezone.
+    """
+    timezone = None
+    if timezone_str:
+        try:
+            timezone = pytz.timezone(timezone_str)
+        except pytz.UnknownTimeZoneError:
+            raise Exception("{} could not be parsed into a timezone".format(timezone_str))
+
+    time = parse_datetime(time_str)
+    if not time:
+        # Parse the date and create a datetime at the zeroth hour
+        date = parse_date(time_str)
+        if not date:
+            raise Exception("{} couldn't be parsed as date or datetime".format(time_str))
+        time = datetime.combine(date, datetime.min.time())
+
+    if timezone_util.is_naive(time):
+        if timezone:
+            time = timezone_util.make_aware(time, timezone)
+        else:
+            time = timezone_util.make_aware(time, timezone_util.get_default_timezone())
+
+    if timezone:
+        time = time.astimezone(timezone)
+    else:
+        time = time.astimezone(timezone_util.utc)
+
+    return time
+
+
+def get_time_series(model, timezone='UTC', time_step='weekly', calendar_ids=None, start=None, end=None):
+    """
+    Returns a list of week-hour tuples corresponding to the events in the `model`. Takes in
+    timezone in order to accurately aggregate events. Includes time_step input either `daily`,
+    `weekly`, or `monthly` which will aggregate accordingly. Splices events that overlap times.
+    """
+    week_hours = []
+    events = model.query().order_by('start')
+    i = 0
+    # Convert start to local time
+    start = events[0].start.astimezone(pytz.timezone(timezone))
+    if time_step == 'daily':
+        # To indicate do nothing if Daily is passed in
+        pass
+    if time_step == 'weekly':
+        # Change start date to be Monday beginning of week
+        while start.weekday() != 0:
+            start = start - timedelta(days=1)
+    if time_step == 'monthly':
+        # Change start date to beginning of month
+        while start.day != 1:
+            start = start - timedelta(days=1)
+    start = start.replace(hour=0, minute=0, second=0, microsecond=0)
+    # Convert back to UTC
+    start = start.astimezone(pytz.utc)
+    # Rollover takes care of events that overlap time periods
+    rollover = 0
+    while i < len(events):
+        if time_step == 'daily':
+            end = start + relativedelta(days=1)
+        if time_step == 'weekly':
+            end = start + relativedelta(days=7)
+        if time_step == 'monthly':
+            end = start + relativedelta(months=1)
+        # Deal with daylight savings time
+        if end.astimezone(pytz.timezone(timezone)).hour != 0:
+            end = end + timedelta(hours=1)
+        total = rollover
+        rollover = 0
+        while i < len(events) and (end - events[i].start).total_seconds() >= 0:
+            # Overlapping events
+            if (end - events[i].end).total_seconds() < 0:
+                total += (end - events[i].start).total_seconds() / 3600
+                rollover = (events[i].end - end).total_seconds() / 3600
+            else:
+                total += (events[i].end - events[i].start).total_seconds() / 3600
+            i += 1
+        week_hours.append((start, total))
+        start = end
+    return week_hours
 
 
 EDGE_OPTIONS = set(['inclusive', 'exclusive', 'truncated'])
@@ -67,7 +156,7 @@ def get_color(calendar, color_index):
     Takes in a calendar and a color_index and returns the associated color codes
     from constants.py.
     """
-    if color_index == "1":
+    if color_index == "1" and calendar:
         return GOOGLE_CALENDAR_COLORS['calendar'].get(calendar.color_index)
     else:
         return GOOGLE_CALENDAR_COLORS['event'].get(color_index)
