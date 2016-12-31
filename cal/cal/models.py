@@ -1,6 +1,6 @@
 from apiclient.discovery import build
 from cal.constants import GOOGLE_CALENDAR_COLORS
-from cal.helpers import EventCollection, TimeNode, TimeNodeChain, ensure_timezone_awareness, get_time_series
+from cal.helpers import EventCollection, TimeNode, TimeNodeChain, ensure_timezone_awareness, get_color, get_time_series
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 from django.db import models
@@ -11,6 +11,7 @@ from oauth2client.django_orm import CredentialsField, FlowField
 from oauth2client.client import AccessTokenRefreshError
 
 import httplib2
+import pytz
 import sys
 
 class InvalidParameterException(Exception):
@@ -375,7 +376,6 @@ class GEvent(Event):
 
     """
     Represents a Google event.
-
     Reference:
     https://developers.google.com/google-apps/calendar/v3/reference/events#resource-representations
     """
@@ -420,11 +420,7 @@ class GEvent(Event):
 
     @property
     def color(self):
-        # For events with default color, use the calendar color instead
-        if self.color_index == "1":
-            color = GOOGLE_CALENDAR_COLORS['calendar'].get(self.calendar.color_index)
-        else:
-            color = GOOGLE_CALENDAR_COLORS['event'].get(self.color_index)
+        color = get_color(self.calendar, self.color_index)
 
         if color:
             return color
@@ -556,6 +552,9 @@ class ColorCategory(models.Model, EventCollection):
 
         return EventCollection(lambda: events).total_time() / 3600
 
+    def category_color(self):
+        return get_color(self.calendar, self.color_index)['background']
+
     def get_events(self, calendar_ids=None, start=None, end=None):
         qs = self.query(calendar_ids, start, end)
         return set(qs)
@@ -580,6 +579,12 @@ class ColorCategory(models.Model, EventCollection):
         # Union over the querysets
         events_qs = reduce(lambda qs1, qs2: qs1 | qs2, querysets)
 
+        if start:
+            events_qs = events_qs.filter(end__gt=start)
+        if end:
+            events_qs = events_qs.filter(start__lt=end)
+        else:
+            events_qs = events_qs.filter(start__lt=datetime.now(pytz.utc))
         return events_qs.order_by('start')
 
     def get_time_series(self, timezone='UTC', time_step='weekly', calendar_ids=None, start=None, end=None):
@@ -640,7 +645,7 @@ class Tag(models.Model, EventCollection):
 
         querysets = [
                 GEvent.objects
-                .filter(calendar=calendar, name__icontains=keyword)
+                .filter(calendar=calendar, name__regex=r'\b(?i)[#]?'+keyword+r'\b')
                 .exclude(all_day_event=True)
                 for keyword in keywords
                 for calendar in calendars
@@ -653,6 +658,8 @@ class Tag(models.Model, EventCollection):
             events_qs = events_qs.filter(end__gt=start)
         if end:
             events_qs = events_qs.filter(start__lt=end)
+        else:
+            events_qs = events_qs.filter(start__lt=datetime.now(pytz.utc))
 
         return events_qs.order_by('start')
 

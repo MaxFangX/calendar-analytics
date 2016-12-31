@@ -1,3 +1,4 @@
+from cal.constants import GOOGLE_CALENDAR_COLORS
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
 from django.utils.dateparse import parse_date, parse_datetime
@@ -148,6 +149,17 @@ def truncated_queryset(queryset, edge, start, end):
         queryset = queryset.filter(end__gt=start, start__lt=end).order_by('start')
 
     return queryset
+
+
+def get_color(calendar, color_index):
+    """
+    Takes in a calendar and a color_index and returns the associated color codes
+    from constants.py.
+    """
+    if color_index == "1" and calendar:
+        return GOOGLE_CALENDAR_COLORS['calendar'].get(calendar.color_index)
+    else:
+        return GOOGLE_CALENDAR_COLORS['event'].get(color_index)
 
 
 class EventCollection:
