@@ -118,20 +118,20 @@ analyticsApp.component('tagList', {
 function TimelineBaseCtrl($scope, $http) {
   $scope.basePopulateData = function(data, type) {
     var maxYValue = 0;
-    var events = []
+    var events = [];
     for (var i = 0; i < data.length; i++) {
       var event = data[i];
-      var date = new Date(event[0])
-      var hours = event[1]
+      var date = new Date(event[0]);
+      var hours = event[1];
       if (hours > maxYValue) {
-        maxYValue = hours
+        maxYValue = hours;
       };
       events.push({
         x: date,
         y: hours
       });
     };
-    $scope.ctrlDetails = []
+    $scope.ctrlDetails = [];
     $scope.ctrlDetails.push({
       values: events,
       key: type + ' Graph',
@@ -151,7 +151,7 @@ function TagsDetailCtrl($scope, $interpolate, $http) {
   var query_timezone = moment.tz.guess();
   this.tagEvents = [];
   this.averageHours = 0;
-  this.timeStep = ""
+  this.timeStep = "";
 
   TimelineBaseCtrl.call(this, $scope, $http);
 
@@ -179,8 +179,8 @@ function TagsDetailCtrl($scope, $interpolate, $http) {
         xAxis: {
           axisLabel: 'Date',
           tickFormat: function(d) {
-                          return d3.time.format('%m/%d/%y')(d)
-                      }
+            return d3.time.format('%m/%d/%y')(d)
+          },
         },
         yAxis: {
           axisLabel: 'Hours',
@@ -189,7 +189,7 @@ function TagsDetailCtrl($scope, $interpolate, $http) {
           },
           axisLabelDistance: -10,
         },
-        forceY: [0, maxYValue+1],
+        forceY: [0, maxYValue + 1],
       },
     };
   }.bind(this);
@@ -429,8 +429,8 @@ function CategoriesDetailCtrl($scope, $http){
         xAxis: {
           axisLabel: 'Date',
           tickFormat: function(d) {
-                          return d3.time.format('%m/%d/%y')(d)
-                      }
+            return d3.time.format('%m/%d/%y')(d)
+          },
         },
         yAxis: {
           axisLabel: 'Hours',
@@ -439,7 +439,7 @@ function CategoriesDetailCtrl($scope, $http){
           },
           axisLabelDistance: -10
         },
-        forceY: [0, maxYValue+1],
+        forceY: [0, maxYValue + 1],
       },
     };
   }.bind(this);
