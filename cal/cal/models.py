@@ -1,6 +1,6 @@
 from apiclient.discovery import build
 from cal.constants import GOOGLE_CALENDAR_COLORS
-from cal.helpers import EventCollection, TimeNode, TimeNodeChain, ensure_timezone_awareness, get_color
+from cal.helpers import EventCollection, TimeNode, TimeNodeChain, ensure_timezone_awareness, get_color, get_time_series
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User
 from django.db import models
@@ -13,7 +13,6 @@ from oauth2client.client import AccessTokenRefreshError
 import httplib2
 import pytz
 import sys
-
 
 class InvalidParameterException(Exception):
     pass
@@ -586,26 +585,14 @@ class ColorCategory(models.Model, EventCollection):
             events_qs = events_qs.filter(start__lt=end)
         else:
             events_qs = events_qs.filter(start__lt=datetime.now(pytz.utc))
-        return events_qs
+        return events_qs.order_by('start')
 
-    def get_hours_per_week(self, calendar_ids=None, start=None, end=None):
+    def get_time_series(self, timezone='UTC', time_step='weekly', calendar_ids=None, start=None, end=None):
         """
         Returns a list of week-hour tuples corresponding to the events in this ColorCategory.
         Each week starts at the start time.
         """
-        week_hours = []
-        events = self.query().order_by('start')
-        i = 0
-        start = events[0].start
-        while i < len(events):
-            end = start + timedelta(days=7)
-            total = 0
-            while i < len(events) and (end - events[i].start).total_seconds() >= 0:
-                total += (events[i].end - events[i].start).total_seconds() / 3600
-                i += 1
-            week_hours.append((start, total))
-            start = end
-        return week_hours
+        return get_time_series(self, timezone, time_step, calendar_ids, start, end)
 
 
 class TagGroup(models.Model):
@@ -676,23 +663,11 @@ class Tag(models.Model, EventCollection):
 
         return events_qs.order_by('start')
 
-    def get_hours_per_week(self, calendar_ids=None, start=None, end=None):
+    def get_time_series(self, timezone='UTC', time_step='weekly', calendar_ids=None, start=None, end=None):
         """
         Returns a list of week-hour tuples corresponding to the events in this Tag.
         """
-        week_hours = []
-        events = self.query()
-        i = 0
-        start = events[0].start
-        while i < len(events):
-            end = start + timedelta(days=7)
-            total = 0
-            while i < len(events) and (end - events[i].start).total_seconds() >= 0:
-                total += (events[i].end - events[i].start).total_seconds() / 3600
-                i += 1
-            week_hours.append((start, total))
-            start = end
-        return week_hours
+        return get_time_series(self, timezone, time_step, calendar_ids, start, end)
 
 
 class Statistic(models.Model):
