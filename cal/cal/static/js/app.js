@@ -152,17 +152,6 @@ function TagsDetailCtrl($scope, $http) {
   $scope.tagEvents = [];
   $scope.tagHours = this.tagHours;
 
-  $http({method: 'GET', url: tagUrl + '.json' }).
-  success(function successCallback(data) {
-    for (var i = 0; i < data.results.length; i++) {
-      var event = data.results[i];
-      $scope.tagEvents.push({
-        start: (new Date(event.start)).toString(),
-        name: event.name,
-      });
-    }
-  });
-
   TimelineBaseCtrl.call(this, $scope, $http);
 
   $scope.populateData = function(data, type) {
@@ -246,8 +235,21 @@ function TagsDetailCtrl($scope, $http) {
     });
   };
 
-  // Initial load of weekly data
-  $scope.showWeekly();
+  $scope.initialize = function() {
+    $scope.showWeekly();
+    $http({method: 'GET', url: tagUrl + '.json' }).
+    success(function successCallback(data) {
+      for (var i = 0; i < data.results.length; i++) {
+        var event = data.results[i];
+        $scope.tagEvents.push({
+          start: (new Date(event.start)).toString(),
+          name: event.name,
+        });
+      }
+    });
+  };
+
+  $scope.initialize();
 };
 
 
@@ -386,6 +388,7 @@ analyticsApp.component('categoryList', {
 });
 
 function CategoriesDetailCtrl($scope, $http){
+  var _this = this;
   var categoryUrl = '/v1/colorcategories/' + this.categoryId + '/events';
   var eventWeek = '/v1/colorcategories/' + this.categoryId + '/eventWeek';
   var eventMonth = '/v1/colorcategories/' + this.categoryId + '/eventMonth';
@@ -393,18 +396,8 @@ function CategoriesDetailCtrl($scope, $http){
   var query_timezone = moment.tz.guess();
   $scope.categoryDetails = [];
   $scope.categoryEvents = [];
-  $scope.categoryHours = this.categoryHours;
-
-  $http({method: 'GET', url: categoryUrl + '.json' }).
-  success(function successCallback(data) {
-    for (var i = 0; i < data.results.length; i++) {
-      var event = data.results[i];
-      $scope.categoryEvents.push({
-        start: (new Date(event.start)).toString(),
-        name: event.name,
-      });
-    }
-  });
+  $scope.averageHours = this.categoryHours;
+  console.log(this.categoryHours)
 
   TimelineBaseCtrl.call(this, $scope, $http);
 
@@ -455,6 +448,7 @@ function CategoriesDetailCtrl($scope, $http){
       }
     }).
     success(function successCallback(data) {
+      $scope.averageHours = _this.categoryHours / data.length;
       var eventData = $scope.populateData(data, 'Category');
       $scope.showGraph(eventData[1]);
     });
@@ -469,6 +463,8 @@ function CategoriesDetailCtrl($scope, $http){
       }
     }).
     success(function successCallback(data) {
+      console.log(_this.averageHours)
+      $scope.averageHours = _this.categoryHours / data.length;
       var eventData = $scope.populateData(data, 'Category');
       $scope.showGraph(eventData[1]);
     });
@@ -483,13 +479,27 @@ function CategoriesDetailCtrl($scope, $http){
       }
     }).
     success(function successCallback(data) {
+      $scope.averageHours = _this.categoryHours / data.length;
       var eventData = $scope.populateData(data, 'Category');
       $scope.showGraph(eventData[1]);
     });
   };
 
-  // Initial load of weekly data
-  $scope.showWeekly();
+  $scope.initialize = function() {
+    $http({method: 'GET', url: categoryUrl + '.json' }).
+    success(function successCallback(data) {
+      for (var i = 0; i < data.results.length; i++) {
+        var event = data.results[i];
+        $scope.categoryEvents.push({
+          start: (new Date(event.start)).toString(),
+          name: event.name,
+        });
+      }
+    });
+    $scope.showWeekly();
+  };
+
+  $scope.initialize();
 };
 
 analyticsApp.component('categoryDetails', {
@@ -498,7 +508,7 @@ analyticsApp.component('categoryDetails', {
   controllerAs: '$ctrl',
   bindings: {
     categoryId: '@',
-    categoryHours: '@'
+    averageHours: '@'
   }
 });
 
