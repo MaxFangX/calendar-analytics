@@ -115,9 +115,38 @@ analyticsApp.component('tagList', {
   }
 });
 
+function TimelineBaseCtrl($scope, $http) {
+  $scope.basePopulateData = function(data, type) {
+    var maxYValue = 0;
+    var events = []
+    for (var i = 0; i < data.length; i++) {
+      var event = data[i];
+      var date = new Date(event[0])
+      var hours = event[1]
+      if (hours > maxYValue) {
+        maxYValue = hours
+      };
+      events.push({
+        x: date,
+        y: hours
+      });
+    };
+    $scope.ctrlDetails = []
+    $scope.ctrlDetails.push({
+      values: events,
+      key: type + ' Graph',
+      color: '#003057',
+      strokeWidth: 2,
+    });
+    return [events, maxYValue];
+  };
+};
+
 function TagsDetailCtrl($scope, $http) {
   var tagUrl = '/v1/tags/' + this.tagId + '/events';
-  var eventweek = '/v1/tags/' + this.tagId + '/eventWeek';
+  var eventWeek = '/v1/tags/' + this.tagId + '/eventWeek';
+  var eventMonth = '/v1/tags/' + this.tagId + '/eventMonth';
+  var eventDay = '/v1/tags/' + this.tagId + '/eventDay';
   var query_timezone = moment.tz.guess();
   $scope.tagDetails = [];
   $scope.tagEvents = [];
@@ -133,35 +162,15 @@ function TagsDetailCtrl($scope, $http) {
       });
     }
   });
-  $http({
-    method: 'GET',
-    url: eventweek + '.json',
-    params: {
-      timezone: query_timezone,
-    }
-  }).
-  success(function successCallback(data) {
-    $scope.tagHours = $scope.tagHours / data.length;
-    var events = [];
-    var max_hour = 0; // Used to calculate max hour across events. Used in line graph for max y-axis.
-    for (var i = 0; i < data.length; i++) {
-      var event = data[i];
-      var start = new Date(event[0]);
-      var hour = event[1];
-      if (hour > max_hour) {
-        max_hour = hour;
-      }
-      events.push({
-        x: start,
-        y: hour
-      });
-    }
-    $scope.tagDetails.push({
-      values: events,      //values - represents the array of {x,y} data points
-      key: 'Tag Graph', //key  - the name of the series.
-      color: '#003057',  //color - optional: choose your own line color.
-      strokeWidth: 2,
-    })
+
+  TimelineBaseCtrl.call(this, $scope, $http);
+
+  $scope.populateData = function(data, type) {
+    return this.basePopulateData(data, type);
+  };
+
+  // Refreshes the line graph
+  $scope.showGraph = function(maxYValue) {
     // line graph
     $scope.tagLine = {
       chart: {
@@ -180,20 +189,65 @@ function TagsDetailCtrl($scope, $http) {
         xAxis: {
           axisLabel: 'Date',
           tickFormat: function(d) {
-            return d3.time.format('%m/%d/%y')(d)
-          }
+                          return d3.time.format('%m/%d/%y')(d)
+                      }
         },
         yAxis: {
           axisLabel: 'Hours',
-          tickFormat: function(d) {
+          tickFormat: function(d){
             return d3.format('.02f')(d);
           },
           axisLabelDistance: -10,
         },
-        forceY: [0, max_hour + 1],
+        forceY: [0, maxYValue+1],
       },
     };
-  });
+  };
+
+  $scope.showDaily = function() {
+    $http({
+      method: 'GET',
+      url: eventDay + '.json',
+      params: {
+        timezone: query_timezone,
+      }
+    }).
+    success(function successCallback(data) {
+      var eventData = $scope.populateData(data, 'Tag');
+      $scope.showGraph(eventData[1]);
+    });
+  };
+
+  $scope.showWeekly = function() {
+    $http({
+      method: 'GET',
+      url: eventWeek + '.json',
+      params: {
+        timezone: query_timezone,
+      }
+    }).
+    success(function successCallback(data) {
+      var eventData = $scope.populateData(data, 'Tag');
+      $scope.showGraph(eventData[1]);
+    });
+  };
+
+  $scope.showMonthly = function() {
+    $http({
+      method: 'GET',
+      url: eventMonth + '.json',
+      params: {
+        timezone: query_timezone,
+      }
+    }).
+    success(function successCallback(data) {
+      var eventData = $scope.populateData(data, 'Tag');
+      $scope.showGraph(eventData[1]);
+    });
+  };
+
+  // Initial load of weekly data
+  $scope.showWeekly();
 };
 
 
@@ -333,7 +387,9 @@ analyticsApp.component('categoryList', {
 
 function CategoriesDetailCtrl($scope, $http){
   var categoryUrl = '/v1/colorcategories/' + this.categoryId + '/events';
-  var eventweek = '/v1/colorcategories/' + this.categoryId + '/eventWeek';
+  var eventWeek = '/v1/colorcategories/' + this.categoryId + '/eventWeek';
+  var eventMonth = '/v1/colorcategories/' + this.categoryId + '/eventMonth';
+  var eventDay = '/v1/colorcategories/' + this.categoryId + '/eventDay';
   var query_timezone = moment.tz.guess();
   $scope.categoryDetails = [];
   $scope.categoryEvents = [];
@@ -350,36 +406,14 @@ function CategoriesDetailCtrl($scope, $http){
     }
   });
 
-  $http({
-    method: 'GET',
-    url: eventweek + '.json',
-    params: {
-      timezone: query_timezone,
-    }
-  }).
-  success(function successCallback(data) {
-    $scope.categoryHours = $scope.categoryHours / data.length;
-    var events = [];
-    var max_hour = 0; // Used to calculate max hour across events. Used in line graph for max y-axis.
-    for (var i = 0; i < data.length; i++) {
-      var event = data[i];
-      var start = new Date(event[0]);
-      var hour = event[1];
-      if (hour > max_hour) {
-        max_hour = hour;
-      }
-      events.push({
-        x: start,
-        y: hour
-      });
-    }
-    $scope.categoryDetails.push({
-      values: events, //values - represents the array of {x,y} data points
-      key: 'Category Graph', //key  - the name of the series.
-      color: '#003057', //color - optional: choose your own line color.
-      strokeWidth: 2,
-    })
-    // line graph
+  TimelineBaseCtrl.call(this, $scope, $http);
+
+  $scope.populateData = function(data, type) {
+    return this.basePopulateData(data, type);
+  };
+
+  // line graph
+  $scope.showGraph = function(maxYValue) {
     $scope.categoryLine = {
       chart: {
         type: 'lineChart',
@@ -397,20 +431,65 @@ function CategoriesDetailCtrl($scope, $http){
         xAxis: {
           axisLabel: 'Date',
           tickFormat: function(d) {
-            return d3.time.format('%m/%d/%y')(d)
-          }
+                          return d3.time.format('%m/%d/%y')(d)
+                      }
         },
         yAxis: {
           axisLabel: 'Hours',
-          tickFormat: function(d) {
+          tickFormat: function(d){
             return d3.format('.02f')(d);
           },
-          axisLabelDistance: -10,
+          axisLabelDistance: -10
         },
-        forceY: [0, max_hour + 1],
+        forceY: [0, maxYValue+1],
       },
     };
-  });
+  };
+
+  $scope.showDaily = function() {
+    $http({
+      method: 'GET',
+      url: eventDay + '.json',
+      params: {
+        timezone: query_timezone,
+      }
+    }).
+    success(function successCallback(data) {
+      var eventData = $scope.populateData(data, 'Category');
+      $scope.showGraph(eventData[1]);
+    });
+  };
+
+  $scope.showWeekly = function() {
+    $http({
+      method: 'GET',
+      url: eventWeek + '.json',
+      params: {
+        timezone: query_timezone,
+      }
+    }).
+    success(function successCallback(data) {
+      var eventData = $scope.populateData(data, 'Category');
+      $scope.showGraph(eventData[1]);
+    });
+  };
+
+  $scope.showMonthly = function() {
+    $http({
+      method: 'GET',
+      url: eventMonth + '.json',
+      params: {
+        timezone: query_timezone,
+      }
+    }).
+    success(function successCallback(data) {
+      var eventData = $scope.populateData(data, 'Category');
+      $scope.showGraph(eventData[1]);
+    });
+  };
+
+  // Initial load of weekly data
+  $scope.showWeekly();
 };
 
 analyticsApp.component('categoryDetails', {

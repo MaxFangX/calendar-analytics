@@ -15,12 +15,12 @@ urlpatterns = patterns(
     url(r'^v1/colorcategories/$', views.ColorCategoryList.as_view()),
     url(r'^v1/colorcategories/(?P<pk>[0-9]+)/?$', views.ColorCategoryDetail.as_view()),
     url(r'^v1/colorcategories/(?P<pk>[0-9]+)/events/?$', views.ColorCategoryDetailEvents.as_view()),
-    url(r'^v1/colorcategories/(?P<pk>[0-9]+)/eventWeek/?$', views.ColorCategoryDetailEventTimeSeries.as_view()),
+    url(r'^v1/colorcategories/(?P<pk>[0-9]+)/event(?P<time_step>\w+)/?$', views.ColorCategoryDetailEventTimeSeries.as_view()),
     url(r'^v1/stats/$', views.StatisticList.as_view()),
     url(r'^v1/tags/$', views.TagList.as_view()),
     url(r'^v1/tags/(?P<pk>[0-9]+)/?$', views.TagDetail.as_view()),
     url(r'^v1/tags/(?P<pk>[0-9]+)/events/?$', views.TagDetailEvents.as_view()),
-    url(r'^v1/tags/(?P<pk>[0-9]+)/eventWeek/?$', views.TagDetailEventTimeSeries.as_view()),
+    url(r'^v1/tags/(?P<pk>[0-9]+)/event(?P<time_step>\w+)/?$', views.TagDetailEventTimeSeries.as_view()),
 
 )
 

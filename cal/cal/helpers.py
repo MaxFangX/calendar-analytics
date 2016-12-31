@@ -66,7 +66,7 @@ def handle_time_string(time_str, timezone_str):
     return time
 
 
-def get_time_series(model, timezone='UTC', time_step='weekly', calendar_ids=None, start=None, end=None):
+def get_time_series(model, timezone='UTC', time_step='Week', calendar_ids=None, start=None, end=None):
     """
     Returns a list of week-hour tuples corresponding to the events in the `model`. Takes in
     timezone in order to accurately aggregate events. Includes time_step input either `daily`,
@@ -77,14 +77,14 @@ def get_time_series(model, timezone='UTC', time_step='weekly', calendar_ids=None
     i = 0
     # Convert start to local time
     start = events[0].start.astimezone(pytz.timezone(timezone))
-    if time_step == 'daily':
+    if time_step == 'Day':
         # To indicate do nothing if Daily is passed in
         pass
-    if time_step == 'weekly':
+    if time_step == 'Week':
         # Change start date to be Monday beginning of week
         while start.weekday() != 0:
             start = start - timedelta(days=1)
-    if time_step == 'monthly':
+    if time_step == 'Month':
         # Change start date to beginning of month
         while start.day != 1:
             start = start - timedelta(days=1)
@@ -94,11 +94,11 @@ def get_time_series(model, timezone='UTC', time_step='weekly', calendar_ids=None
     # Rollover takes care of events that overlap time periods
     rollover = 0
     while i < len(events):
-        if time_step == 'daily':
+        if time_step == 'Day':
             end = start + relativedelta(days=1)
-        if time_step == 'weekly':
+        if time_step == 'Week':
             end = start + relativedelta(days=7)
-        if time_step == 'monthly':
+        if time_step == 'Month':
             end = start + relativedelta(months=1)
         # Deal with daylight savings time
         if end.astimezone(pytz.timezone(timezone)).hour != 0:
