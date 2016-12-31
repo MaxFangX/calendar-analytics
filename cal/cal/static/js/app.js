@@ -143,14 +143,16 @@ function TimelineBaseCtrl($scope, $http) {
 };
 
 function TagsDetailCtrl($scope, $http) {
+  var _this = this;
   var tagUrl = '/v1/tags/' + this.tagId + '/events';
   var eventWeek = '/v1/tags/' + this.tagId + '/eventWeek';
   var eventMonth = '/v1/tags/' + this.tagId + '/eventMonth';
   var eventDay = '/v1/tags/' + this.tagId + '/eventDay';
   var query_timezone = moment.tz.guess();
-  $scope.tagDetails = [];
-  $scope.tagEvents = [];
-  $scope.tagHours = this.tagHours;
+  this.tagEvents = [];
+  $scope.averageHours = this.tagHours;
+  $scope.timeStep = ""
+  // console.log(this.tagHours)
 
   TimelineBaseCtrl.call(this, $scope, $http);
 
@@ -202,6 +204,8 @@ function TagsDetailCtrl($scope, $http) {
       }
     }).
     success(function successCallback(data) {
+      $scope.timeStep = "day";
+      $scope.averageHours = _this.tagHours / data.length;
       var eventData = $scope.populateData(data, 'Tag');
       $scope.showGraph(eventData[1]);
     });
@@ -216,6 +220,8 @@ function TagsDetailCtrl($scope, $http) {
       }
     }).
     success(function successCallback(data) {
+      $scope.timeStep = "week";
+      $scope.averageHours = _this.tagHours / data.length;
       var eventData = $scope.populateData(data, 'Tag');
       $scope.showGraph(eventData[1]);
     });
@@ -230,6 +236,8 @@ function TagsDetailCtrl($scope, $http) {
       }
     }).
     success(function successCallback(data) {
+      $scope.timeStep = "month";
+      $scope.averageHours = _this.tagHours / data.length;
       var eventData = $scope.populateData(data, 'Tag');
       $scope.showGraph(eventData[1]);
     });
@@ -394,10 +402,10 @@ function CategoriesDetailCtrl($scope, $http){
   var eventMonth = '/v1/colorcategories/' + this.categoryId + '/eventMonth';
   var eventDay = '/v1/colorcategories/' + this.categoryId + '/eventDay';
   var query_timezone = moment.tz.guess();
-  $scope.categoryDetails = [];
   $scope.categoryEvents = [];
   $scope.averageHours = this.categoryHours;
-  console.log(this.categoryHours)
+  $scope.timeStep = "";
+  // console.log(this.categoryHours)
 
   TimelineBaseCtrl.call(this, $scope, $http);
 
@@ -448,6 +456,7 @@ function CategoriesDetailCtrl($scope, $http){
       }
     }).
     success(function successCallback(data) {
+      $scope.timeStep = "day";
       $scope.averageHours = _this.categoryHours / data.length;
       var eventData = $scope.populateData(data, 'Category');
       $scope.showGraph(eventData[1]);
@@ -463,7 +472,7 @@ function CategoriesDetailCtrl($scope, $http){
       }
     }).
     success(function successCallback(data) {
-      console.log(_this.averageHours)
+      $scope.timeStep = "week";
       $scope.averageHours = _this.categoryHours / data.length;
       var eventData = $scope.populateData(data, 'Category');
       $scope.showGraph(eventData[1]);
@@ -479,6 +488,7 @@ function CategoriesDetailCtrl($scope, $http){
       }
     }).
     success(function successCallback(data) {
+      $scope.timeStep = "month";
       $scope.averageHours = _this.categoryHours / data.length;
       var eventData = $scope.populateData(data, 'Category');
       $scope.showGraph(eventData[1]);
@@ -508,7 +518,7 @@ analyticsApp.component('categoryDetails', {
   controllerAs: '$ctrl',
   bindings: {
     categoryId: '@',
-    averageHours: '@'
+    categoryHours: '@'
   }
 });
 
