@@ -3,7 +3,12 @@
 
 var analyticsApp = window.angular.module('analyticsApp', ['analyticsApp.services', 'nvd3', 'ui.calendar']);
 
-analyticsApp.controller('LoggedInCtrl', function LoggedInController() {
+analyticsApp.controller('LoggedInCtrl', function LoggedInController($scope, $window) {
+  $scope.init = function() {
+    angular.element(document).ready(function () {
+        $window.location.href = '/v1/sync?sync_all=true';
+    });
+  };
 });
 
 function TagListCtrl($scope, $http, CalendarRangeService, TagService) {

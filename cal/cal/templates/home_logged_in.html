@@ -26,13 +26,12 @@
         }
       });
     });
-    function runFullSync() {
-      if ("{{request.user.profile.first_time_authed}}" == "True") {
-        "{{request.user.profile.resetFirstTimeAuth}}";
-        window.location = "/v1/sync?full_sync=true&sync_all=true";
-      };
-    };
-    window.onload = runFullSync;
+    // function runFullSync() {
+    //   if ("{{request.user.profile.first_time_authed}}" == "True") {
+    //     window.location = "/v1/sync?full_sync=true&sync_all=true";
+    //   };
+    // };
+    // window.onload = runFullSync;
   </script>
   <!-- END PSA G+ Logout -->
 
@@ -90,9 +89,11 @@
 
     <!-- For new users, needing to connect their calendars -->
     {% else %}
-      <div class="jumbotron">
-        <h3><a href="/auth/google">Connect Google Calendar</a></h3>
-      </div>
+      <body ng-controller="LoggedInCtrl" ng-init="init()">
+        <div class="jumbotron">
+          <h3><a href="/auth/google">Connect Google Calendar</a></h3>
+        </div>
+      </body>
     {% endif %}
 
     <!-- Super user buttons -->
