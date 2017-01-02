@@ -3,7 +3,7 @@
   <button ng-click='$ctrl.showDaily()'>Daily</buton>
   <button ng-click='$ctrl.showWeekly()'>Weekly</button>
   <button ng-click='$ctrl.showMonthly()'>Monthly</button>
-  <nvd3 options="$ctrl.tagLine" data="ctrlDetails"></nvd3>
+  <nvd3 options="$ctrl.tagLine" data="$ctrl.ctrlDetails"></nvd3>
   <h3 class="well">Contained Events</h3>
   <ul class="list-group" ng-repeat="tag in $ctrl.tagEvents">
     <li class="list-group-item">{{ tag.start }}: {{ tag.name }}</li>

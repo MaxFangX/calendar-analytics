@@ -115,33 +115,7 @@ analyticsApp.component('tagList', {
   }
 });
 
-function TimelineBaseCtrl($scope, $http) {
-  $scope.basePopulateData = function(data, type) {
-    var maxYValue = 0;
-    var events = [];
-    for (var i = 0; i < data.length; i++) {
-      var event = data[i];
-      var date = new Date(event[0]);
-      var hours = event[1];
-      if (hours > maxYValue) {
-        maxYValue = hours;
-      };
-      events.push({
-        x: date,
-        y: hours
-      });
-    };
-    $scope.ctrlDetails = [{
-      values: events,
-      key: type + ' Graph',
-      color: '#003057',
-      strokeWidth: 2,
-    }];
-    return [events, maxYValue];
-  };
-};
-
-function TagsDetailCtrl($scope, $interpolate, $http) {
+function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
   var _this = this;
   var tagUrl = '/v1/tags/' + this.tagId + '/events';
   var eventWeek = '/v1/tags/' + this.tagId + '/event/week';
@@ -151,12 +125,6 @@ function TagsDetailCtrl($scope, $interpolate, $http) {
   this.tagEvents = [];
   this.averageHours = 0;
   this.timeStep = "";
-
-  TimelineBaseCtrl.call(this, $scope, $http);
-
-  $scope.populateData = function(data, type) {
-    return this.basePopulateData(data, type);
-  };
 
   // Refreshes the line graph
   this.showGraph = function(maxYValue) {
@@ -204,7 +172,8 @@ function TagsDetailCtrl($scope, $interpolate, $http) {
     success(function successCallback(data) {
       _this.timeStep = "day";
       _this.averageHours = _this.tagHours / data.length;
-      var eventData = $scope.populateData(data, 'Tag');
+      var eventData = QueryService.populateData(data, 'Tag');
+      _this.ctrlDetails = eventData[0];
       _this.showGraph(eventData[1]);
     });
   };
@@ -220,7 +189,8 @@ function TagsDetailCtrl($scope, $interpolate, $http) {
     success(function successCallback(data) {
       _this.timeStep = "week";
       _this.averageHours = _this.tagHours / data.length;
-      var eventData = $scope.populateData(data, 'Tag');
+      var eventData = QueryService.populateData(data, 'Tag');
+      _this.ctrlDetails = eventData[0];
       _this.showGraph(eventData[1]);
     });
   };
@@ -236,7 +206,8 @@ function TagsDetailCtrl($scope, $interpolate, $http) {
     success(function successCallback(data) {
       _this.timeStep = "month";
       _this.averageHours = _this.tagHours / data.length;
-      var eventData = $scope.populateData(data, 'Tag');
+      var eventData = QueryService.populateData(data, 'Tag');
+      _this.ctrlDetails = eventData[0];
       _this.showGraph(eventData[1]);
     });
   };
@@ -260,7 +231,7 @@ function TagsDetailCtrl($scope, $interpolate, $http) {
 
 analyticsApp.component('tagDetails', {
   templateUrl: '/static/templates/tagDetails.html',
-  controller: TagsDetailCtrl,
+  controller: ['$scope', '$interpolate', '$http', 'QueryService', TagsDetailCtrl],
   controllerAs: '$ctrl',
   bindings: {
     tagId: '@',
@@ -392,7 +363,7 @@ analyticsApp.component('categoryList', {
   }
 });
 
-function CategoriesDetailCtrl($scope, $http){
+function CategoriesDetailCtrl($scope, $http, QueryService){
   var _this = this;
   var categoryUrl = '/v1/colorcategories/' + this.categoryId + '/events';
   var eventWeek = '/v1/colorcategories/' + this.categoryId + '/event/week';
@@ -402,12 +373,6 @@ function CategoriesDetailCtrl($scope, $http){
   this.categoryEvents = [];
   this.averageHours = 0;
   this.timeStep = "";
-
-  TimelineBaseCtrl.call(this, $scope, $http);
-
-  $scope.populateData = function(data, type) {
-    return this.basePopulateData(data, type);
-  };
 
   // line graph
   this.showGraph = function(maxYValue) {
@@ -454,7 +419,8 @@ function CategoriesDetailCtrl($scope, $http){
     success(function successCallback(data) {
       _this.timeStep = "day";
       _this.averageHours = _this.categoryHours / data.length;
-      var eventData = $scope.populateData(data, 'Category');
+      var eventData = QueryService.populateData(data, 'Tag');
+      _this.ctrlDetails = eventData[0];
       _this.showGraph(eventData[1]);
     });
   };
@@ -470,7 +436,8 @@ function CategoriesDetailCtrl($scope, $http){
     success(function successCallback(data) {
       _this.timeStep = "week";
       _this.averageHours = _this.categoryHours / data.length;
-      var eventData = $scope.populateData(data, 'Category');
+      var eventData = QueryService.populateData(data, 'Tag');
+      _this.ctrlDetails = eventData[0];
       _this.showGraph(eventData[1]);
     });
   };
@@ -486,7 +453,8 @@ function CategoriesDetailCtrl($scope, $http){
     success(function successCallback(data) {
       _this.timeStep = "month";
       _this.averageHours = _this.categoryHours / data.length;
-      var eventData = $scope.populateData(data, 'Category');
+      var eventData = QueryService.populateData(data, 'Tag');
+      _this.ctrlDetails = eventData[0];
       _this.showGraph(eventData[1]);
     });
   };
@@ -510,7 +478,7 @@ function CategoriesDetailCtrl($scope, $http){
 
 analyticsApp.component('categoryDetails', {
   templateUrl: '/static/templates/categoryDetails.html',
-  controller: CategoriesDetailCtrl,
+  controller: ['$scope', '$http', 'QueryService', CategoriesDetailCtrl],
   controllerAs: '$ctrl',
   bindings: {
     categoryId: '@',
