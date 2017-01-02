@@ -86,3 +86,15 @@ class TagSerializer(serializers.ModelSerializer):
         start = self.context.get('start')
         end = self.context.get('end')
         return obj.hours(calendar_ids=calendar_ids, start=start, end=end)
+
+
+class ColorCategoryTimeSeriesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ('timezone')
+
+
+class TagTimeSeriesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        fields = ('timezone')
