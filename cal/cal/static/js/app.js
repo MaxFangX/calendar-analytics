@@ -145,9 +145,9 @@ function TimelineBaseCtrl($scope, $http) {
 function TagsDetailCtrl($scope, $interpolate, $http) {
   var _this = this;
   var tagUrl = '/v1/tags/' + this.tagId + '/events';
-  var eventWeek = '/v1/tags/' + this.tagId + '/eventWeek';
-  var eventMonth = '/v1/tags/' + this.tagId + '/eventMonth';
-  var eventDay = '/v1/tags/' + this.tagId + '/eventDay';
+  var eventWeek = '/v1/tags/' + this.tagId + '/event/week';
+  var eventMonth = '/v1/tags/' + this.tagId + '/event/month';
+  var eventDay = '/v1/tags/' + this.tagId + '/event/day';
   var query_timezone = moment.tz.guess();
   this.tagEvents = [];
   this.averageHours = 0;
@@ -396,9 +396,9 @@ analyticsApp.component('categoryList', {
 function CategoriesDetailCtrl($scope, $http){
   var _this = this;
   var categoryUrl = '/v1/colorcategories/' + this.categoryId + '/events';
-  var eventWeek = '/v1/colorcategories/' + this.categoryId + '/eventWeek';
-  var eventMonth = '/v1/colorcategories/' + this.categoryId + '/eventMonth';
-  var eventDay = '/v1/colorcategories/' + this.categoryId + '/eventDay';
+  var eventWeek = '/v1/colorcategories/' + this.categoryId + '/event/week';
+  var eventMonth = '/v1/colorcategories/' + this.categoryId + '/event/month';
+  var eventDay = '/v1/colorcategories/' + this.categoryId + '/event/day';
   var query_timezone = moment.tz.guess();
   this.categoryEvents = [];
   this.averageHours = 0;
