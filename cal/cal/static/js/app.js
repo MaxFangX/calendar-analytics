@@ -131,13 +131,12 @@ function TimelineBaseCtrl($scope, $http) {
         y: hours
       });
     };
-    $scope.ctrlDetails = [];
-    $scope.ctrlDetails.push({
+    $scope.ctrlDetails = [{
       values: events,
       key: type + ' Graph',
       color: '#003057',
       strokeWidth: 2,
-    });
+    }];
     return [events, maxYValue];
   };
 };
