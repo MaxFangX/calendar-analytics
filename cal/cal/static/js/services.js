@@ -216,8 +216,8 @@ analyticsApp.service('CategoryService', ['$http', '$q', function($http, $q) {
 }]);
 
 analyticsApp.service('QueryService', function() {
-  var ctrlDetails = [];
   this.populateData = function(data, type) {
+    var ctrlDetails = [];
     var maxYValue = 0;
     var events = [];
     for (var i = 0; i < data.length; i++) {

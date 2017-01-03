@@ -118,9 +118,9 @@ analyticsApp.component('tagList', {
 function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
   var _this = this;
   var tagUrl = '/v1/tags/' + this.tagId + '/events';
-  var eventWeek = '/v1/tags/' + this.tagId + '/event/week';
-  var eventMonth = '/v1/tags/' + this.tagId + '/event/month';
-  var eventDay = '/v1/tags/' + this.tagId + '/event/day';
+  var timeseriesWeek = '/v1/tags/' + this.tagId + '/timeseries/week';
+  var timeseriesMonth = '/v1/tags/' + this.tagId + '/timeseries/month';
+  var timeseriesDay = '/v1/tags/' + this.tagId + '/timeseries/day';
   var query_timezone = moment.tz.guess();
   this.tagEvents = [];
   this.averageHours = 0;
@@ -164,7 +164,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
   this.showDaily = function() {
     $http({
       method: 'GET',
-      url: eventDay + '.json',
+      url: timeseriesDay + '.json',
       params: {
         timezone: query_timezone,
       }
@@ -173,7 +173,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
       _this.timeStep = "day";
       _this.averageHours = _this.tagHours / data.length;
       var eventData = QueryService.populateData(data, 'Tag');
-      _this.ctrlDetails = eventData[0];
+      _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
     });
   };
@@ -181,7 +181,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
   this.showWeekly = function() {
     $http({
       method: 'GET',
-      url: eventWeek + '.json',
+      url: timeseriesWeek + '.json',
       params: {
         timezone: query_timezone,
       }
@@ -190,7 +190,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
       _this.timeStep = "week";
       _this.averageHours = _this.tagHours / data.length;
       var eventData = QueryService.populateData(data, 'Tag');
-      _this.ctrlDetails = eventData[0];
+      _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
     });
   };
@@ -198,7 +198,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
   this.showMonthly = function() {
     $http({
       method: 'GET',
-      url: eventMonth + '.json',
+      url: timeseriesMonth + '.json',
       params: {
         timezone: query_timezone,
       }
@@ -207,7 +207,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
       _this.timeStep = "month";
       _this.averageHours = _this.tagHours / data.length;
       var eventData = QueryService.populateData(data, 'Tag');
-      _this.ctrlDetails = eventData[0];
+      _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
     });
   };
@@ -278,7 +278,7 @@ function CategoryListCtrl($scope, $http, CalendarRangeService, CategoryService) 
   }.bind(this);
   this.initialize();
 
-  this.hideZeroHoursFilter = function (value, index, array) {
+  this.hideZeroHoursFilter = function(value, index, array) {
     /* jshint unused:vars */
     if (this.hideZeroHours && value.hours === 0) {
       return false;
@@ -366,9 +366,9 @@ analyticsApp.component('categoryList', {
 function CategoriesDetailCtrl($scope, $http, QueryService){
   var _this = this;
   var categoryUrl = '/v1/colorcategories/' + this.categoryId + '/events';
-  var eventWeek = '/v1/colorcategories/' + this.categoryId + '/event/week';
-  var eventMonth = '/v1/colorcategories/' + this.categoryId + '/event/month';
-  var eventDay = '/v1/colorcategories/' + this.categoryId + '/event/day';
+  var timeseriesWeek = '/v1/colorcategories/' + this.categoryId + '/timeseries/week';
+  var timeseriesMonth = '/v1/colorcategories/' + this.categoryId + '/timeseries/month';
+  var timeseriesDay = '/v1/colorcategories/' + this.categoryId + '/timeseries/day';
   var query_timezone = moment.tz.guess();
   this.categoryEvents = [];
   this.averageHours = 0;
@@ -411,7 +411,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
   this.showDaily = function() {
     $http({
       method: 'GET',
-      url: eventDay + '.json',
+      url: timeseriesDay + '.json',
       params: {
         timezone: query_timezone,
       }
@@ -420,7 +420,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
       _this.timeStep = "day";
       _this.averageHours = _this.categoryHours / data.length;
       var eventData = QueryService.populateData(data, 'Tag');
-      _this.ctrlDetails = eventData[0];
+      _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
     });
   };
@@ -428,7 +428,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
   this.showWeekly = function() {
     $http({
       method: 'GET',
-      url: eventWeek + '.json',
+      url: timeseriesWeek + '.json',
       params: {
         timezone: query_timezone,
       }
@@ -437,7 +437,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
       _this.timeStep = "week";
       _this.averageHours = _this.categoryHours / data.length;
       var eventData = QueryService.populateData(data, 'Tag');
-      _this.ctrlDetails = eventData[0];
+      _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
     });
   };
@@ -445,7 +445,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
   this.showMonthly = function() {
     $http({
       method: 'GET',
-      url: eventMonth + '.json',
+      url: timeseriesMonth + '.json',
       params: {
         timezone: query_timezone,
       }
@@ -454,7 +454,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
       _this.timeStep = "month";
       _this.averageHours = _this.categoryHours / data.length;
       var eventData = QueryService.populateData(data, 'Tag');
-      _this.ctrlDetails = eventData[0];
+      _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
     });
   };
