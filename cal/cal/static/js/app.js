@@ -11,6 +11,7 @@ function TagListCtrl($scope, $http, CalendarRangeService, TagService) {
   var _this = this;
 
   this.tags = [];
+  this.tags.dataLoaded = false;
 
   $scope.$on('calendarRange:updated', function(event, data) {
     /* jshint unused:vars */
@@ -20,8 +21,9 @@ function TagListCtrl($scope, $http, CalendarRangeService, TagService) {
         .then(function(tags) {
           _this.tags = tags;
           _this.timeRange = rangeData.timeRange;
+          _this.tags.dataLoaded = true;
         });
-    }
+      }
   });
 
   // Initialization
@@ -35,6 +37,7 @@ function TagListCtrl($scope, $http, CalendarRangeService, TagService) {
     }
     tagsPromise.then(function(tags) {
       _this.tags = tags;
+      _this.tags.dataLoaded = true;
     });
   }.bind(this);
 
@@ -59,6 +62,7 @@ function TagListCtrl($scope, $http, CalendarRangeService, TagService) {
           hours: data.hours,
           editing: false
         });
+      _this.tags.dataLoaded = true;
       });
   }.bind(this);
 
@@ -100,6 +104,7 @@ function TagListCtrl($scope, $http, CalendarRangeService, TagService) {
         _this.tags = _this.tags.filter(function(tag) {
           return tag.id !== tagId;
         });
+        _this.tags.dataLoaded = true;
       });
   };
 }
@@ -127,7 +132,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
   this.timeStep = "";
 
   // Refreshes the line graph
-  this.showGraph = function(maxYValue) {
+  this.showGraph = function(maxYValue) 
     // line graph
     this.tagLine = {
       chart: {
@@ -307,6 +312,7 @@ function CategoryListCtrl($scope, $http, CalendarRangeService, CategoryService) 
       .then(function(returnedCategory) {
         category.label = returnedCategory.label;
         category.hours = returnedCategory.hours;
+        $scope.categories.dataLoaded = true;
       });
   };
 
@@ -326,6 +332,7 @@ function CategoryListCtrl($scope, $http, CalendarRangeService, CategoryService) 
           return category.id !== categoryId;
         });
       });
+      $scope.categories.dataLoaded = true;
   };
 
   // categories pie chart
@@ -370,9 +377,6 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
   var timeseriesMonth = '/v1/colorcategories/' + this.categoryId + '/timeseries/month';
   var timeseriesDay = '/v1/colorcategories/' + this.categoryId + '/timeseries/day';
   var query_timezone = moment.tz.guess();
-  this.categoryEvents = [];
-  this.averageHours = 0;
-  this.timeStep = "";
 
   // line graph
   this.showGraph = function(maxYValue) {
