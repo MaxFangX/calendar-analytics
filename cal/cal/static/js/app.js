@@ -11,6 +11,7 @@ function TagListCtrl($scope, $http, CalendarRangeService, TagService) {
   var _this = this;
 
   this.tags = [];
+  this.tags.dataLoaded = false;
 
   $scope.$on('calendarRange:updated', function(event, data) {
     /* jshint unused:vars */
@@ -20,8 +21,9 @@ function TagListCtrl($scope, $http, CalendarRangeService, TagService) {
         .then(function(tags) {
           _this.tags = tags;
           _this.timeRange = rangeData.timeRange;
+          _this.tags.dataLoaded = true;
         });
-    }
+      }
   });
 
   // Initialization
@@ -35,6 +37,7 @@ function TagListCtrl($scope, $http, CalendarRangeService, TagService) {
     }
     tagsPromise.then(function(tags) {
       _this.tags = tags;
+      _this.tags.dataLoaded = true;
     });
   }.bind(this);
 
@@ -59,6 +62,7 @@ function TagListCtrl($scope, $http, CalendarRangeService, TagService) {
           hours: data.hours,
           editing: false
         });
+      _this.tags.dataLoaded = true;
       });
   }.bind(this);
 
@@ -100,6 +104,7 @@ function TagListCtrl($scope, $http, CalendarRangeService, TagService) {
         _this.tags = _this.tags.filter(function(tag) {
           return tag.id !== tagId;
         });
+        _this.tags.dataLoaded = true;
       });
   };
 }
@@ -121,6 +126,7 @@ function TagsDetailCtrl($scope, $http) {
   var query_timezone = moment.tz.guess();
   $scope.tagDetails = [];
   $scope.tagEvents = [];
+  $scope.tagEvents.dataLoaded = false;
   $scope.tagHours = this.tagHours;
 
   $http({method: 'GET', url: tagUrl + '.json' }).
@@ -132,6 +138,7 @@ function TagsDetailCtrl($scope, $http) {
         name: event.name,
       });
     }
+    $scope.tagEvents.dataLoaded = true;
   });
   $http({
     method: 'GET',
@@ -275,6 +282,7 @@ function CategoryListCtrl($scope, $http, CalendarRangeService, CategoryService) 
       .then(function(returnedCategory) {
         category.label = returnedCategory.label;
         category.hours = returnedCategory.hours;
+        $scope.categories.dataLoaded = true;
       });
   };
 
@@ -294,6 +302,7 @@ function CategoryListCtrl($scope, $http, CalendarRangeService, CategoryService) 
           return category.id !== categoryId;
         });
       });
+      $scope.categories.dataLoaded = true;
   };
 
   // categories pie chart
@@ -337,6 +346,7 @@ function CategoriesDetailCtrl($scope, $http){
   var query_timezone = moment.tz.guess();
   $scope.categoryDetails = [];
   $scope.categoryEvents = [];
+  $scope.categoryEvents.dataLoaded = false;
   $scope.categoryHours = this.categoryHours;
 
   $http({method: 'GET', url: categoryUrl + '.json' }).
@@ -348,6 +358,7 @@ function CategoriesDetailCtrl($scope, $http){
         name: event.name,
       });
     }
+  $scope.categoryEvents.dataLoaded = true;
   });
 
   $http({

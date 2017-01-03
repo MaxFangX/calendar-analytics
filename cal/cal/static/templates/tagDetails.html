@@ -1,6 +1,9 @@
 <div>
   <h3 class="well">Average hours per week: {{ tagHours }}<h3>
-  <nvd3 options="tagLine" data="tagDetails"></nvd3>
+  <div ng-hide="tagEvents.dataLoaded" class="preloader"></div>
+  <div ng-if="tagEvents.dataLoaded">
+    <nvd3 options="tagLine" data="tagDetails"></nvd3>
+  </div>
   <h3 class="well">Contained Events</h3>
   <ul class="list-group" ng-repeat="tag in tagEvents">
     <li class="list-group-item">{{ tag.start }}: {{ tag.name }}</li>

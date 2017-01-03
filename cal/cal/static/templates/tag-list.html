@@ -1,62 +1,66 @@
 <div>
   <h4 class="well">Tags - {{ $ctrl.displayName }}</h4>
-  <table class="table table-hover">
-    <thead>
-      <th>
-        <a href="" ng-click="orderByField = 'label'; reverseSort = !reverseSort">
-          Label
-        </a>
-      </th>
-      <th>
-        <a href="" ng-click="orderByField = 'hours'; reverseSort = !reverseSort">
-          Hours
-        </a>
-      </th>
-    </thead>
-    <tbody>
-      <tr ng-repeat="tag in $ctrl.tags
-                    | filter : $ctrl.hideZeroHoursFilter
-                    | orderBy:orderByField:reverseSort">
-        <td ng-hide="tag.editing"><a href="/tags/{{ tag.id }}/">{{ tag.label }}</a></td>
-        <td ng-hide="tag.editing">{{ tag.hours }}</td>
-        <td ng-show="tag.editing">
-          Label<br>
-          <input type="text" ng-model="tag.newLabel">
-        </td>
-        <td ng-show="tag.editing">
-          Keywords<br>
-          <input type="text" ng-model="tag.newKeywords">
-        </td>
-        <td class="text-right text-nowrap" ng-show="tag.editing">
-          <button class="btn btn-success">
-            <span class="glyphicon glyphicon-ok" ng-click="$ctrl.submitEdit(tag.id)"></span>
-          </button>
-          <button class="btn btn-warning">
-            <span class="glyphicon glyphicon-remove" ng-click="$ctrl.cancelEdit(tag.id)"></span>
-          </button>
-        </td>
-        <td class="text-right text-nowrap" ng-hide="tag.editing">
-          <button class="btn btn-info">
-            <span class="glyphicon glyphicon-edit" ng-click="$ctrl.startEdit(tag.id)"></span>
-          </button>
-          <button class="btn btn-danger">
-            <span class="glyphicon glyphicon-trash" ng-click="$ctrl.delete(tag.id)"></span>
-          </button>
-        </td>
-      </tr>
-      <tr>
-        <td>Label<br>
-          <input type="text" ng-model="tag.label">
-        </td>
-        <td>Keywords<br>
-         <input type="text" ng-model="tag.keywords">
-        </td>
-        <td class="text-right text-nowrap">
-          <button class="btn btn-primary">
-            <span class="glyphicon glyphicon-plus" ng-click="$ctrl.create(tag)"></span>
-          </button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <h3>{{ $ctrl.rangeService.type }}</h3>
+  <div ng-hide="$ctrl.tags.dataLoaded" class="preloader"></div>
+  <div ng-if="$ctrl.tags.dataLoaded">
+    <table class="table table-hover">
+      <thead>
+        <th>
+          <a href="" ng-click="orderByField = 'label'; reverseSort = !reverseSort">
+            Label
+          </a>
+        </th>
+        <th>
+          <a href="" ng-click="orderByField = 'hours'; reverseSort = !reverseSort">
+            Hours
+          </a>
+        </th>
+      </thead>
+      <tbody>
+        <tr ng-repeat="tag in $ctrl.tags
+                      | filter : $ctrl.hideZeroHoursFilter
+                      | orderBy:orderByField:reverseSort">
+          <td ng-hide="tag.editing"><a href="/tags/{{ tag.id }}/">{{ tag.label }}</a></td>
+          <td ng-hide="tag.editing">{{ tag.hours }}</td>
+          <td ng-show="tag.editing">
+            Label<br>
+            <input type="text" ng-model="tag.newLabel">
+          </td>
+          <td ng-show="tag.editing">
+            Keywords<br>
+            <input type="text" ng-model="tag.newKeywords">
+          </td>
+          <td class="text-right text-nowrap" ng-show="tag.editing">
+            <button class="btn btn-success">
+              <span class="glyphicon glyphicon-ok" ng-click="$ctrl.submitEdit(tag.id)"></span>
+            </button>
+            <button class="btn btn-warning">
+              <span class="glyphicon glyphicon-remove" ng-click="$ctrl.cancelEdit(tag.id)"></span>
+            </button>
+          </td>
+          <td class="text-right text-nowrap" ng-hide="tag.editing">
+            <button class="btn btn-info">
+              <span class="glyphicon glyphicon-edit" ng-click="$ctrl.startEdit(tag.id)"></span>
+            </button>
+            <button class="btn btn-danger">
+              <span class="glyphicon glyphicon-trash" ng-click="$ctrl.delete(tag.id)"></span>
+            </button>
+          </td>
+        </tr>
+        <tr>
+          <td>Label<br>
+            <input type="text" ng-model="tag.label">
+          </td>
+          <td>Keywords<br>
+           <input type="text" ng-model="tag.keywords">
+          </td>
+          <td class="text-right text-nowrap">
+            <button class="btn btn-primary">
+              <span class="glyphicon glyphicon-plus" ng-click="$ctrl.create(tag)"></span>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
