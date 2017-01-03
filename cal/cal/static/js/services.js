@@ -128,7 +128,7 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
 
 }]);
 
-analyticsApp.service("CategoryService", ['$http', '$q', function($http, $q) {
+analyticsApp.service('CategoryService', ['$http', '$q', function($http, $q) {
 
   var _this = this;
 
@@ -214,3 +214,30 @@ analyticsApp.service("CategoryService", ['$http', '$q', function($http, $q) {
   };
 
 }]);
+
+analyticsApp.service('QueryService', function() {
+  this.populateData = function(data, type) {
+    var ctrlDetails = [];
+    var maxYValue = 0;
+    var events = [];
+    for (var i = 0; i < data.length; i++) {
+      var event = data[i];
+      var date = new Date(event[0]);
+      var hours = event[1];
+      if (hours > maxYValue) {
+        maxYValue = hours;
+      };
+      events.push({
+        x: date,
+        y: hours
+      });
+    };
+    ctrlDetails = [{
+      values: events,
+      key: type + ' Graph',
+      color: '#003057',
+      strokeWidth: 2,
+    }];
+    return [ctrlDetails, maxYValue];
+  };
+});

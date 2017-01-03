@@ -178,7 +178,7 @@ class ColorCategoryDetailEventTimeSeries(APIView):
 
     def get(self, request, *args, **kwargs):
         category = ColorCategory.objects.get(user=self.request.user, id=self.kwargs['pk'])
-        return Response(category.get_time_series(self.request.query_params.get('timezone')))
+        return Response(category.get_time_series(self.request.query_params.get('timezone'), time_step=self.kwargs['time_step']))
 
 
 class TagList(generics.ListCreateAPIView):
@@ -242,4 +242,4 @@ class TagDetailEventTimeSeries(APIView):
 
     def get(self, request, *args, **kw):
         tag = Tag.objects.get(user=self.request.user, id=self.kwargs['pk'])
-        return Response(tag.get_time_series(self.request.query_params.get('timezone')))
+        return Response(tag.get_time_series(self.request.query_params.get('timezone'), time_step=self.kwargs['time_step']))

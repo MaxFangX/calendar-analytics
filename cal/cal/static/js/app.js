@@ -120,57 +120,22 @@ analyticsApp.component('tagList', {
   }
 });
 
-function TagsDetailCtrl($scope, $http) {
+function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
+  var _this = this;
   var tagUrl = '/v1/tags/' + this.tagId + '/events';
-  var eventweek = '/v1/tags/' + this.tagId + '/eventWeek';
+  var timeseriesWeek = '/v1/tags/' + this.tagId + '/timeseries/week';
+  var timeseriesMonth = '/v1/tags/' + this.tagId + '/timeseries/month';
+  var timeseriesDay = '/v1/tags/' + this.tagId + '/timeseries/day';
   var query_timezone = moment.tz.guess();
-  $scope.tagDetails = [];
-  $scope.tagEvents = [];
-  $scope.tagEvents.dataLoaded = false;
-  $scope.tagHours = this.tagHours;
+  this.tagEvents = [];
+  this.tagEvents.dataLoaded = false;
+  this.averageHours = 0;
+  this.timeStep = "";
 
-  $http({method: 'GET', url: tagUrl + '.json' }).
-  success(function successCallback(data) {
-    for (var i = 0; i < data.results.length; i++) {
-      var event = data.results[i];
-      $scope.tagEvents.push({
-        start: (new Date(event.start)).toString(),
-        name: event.name,
-      });
-    }
-    $scope.tagEvents.dataLoaded = true;
-  });
-  $http({
-    method: 'GET',
-    url: eventweek + '.json',
-    params: {
-      timezone: query_timezone,
-    }
-  }).
-  success(function successCallback(data) {
-    $scope.tagHours = $scope.tagHours / data.length;
-    var events = [];
-    var max_hour = 0; // Used to calculate max hour across events. Used in line graph for max y-axis.
-    for (var i = 0; i < data.length; i++) {
-      var event = data[i];
-      var start = new Date(event[0]);
-      var hour = event[1];
-      if (hour > max_hour) {
-        max_hour = hour;
-      }
-      events.push({
-        x: start,
-        y: hour
-      });
-    }
-    $scope.tagDetails.push({
-      values: events,      //values - represents the array of {x,y} data points
-      key: 'Tag Graph', //key  - the name of the series.
-      color: '#003057',  //color - optional: choose your own line color.
-      strokeWidth: 2,
-    })
+  // Refreshes the line graph
+  this.showGraph = function(maxYValue) {
     // line graph
-    $scope.tagLine = {
+    _this.tagLine = {
       chart: {
         type: 'lineChart',
         height: 450,
@@ -188,25 +153,92 @@ function TagsDetailCtrl($scope, $http) {
           axisLabel: 'Date',
           tickFormat: function(d) {
             return d3.time.format('%m/%d/%y')(d)
-          }
+          },
         },
         yAxis: {
           axisLabel: 'Hours',
-          tickFormat: function(d) {
+          tickFormat: function(d){
             return d3.format('.02f')(d);
           },
           axisLabelDistance: -10,
         },
-        forceY: [0, max_hour + 1],
+        forceY: [0, maxYValue + 1],
       },
     };
-  });
+  }.bind(this);
+
+  this.showDaily = function() {
+    $http({
+      method: 'GET',
+      url: timeseriesDay + '.json',
+      params: {
+        timezone: query_timezone,
+      }
+    }).
+    success(function successCallback(data) {
+      _this.timeStep = "day";
+      _this.averageHours = _this.tagHours / data.length;
+      var eventData = QueryService.populateData(data, 'Tag');
+      _this.ctrlGraphData = eventData[0];
+      _this.showGraph(eventData[1]);
+    });
+  };
+
+  this.showWeekly = function() {
+    $http({
+      method: 'GET',
+      url: timeseriesWeek + '.json',
+      params: {
+        timezone: query_timezone,
+      }
+    }).
+    success(function successCallback(data) {
+      _this.timeStep = "week";
+      _this.averageHours = _this.tagHours / data.length;
+      var eventData = QueryService.populateData(data, 'Tag');
+      _this.ctrlGraphData = eventData[0];
+      _this.showGraph(eventData[1]);
+    });
+  };
+
+  this.showMonthly = function() {
+    $http({
+      method: 'GET',
+      url: timeseriesMonth + '.json',
+      params: {
+        timezone: query_timezone,
+      }
+    }).
+    success(function successCallback(data) {
+      _this.timeStep = "month";
+      _this.averageHours = _this.tagHours / data.length;
+      var eventData = QueryService.populateData(data, 'Tag');
+      _this.ctrlGraphData = eventData[0];
+      _this.showGraph(eventData[1]);
+    });
+  };
+
+  this.initialize = function() {
+    this.showWeekly();
+    $http({method: 'GET', url: tagUrl + '.json' }).
+    success(function successCallback(data) {
+      for (var i = 0; i < data.results.length; i++) {
+        var event = data.results[i];
+        _this.tagEvents.push({
+          start: (new Date(event.start)).toString(),
+          name: event.name,
+        });
+      };
+      _this.tagEvents.dataLoaded = true;
+    });
+  }.bind(this);
+  this.initialize();
 };
 
 
 analyticsApp.component('tagDetails', {
   templateUrl: '/static/templates/tagDetails.html',
-  controller: TagsDetailCtrl,
+  controller: ['$scope', '$interpolate', '$http', 'QueryService', TagsDetailCtrl],
   controllerAs: '$ctrl',
   bindings: {
     tagId: '@',
@@ -253,7 +285,7 @@ function CategoryListCtrl($scope, $http, CalendarRangeService, CategoryService) 
   }.bind(this);
   this.initialize();
 
-  this.hideZeroHoursFilter = function (value, index, array) {
+  this.hideZeroHoursFilter = function(value, index, array) {
     /* jshint unused:vars */
     if (this.hideZeroHours && value.hours === 0) {
       return false;
@@ -340,58 +372,21 @@ analyticsApp.component('categoryList', {
   }
 });
 
-function CategoriesDetailCtrl($scope, $http){
+function CategoriesDetailCtrl($scope, $http, QueryService){
+  var _this = this;
   var categoryUrl = '/v1/colorcategories/' + this.categoryId + '/events';
-  var eventweek = '/v1/colorcategories/' + this.categoryId + '/eventWeek';
+  var timeseriesWeek = '/v1/colorcategories/' + this.categoryId + '/timeseries/week';
+  var timeseriesMonth = '/v1/colorcategories/' + this.categoryId + '/timeseries/month';
+  var timeseriesDay = '/v1/colorcategories/' + this.categoryId + '/timeseries/day';
   var query_timezone = moment.tz.guess();
-  $scope.categoryDetails = [];
-  $scope.categoryEvents = [];
-  $scope.categoryEvents.dataLoaded = false;
-  $scope.categoryHours = this.categoryHours;
+  this.categoryEvents = [];
+  this.categoryEvents.dataLoaded = false;
+  this.averageHours = 0;
+  this.timeStep = "";
 
-  $http({method: 'GET', url: categoryUrl + '.json' }).
-  success(function successCallback(data) {
-    for (var i = 0; i < data.results.length; i++) {
-      var event = data.results[i];
-      $scope.categoryEvents.push({
-        start: (new Date(event.start)).toString(),
-        name: event.name,
-      });
-    }
-  $scope.categoryEvents.dataLoaded = true;
-  });
-
-  $http({
-    method: 'GET',
-    url: eventweek + '.json',
-    params: {
-      timezone: query_timezone,
-    }
-  }).
-  success(function successCallback(data) {
-    $scope.categoryHours = $scope.categoryHours / data.length;
-    var events = [];
-    var max_hour = 0; // Used to calculate max hour across events. Used in line graph for max y-axis.
-    for (var i = 0; i < data.length; i++) {
-      var event = data[i];
-      var start = new Date(event[0]);
-      var hour = event[1];
-      if (hour > max_hour) {
-        max_hour = hour;
-      }
-      events.push({
-        x: start,
-        y: hour
-      });
-    }
-    $scope.categoryDetails.push({
-      values: events, //values - represents the array of {x,y} data points
-      key: 'Category Graph', //key  - the name of the series.
-      color: '#003057', //color - optional: choose your own line color.
-      strokeWidth: 2,
-    })
-    // line graph
-    $scope.categoryLine = {
+  // line graph
+  this.showGraph = function(maxYValue) {
+    this.categoryLine = {
       chart: {
         type: 'lineChart',
         height: 450,
@@ -409,24 +404,92 @@ function CategoriesDetailCtrl($scope, $http){
           axisLabel: 'Date',
           tickFormat: function(d) {
             return d3.time.format('%m/%d/%y')(d)
-          }
+          },
         },
         yAxis: {
           axisLabel: 'Hours',
-          tickFormat: function(d) {
+          tickFormat: function(d){
             return d3.format('.02f')(d);
           },
-          axisLabelDistance: -10,
+          axisLabelDistance: -10
         },
-        forceY: [0, max_hour + 1],
+        forceY: [0, maxYValue + 1],
       },
     };
-  });
+  }.bind(this);
+
+  this.showDaily = function() {
+    $http({
+      method: 'GET',
+      url: timeseriesDay + '.json',
+      params: {
+        timezone: query_timezone,
+      }
+    }).
+    success(function successCallback(data) {
+      _this.timeStep = "day";
+      _this.averageHours = _this.categoryHours / data.length;
+      var eventData = QueryService.populateData(data, 'Tag');
+      _this.ctrlGraphData = eventData[0];
+      _this.showGraph(eventData[1]);
+    });
+  };
+
+  this.showWeekly = function() {
+    $http({
+      method: 'GET',
+      url: timeseriesWeek + '.json',
+      params: {
+        timezone: query_timezone,
+      }
+    }).
+    success(function successCallback(data) {
+      _this.timeStep = "week";
+      _this.averageHours = _this.categoryHours / data.length;
+      var eventData = QueryService.populateData(data, 'Tag');
+      _this.ctrlGraphData = eventData[0];
+      _this.showGraph(eventData[1]);
+    });
+  };
+
+  this.showMonthly = function() {
+    $http({
+      method: 'GET',
+      url: timeseriesMonth + '.json',
+      params: {
+        timezone: query_timezone,
+      }
+    }).
+    success(function successCallback(data) {
+      _this.timeStep = "month";
+      _this.averageHours = _this.categoryHours / data.length;
+      var eventData = QueryService.populateData(data, 'Tag');
+      _this.ctrlGraphData = eventData[0];
+      _this.showGraph(eventData[1]);
+    });
+  };
+
+  this.initialize = function() {
+    this.showWeekly();
+    $http({method: 'GET', url: categoryUrl + '.json' }).
+    success(function successCallback(data) {
+      for (var i = 0; i < data.results.length; i++) {
+        var event = data.results[i];
+        _this.categoryEvents.push({
+          start: (new Date(event.start)).toString(),
+          name: event.name,
+        });
+      };
+      _this.categoryEvents.dataLoaded = true;
+    });
+  }.bind(this);
+
+  this.initialize();
 };
 
 analyticsApp.component('categoryDetails', {
   templateUrl: '/static/templates/categoryDetails.html',
-  controller: CategoriesDetailCtrl,
+  controller: ['$scope', '$http', 'QueryService', CategoriesDetailCtrl],
   controllerAs: '$ctrl',
   bindings: {
     categoryId: '@',

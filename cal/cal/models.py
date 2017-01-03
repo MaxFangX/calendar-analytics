@@ -587,10 +587,10 @@ class ColorCategory(models.Model, EventCollection):
             events_qs = events_qs.filter(start__lt=datetime.now(pytz.utc))
         return events_qs.order_by('start')
 
-    def get_time_series(self, timezone='UTC', time_step='weekly', calendar_ids=None, start=None, end=None):
+    def get_time_series(self, timezone='UTC', time_step='week', calendar_ids=None, start=None, end=None):
         """
-        Returns a list of week-hour tuples corresponding to the events in this ColorCategory.
-        Each week starts at the start time.
+        Returns a list of date-hour tuples corresponding to the events in this ColorCategory.
+        The dates are spaced out by the time_step.
         """
         return get_time_series(self, timezone, time_step, calendar_ids, start, end)
 
@@ -663,9 +663,10 @@ class Tag(models.Model, EventCollection):
 
         return events_qs.order_by('start')
 
-    def get_time_series(self, timezone='UTC', time_step='weekly', calendar_ids=None, start=None, end=None):
+    def get_time_series(self, timezone='UTC', time_step='week', calendar_ids=None, start=None, end=None):
         """
-        Returns a list of week-hour tuples corresponding to the events in this Tag.
+        Returns a list of date-hour tuples corresponding to the events in this Tag.
+        The dates are spaced out by the time_step.
         """
         return get_time_series(self, timezone, time_step, calendar_ids, start, end)
 
