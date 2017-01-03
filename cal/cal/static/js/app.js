@@ -128,13 +128,14 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
   var timeseriesDay = '/v1/tags/' + this.tagId + '/timeseries/day';
   var query_timezone = moment.tz.guess();
   this.tagEvents = [];
+  this.tagEvents.dataLoaded = false;
   this.averageHours = 0;
   this.timeStep = "";
 
   // Refreshes the line graph
-  this.showGraph = function(maxYValue) 
+  this.showGraph = function(maxYValue) {
     // line graph
-    this.tagLine = {
+    _this.tagLine = {
       chart: {
         type: 'lineChart',
         height: 450,
@@ -228,6 +229,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
           name: event.name,
         });
       };
+      _this.tagEvents.dataLoaded = true;
     });
   }.bind(this);
   this.initialize();
@@ -377,6 +379,10 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
   var timeseriesMonth = '/v1/colorcategories/' + this.categoryId + '/timeseries/month';
   var timeseriesDay = '/v1/colorcategories/' + this.categoryId + '/timeseries/day';
   var query_timezone = moment.tz.guess();
+  this.categoryEvents = [];
+  this.categoryEvents.dataLoaded = false;
+  this.averageHours = 0;
+  this.timeStep = "";
 
   // line graph
   this.showGraph = function(maxYValue) {
@@ -473,7 +479,8 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
           start: (new Date(event.start)).toString(),
           name: event.name,
         });
-      }
+      };
+      _this.categoryEvents.dataLoaded = true;
     });
   }.bind(this);
 
