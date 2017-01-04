@@ -147,7 +147,6 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
         },
         x: function(d){ return d.x; },
         y: function(d){ return d.y; },
-        useInteractiveGuideline: true,
         xScale: d3.time.scale(),
         xAxis: {
           axisLabel: 'Date',
@@ -398,7 +397,6 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
         },
         x: function(d){ return d.x; },
         y: function(d){ return d.y; },
-        useInteractiveGuideline: true,
         xScale: d3.time.scale(),
         xAxis: {
           axisLabel: 'Date',
@@ -429,7 +427,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
     success(function successCallback(data) {
       _this.timeStep = "day";
       _this.averageHours = _this.categoryHours / data.length;
-      var eventData = QueryService.populateData(data, 'Tag');
+      var eventData = QueryService.populateData(data, 'Category');
       _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
     });
@@ -446,7 +444,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
     success(function successCallback(data) {
       _this.timeStep = "week";
       _this.averageHours = _this.categoryHours / data.length;
-      var eventData = QueryService.populateData(data, 'Tag');
+      var eventData = QueryService.populateData(data, 'Category');
       _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
     });
@@ -463,7 +461,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
     success(function successCallback(data) {
       _this.timeStep = "month";
       _this.averageHours = _this.categoryHours / data.length;
-      var eventData = QueryService.populateData(data, 'Tag');
+      var eventData = QueryService.populateData(data, 'Category');
       _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
     });
