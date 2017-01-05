@@ -240,11 +240,11 @@ analyticsApp.service('QueryService', function() {
     var leastSquaresCoeff = leastSquares(xSeries, yLabels);
 
     // apply the results of the least squares regression
-		var x1 = xLabels[0];
-		var y1 = leastSquaresCoeff[0] + leastSquaresCoeff[1];
-		var x2 = xLabels[xLabels.length - 1];
-		var y2 = leastSquaresCoeff[0] * xSeries.length + leastSquaresCoeff[1];
-		var trendData = [{x:x1,y:y1},{x:x2,y:y2}];
+    var x1 = xLabels[0];
+    var y1 = leastSquaresCoeff[0] + leastSquaresCoeff[1];
+    var x2 = xLabels[xLabels.length - 1];
+    var y2 = leastSquaresCoeff[0] * xSeries.length + leastSquaresCoeff[1];
+    var trendData = [{x:x1,y:y1},{x:x2,y:y2}];
 
     ctrlDetails.push({
       values: events,
@@ -272,13 +272,13 @@ function leastSquares(xSeries, ySeries) {
   var yBar = ySeries.reduce(reduceSumFunc) * 1.0 / ySeries.length;
 
   var ssXX = xSeries.map(function(d) { return Math.pow(d - xBar, 2); })
-    .reduce(reduceSumFunc);
+  .reduce(reduceSumFunc);
 
   var ssYY = ySeries.map(function(d) { return Math.pow(d - yBar, 2); })
-    .reduce(reduceSumFunc);
+  .reduce(reduceSumFunc);
 
   var ssXY = xSeries.map(function(d, i) { return (d - xBar) * (ySeries[i] - yBar); })
-    .reduce(reduceSumFunc);
+  .reduce(reduceSumFunc);
 
   var slope = ssXY / ssXX;
   var intercept = yBar - (xBar * slope);
