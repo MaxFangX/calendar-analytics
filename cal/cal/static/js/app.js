@@ -223,7 +223,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
     success(function successCallback(data) {
       for (var i = 0; i < data.results.length; i++) {
         var event = data.results[i];
-        _this.tagEvents.push({
+        _this.tagEvents.unshift({
           start: (new Date(event.start)).toString(),
           name: event.name,
         });
@@ -473,7 +473,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
     success(function successCallback(data) {
       for (var i = 0; i < data.results.length; i++) {
         var event = data.results[i];
-        _this.categoryEvents.push({
+        _this.categoryEvents.unshift({
           start: (new Date(event.start)).toString(),
           name: event.name,
         });
