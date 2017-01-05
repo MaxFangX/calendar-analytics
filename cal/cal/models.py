@@ -550,7 +550,7 @@ class ColorCategory(models.Model, EventCollection):
     def hours(self, calendar_ids=None, start=None, end=None):
         events = self.get_events(calendar_ids=calendar_ids, start=start, end=end)
 
-        return EventCollection(lambda: events).total_time() / 3600
+        return round(float(EventCollection(lambda: events).total_time()) / 3600, 2)
 
     def category_color(self):
         return get_color(self.calendar, self.color_index)['background']
@@ -620,7 +620,7 @@ class Tag(models.Model, EventCollection):
     def hours(self, calendar_ids=None, start=None, end=None):
         events = self.get_events(calendar_ids=calendar_ids, start=start, end=end)
 
-        return EventCollection(lambda: events).total_time() / 3600
+        return round(float(EventCollection(lambda: events).total_time()) / 3600, 2)
 
     def get_events(self, calendar_ids=None, start=None, end=None):
         """
