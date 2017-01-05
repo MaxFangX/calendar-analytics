@@ -176,7 +176,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
     }).
     success(function successCallback(data) {
       _this.timeStep = "day";
-      _this.averageHours = _this.tagHours / data.length;
+      _this.averageHours = Math.round(((_this.tagHours / data.length) * 100)) / 100;
       var eventData = QueryService.populateData(data, 'Tag');
       _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
@@ -193,7 +193,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
     }).
     success(function successCallback(data) {
       _this.timeStep = "week";
-      _this.averageHours = _this.tagHours / data.length;
+      _this.averageHours = Math.round(((_this.tagHours / data.length) * 100)) / 100;
       var eventData = QueryService.populateData(data, 'Tag');
       _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
@@ -210,7 +210,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
     }).
     success(function successCallback(data) {
       _this.timeStep = "month";
-      _this.averageHours = _this.tagHours / data.length;
+      _this.averageHours = Math.round(((_this.tagHours / data.length) * 100)) / 100;
       var eventData = QueryService.populateData(data, 'Tag');
       _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
@@ -426,7 +426,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
     }).
     success(function successCallback(data) {
       _this.timeStep = "day";
-      _this.averageHours = _this.categoryHours / data.length;
+      _this.averageHours = Math.round(((_this.categoryHours / data.length) * 100)) / 100;
       var eventData = QueryService.populateData(data, 'Category');
       _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
@@ -443,7 +443,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
     }).
     success(function successCallback(data) {
       _this.timeStep = "week";
-      _this.averageHours = _this.categoryHours / data.length;
+      _this.averageHours = Math.round(((_this.categoryHours / data.length) * 100)) / 100;
       var eventData = QueryService.populateData(data, 'Category');
       _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
@@ -460,7 +460,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
     }).
     success(function successCallback(data) {
       _this.timeStep = "month";
-      _this.averageHours = _this.categoryHours / data.length;
+      _this.averageHours = Math.round(((_this.categoryHours / data.length) * 100)) / 100;
       var eventData = QueryService.populateData(data, 'Category');
       _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
