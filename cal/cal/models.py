@@ -109,9 +109,9 @@ class Profile(models.Model):
                     cc.save()
                     print "Created color category {}".format(cc)
 
-        # Create categories for event colors
+        # Create Color Categories
         for key in GEvent.EVENT_COLORS_KEYS:
-            # Skip default events, those will use a calendar key
+            # Skip default colors
             if key == "1":
                 continue
             qs = GEvent.objects.filter(calendar__user=self.user,
@@ -121,10 +121,9 @@ class Profile(models.Model):
             if qs.count() > 0:
                 create_category_if_nonexistent(color_index=key)
 
-        # Create categories for default event colors on separate calendars
+        # Create Calendar Categories
         for calendar in GCalendar.objects.filter(user=self.user):
             qs = GEvent.objects.filter(calendar__user=self.user,
-                                       color_index="1",
                                        all_day_event=False)
             if qs.count() > 0:
                 create_category_if_nonexistent(color_index="1", gcalendar=calendar)
