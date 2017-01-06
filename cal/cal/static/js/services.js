@@ -176,7 +176,7 @@ analyticsApp.service('CategoryService', ['$http', '$q', function($http, $q) {
       params: {
         start: (start)? start.toISOString() : null,
         end: (end)? end.toISOString() : null,
-        // calendar_ids: JSON.stringify(calendarIds)
+        calendar_ids: JSON.stringify(calendarIds)
       }
     }).then(function successCallback(response) {
       _this.categories[filterKey] = [];

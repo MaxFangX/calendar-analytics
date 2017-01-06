@@ -17,6 +17,9 @@ import sys
 class InvalidParameterException(Exception):
     pass
 
+class MalformedDataException(Exception):
+    pass
+
 
 class Profile(models.Model):
 
@@ -577,6 +580,13 @@ class Category(models.Model, EventCollection):
         if self.calendar:
             val += " for calendar {}".format(self.calendar.calendar_id)
         return val
+
+    def save(self, *args, **kwargs):
+
+        if self.calendar and self.color_index != "1":
+            raise MalformedDataException("Category can only have non-null calendar field OR non-default color_index, but not both.")
+
+        return super(Category, self).save(*args, **kwargs)
 
     def hours(self, calendar_ids=None, start=None, end=None):
         events = self.get_events(calendar_ids=calendar_ids, start=start, end=end)
