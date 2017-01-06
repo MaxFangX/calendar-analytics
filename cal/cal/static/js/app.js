@@ -17,7 +17,8 @@ function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
     /* jshint unused:vars */
     var filterData = CalendarFilterService.getFilter();
     if (!_this.isCumulative) {
-      TagService.getTags(filterData.filterKey, filterData.start, filterData.end)
+      TagService.getTags(filterData.filterKey, filterData.start, filterData.end,
+                         filterData.calendarIds)
         .then(function(tags) {
           _this.tags = tags;
           _this.filterKey = filterData.filterKey;
@@ -29,11 +30,14 @@ function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
   // Initialization
   this.initialize = function() {
     var tagsPromise;
+    var initialFilterData = CalendarFilterService.getFilter();
     if (this.isCumulative) {
-      tagsPromise = TagService.getTags('cumulative', null, null);
+      tagsPromise = TagService.getTags('cumulative', null, null,
+        initialFilterData.calendarIds);
     } else {
-      var initialFilterData = CalendarFilterService.getFilter();
-      tagsPromise = TagService.getTags(initialFilterData.filterKey, initialFilterData.start, initialFilterData.end);
+      tagsPromise = TagService.getTags(initialFilterData.filterKey,
+        initialFilterData.start, initialFilterData.end,
+        initialFilterData.calendarIds);
     }
     tagsPromise.then(function(tags) {
       _this.tags = tags;
@@ -257,7 +261,8 @@ function CategoryListCtrl($scope, $http, CalendarFilterService, CategoryService)
     /* jshint unused:vars */
     var filterData = CalendarFilterService.getFilter();
     if (!_this.isCumulative) {
-      CategoryService.getCategories(filterData.filterKey, filterData.start, filterData.end)
+      CategoryService.getCategories(filterData.filterKey, filterData.start,
+        filterData.end, filterData.calendarIds)
         .then(function(categories) {
           _this.categories = categories;
           _this.filterKey = filterData.filterKey;
@@ -270,12 +275,17 @@ function CategoryListCtrl($scope, $http, CalendarFilterService, CategoryService)
   this.initialize = function() {
 
     var categoriesPromise;
-
+    var initialFilterData = CalendarFilterService.getFilter();
     if (this.isCumulative) {
-      categoriesPromise = CategoryService.getCategories('cumulative', null, null);
+      categoriesPromise = CategoryService.getCategories('cumulative', null,
+        null, initialFilterData.calendarIds);
     } else {
-      var initialFilterData = CalendarFilterService.getFilter();
-      categoriesPromise = CategoryService.getCategories(initialFilterData.filterKey, initialFilterData.start, initialFilterData.end);
+      categoriesPromise = CategoryService.getCategories(
+        initialFilterData.filterKey,
+        initialFilterData.start,
+        initialFilterData.end,
+        initialFilterData.calendarIds
+      );
       _this.filterKey = initialFilterData.filterKey;
     }
     categoriesPromise.then(function(categories) {
@@ -518,15 +528,20 @@ analyticsApp.controller('CalendarCtrl', function CalendarCtrl($scope, $http, $q,
       cache: true,
     }).then(function gcalSuccess(response) {
 
-      var collectedEvents = [];
-      var eventPromises = response.data.results.map(function(gcal) {
-
-        // Initialize cached calendars
+      // Initialize cached calendars
+      for (var i = 0; i < response.data.results.length; i++) {
+        var gcal = response.data.results[i];
         if (_this.calendars[gcal.calendar_id] === undefined) {
           _this.calendars[gcal.calendar_id] = gcal;
           _this.calendars[gcal.calendar_id].enabled = gcal.enabled_by_default;
         }
+      }
 
+      // Trigger first CalendarFilter now that this.calendars has been set
+      CalendarFilterService.setFilter(start, end, _this.getEnabledCalendarIds());
+
+      var collectedEvents = [];
+      var eventPromises = response.data.results.map(function(gcal) {
         return $http({
           method: 'GET',
           url: "/v1/gevents.json",
@@ -558,7 +573,8 @@ analyticsApp.controller('CalendarCtrl', function CalendarCtrl($scope, $http, $q,
             collectedEvents = collectedEvents.concat(events);
           }
         }, function eventError(response) {
-          console.log("Ajax call to gevents failed: " + response);
+          console.log("Ajax call to gevents failed:");
+          console.log(response);
         });
       });
 
@@ -598,9 +614,12 @@ analyticsApp.controller('CalendarCtrl', function CalendarCtrl($scope, $http, $q,
 
   this.viewRender = function(view, element) {
     /* jshint unused:vars */
-    CalendarFilterService.setFilter(view.start,
-                                    view.end,
-                                    this.getEnabledCalendarIds());
+    // The first time viewRender is called, the GCalendars haven't been
+    // populated yet.
+    if(_this.calendars.length !== 0) {
+      CalendarFilterService.setFilter(view.start, view.end,
+                                      this.getEnabledCalendarIds());
+    }
   }.bind(this);
 
   $scope.uiConfig = {

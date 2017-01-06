@@ -5,8 +5,8 @@ var analyticsApp = window.angular.module('analyticsApp.services', []);
 
 analyticsApp.factory('CalendarFilterService', ['$rootScope', function CalendarFilterService($rootScope) {
   var filterData =  {
-    start: undefined, // ISO String
-    end: undefined, // ISO String
+    start: undefined, // Moment object
+    end: undefined, // Moment object
     calendarIds: undefined, // array of ids of enabled calendars
     filterKey: undefined,
   };
@@ -32,7 +32,6 @@ analyticsApp.factory('CalendarFilterService', ['$rootScope', function CalendarFi
         filterData.calendarIds.join(' ');
 
       $rootScope.$broadcast('calendarFilter:updated');
-      console.log('filter set"0;');
     }
   };
 }]);
@@ -43,7 +42,7 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
 
   this.tags = {};
 
-  this.getTags = function(filterKey, start, end) {
+  this.getTags = function(filterKey, start, end, calendarIds) {
 
     if (!filterKey) {
       throw "filterKey must always be supplied";
@@ -51,7 +50,9 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
 
     if (start || end) {
       // If the start and end time match the given filterKey
-      if (filterKey !== start.toISOString() + " " + end.toISOString()) {
+      var keyFromParameters = start.toISOString() + " " + end.toISOString() +
+        " " + calendarIds.join(' ');
+      if (filterKey !== keyFromParameters) {
         throw "filterKey doesn't match given start and end times";
       }
     }
@@ -69,6 +70,7 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
       params: {
         start: (start)? start.toISOString() : null,
         end: (end)? end.toISOString() : null,
+        calendar_ids: JSON.stringify(calendarIds)
       }
     }).then(function successCallback(response) {
       _this.tags[filterKey] = [];
@@ -84,7 +86,8 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
       return _this.tags[filterKey];
     }, function errorCallback(response) {
       /* jshint unused:vars */
-      console.log("Failed to get tags");
+      console.log("Failed to get tags:");
+      console.log(response);
     });
   };
 
@@ -146,15 +149,17 @@ analyticsApp.service('CategoryService', ['$http', '$q', function($http, $q) {
 
   this.categories = {};
 
-  this.getCategories = function(filterKey, start, end) {
+  this.getCategories = function(filterKey, start, end, calendarIds) {
     if (!filterKey) {
       throw "filterKey must always be supplied";
     }
 
     if (start || end) {
       // If the start and end time match the given filterKey
-      if (filterKey !== start.toISOString() + " " + end.toISOString()) {
-        throw "filterKey doesn't match given start and end times";
+      var keyFromParameters = start.toISOString() + " " + end.toISOString() +
+        " " + calendarIds.join(' ');
+      if (filterKey !== keyFromParameters) {
+        throw "filterKey doesn't match given start, end, and calendarIds";
       }
     }
 
@@ -171,6 +176,7 @@ analyticsApp.service('CategoryService', ['$http', '$q', function($http, $q) {
       params: {
         start: (start)? start.toISOString() : null,
         end: (end)? end.toISOString() : null,
+        // calendar_ids: calendarIds
       }
     }).then(function successCallback(response) {
       _this.categories[filterKey] = [];
