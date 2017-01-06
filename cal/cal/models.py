@@ -85,16 +85,16 @@ class Profile(models.Model):
 
     def generate_categories(self):
         """
-        Generates a ColorCategory for every permutation of color and calendar that exists
+        Generates a Category for every permutation of color and calendar that exists
         """
         def create_category_if_nonexistent(color_index, gcalendar=None):
             try:
-                ColorCategory.objects.get(color_index=color_index, calendar=gcalendar)
-            except ColorCategory.DoesNotExist:
+                Category.objects.get(color_index=color_index, calendar=gcalendar)
+            except Category.DoesNotExist:
                 label = color_index
                 if gcalendar:
                     label = gcalendar.summary
-                cc = ColorCategory(
+                cc = Category(
                                    calendar=gcalendar,
                                    user=self.user,
                                    color_index=color_index,
@@ -534,10 +534,41 @@ class DeletedEvent(models.Model):
             event.delete()
 
 
-class ColorCategory(models.Model, EventCollection):
+class Category(models.Model, EventCollection):
+    """
+    Categories are slightly complex. There are two types:
 
-    calendar = models.ForeignKey(GCalendar, null=True, related_name='colorcategories')
-    user = models.ForeignKey(User, related_name='colorcategories')
+    Calendar Categories - Categories based off of its affiliation with a
+    *calendar* in Google Calendar. This is the typical case. These will have a
+    non-null `calendar` field, and will ignore the color_index when making
+    queries; i.e. it will return all events on a calendar regardless of if the
+    event is the default color or not.
+
+    Color Categories - Categories based off a *non-default color* set in Google
+    Calendar, not tied to any particular calendar. In Google Calendar, default
+    event colors actually have no value and defer to the color of the
+    associated calendar, so this is why a Color Category must have a
+    non-default color. 
+
+    To enforce the above, the `save` function will throw an error if both a
+    calendar and a non-default color are specified. Accordingly, you can
+    identify whether a Category is a Calendar Category or a Color Category by
+    seeing whether the `calendar` field is set or the `color_index` is not
+    equal to 1, respectively.
+
+    Filtering by `calendar_ids` will have a different effect on both types
+    as well.
+    - For Calendar Categories, the calendar_ids parameter is ignored, because a
+      Category tied to a specific calendar has nothing to do with multiple
+      calendars.
+    - For Color Categories, only events from the specified calendars in
+      calendar_ids will be queried, much like the `calendar_ids` behavior for
+      Tags.
+
+    """
+
+    calendar = models.ForeignKey(GCalendar, null=True, related_name='categories')
+    user = models.ForeignKey(User, related_name='categories')
     color_index = models.CharField(max_length=100, help_text="str of the number of the event color in constants.py")
     label = models.CharField(max_length=100)
 
@@ -561,7 +592,7 @@ class ColorCategory(models.Model, EventCollection):
 
     def query(self, calendar_ids=None, start=None, end=None):
         if calendar_ids and self.calendar:
-            message = "Calendar ids can only be specified for ColorCategories without a calendar field attached."
+            message = "Calendar ids can only be specified for Categories without a calendar field attached."
             raise InvalidParameterException(message)
 
         if self.calendar:
@@ -589,7 +620,7 @@ class ColorCategory(models.Model, EventCollection):
 
     def get_time_series(self, timezone='UTC', time_step='week', calendar_ids=None, start=None, end=None):
         """
-        Returns a list of date-hour tuples corresponding to the events in this ColorCategory.
+        Returns a list of date-hour tuples corresponding to the events in this Category.
         The dates are spaced out by the time_step.
         """
         return get_time_series(self, timezone, time_step, calendar_ids, start, end)

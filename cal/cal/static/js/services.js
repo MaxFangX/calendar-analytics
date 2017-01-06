@@ -171,12 +171,12 @@ analyticsApp.service('CategoryService', ['$http', '$q', function($http, $q) {
     // Request the categories and return a promise
     return $http({
       method: 'GET',
-      url: '/v1/colorcategories.json',
+      url: '/v1/categories.json',
       cache: true,
       params: {
         start: (start)? start.toISOString() : null,
         end: (end)? end.toISOString() : null,
-        // calendar_ids: calendarIds
+        // calendar_ids: JSON.stringify(calendarIds)
       }
     }).then(function successCallback(response) {
       _this.categories[filterKey] = [];
@@ -200,7 +200,7 @@ analyticsApp.service('CategoryService', ['$http', '$q', function($http, $q) {
   this.editCategory = function(categoryId, newLabel) {
     return $http({
       method: 'POST',
-      url: '/v1/colorcategories/' + categoryId,
+      url: '/v1/categories/' + categoryId,
       data: $.param({
         label: newLabel,
         csrfmiddlewaretoken: getCookie('csrftoken'),
@@ -220,7 +220,7 @@ analyticsApp.service('CategoryService', ['$http', '$q', function($http, $q) {
   this.deleteCategory = function(categoryId) {
     return $http({
       method: 'POST',
-      url: '/v1/colorcategories/' + categoryId,
+      url: '/v1/categories/' + categoryId,
       data: $.param({
         csrfmiddlewaretoken: getCookie('csrftoken'),
         _method: 'DELETE'

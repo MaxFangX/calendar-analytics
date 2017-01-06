@@ -384,10 +384,10 @@ analyticsApp.component('categoryList', {
 
 function CategoriesDetailCtrl($scope, $http, QueryService){
   var _this = this;
-  var categoryUrl = '/v1/colorcategories/' + this.categoryId + '/events';
-  var timeseriesWeek = '/v1/colorcategories/' + this.categoryId + '/timeseries/week';
-  var timeseriesMonth = '/v1/colorcategories/' + this.categoryId + '/timeseries/month';
-  var timeseriesDay = '/v1/colorcategories/' + this.categoryId + '/timeseries/day';
+  var categoryUrl = '/v1/categories/' + this.categoryId + '/events';
+  var timeseriesWeek = '/v1/categories/' + this.categoryId + '/timeseries/week';
+  var timeseriesMonth = '/v1/categories/' + this.categoryId + '/timeseries/month';
+  var timeseriesDay = '/v1/categories/' + this.categoryId + '/timeseries/day';
   var query_timezone = moment.tz.guess();
   this.categoryEvents = [];
   this.categoryEvents.dataLoaded = false;

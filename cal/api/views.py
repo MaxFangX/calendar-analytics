@@ -1,6 +1,6 @@
-from api.serializers import GCalendarSerializer, GEventSerializer, StatisticSerializer, ColorCategorySerializer, TagSerializer, ColorCategoryTimeSeriesSerializer, TagTimeSeriesSerializer
+from api.serializers import GCalendarSerializer, GEventSerializer, StatisticSerializer, CategorySerializer, TagSerializer, CategoryTimeSeriesSerializer, TagTimeSeriesSerializer
 from cal.helpers import handle_time_string, truncated_queryset
-from cal.models import ColorCategory, GCalendar, GEvent, Statistic, Profile, Tag
+from cal.models import Category, GCalendar, GEvent, Statistic, Profile, Tag
 from django.http import HttpResponseRedirect
 from rest_framework import generics, status
 from rest_framework.decorators import api_view
@@ -128,12 +128,12 @@ class StatisticList(generics.ListAPIView):
     serializer_class = StatisticSerializer
 
 
-class ColorCategoryList(generics.ListAPIView):
+class CategoryList(generics.ListAPIView):
 
-    serializer_class = ColorCategorySerializer
+    serializer_class = CategorySerializer
 
     def get_serializer_context(self, *args, **kwargs):
-        context = super(ColorCategoryList, self).get_serializer_context(*args, **kwargs)
+        context = super(CategoryList, self).get_serializer_context(*args, **kwargs)
         context.update({
             'calendar_ids': self.request.query_params.get('calendar_ids'),
             'start': self.request.query_params.get('start'),
@@ -142,15 +142,15 @@ class ColorCategoryList(generics.ListAPIView):
         return context
 
     def get_queryset(self):
-        return ColorCategory.objects.filter(user=self.request.user)
+        return Category.objects.filter(user=self.request.user)
 
 
-class ColorCategoryDetail(generics.RetrieveUpdateDestroyAPIView):
+class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
 
-    serializer_class = ColorCategorySerializer
+    serializer_class = CategorySerializer
 
     def get_serializer_context(self, *args, **kwargs):
-        context = super(ColorCategoryDetail, self).get_serializer_context(*args, **kwargs)
+        context = super(CategoryDetail, self).get_serializer_context(*args, **kwargs)
         context.update({
             'calendar_ids': self.request.query_params.get('calendar_ids'),
             'start': self.request.query_params.get('start'),
@@ -159,23 +159,23 @@ class ColorCategoryDetail(generics.RetrieveUpdateDestroyAPIView):
         return context
 
     def get_queryset(self):
-        return ColorCategory.objects.filter(user=self.request.user)
+        return Category.objects.filter(user=self.request.user)
 
 
-class ColorCategoryDetailEvents(generics.ListAPIView):
+class CategoryDetailEvents(generics.ListAPIView):
 
     serializer_class = GEventSerializer
 
     def get_queryset(self):
-        return ColorCategory.objects.get(user=self.request.user, id=self.kwargs['pk']).query()
+        return Category.objects.get(user=self.request.user, id=self.kwargs['pk']).query()
 
 
-class ColorCategoryDetailEventTimeSeries(APIView):
+class CategoryDetailEventTimeSeries(APIView):
 
-    serializer_class = ColorCategoryTimeSeriesSerializer
+    serializer_class = CategoryTimeSeriesSerializer
 
     def get(self, request, *args, **kwargs):
-        category = ColorCategory.objects.get(user=self.request.user, id=self.kwargs['pk'])
+        category = Category.objects.get(user=self.request.user, id=self.kwargs['pk'])
         return Response(category.get_time_series(self.request.query_params.get('timezone'), time_step=self.kwargs['time_step']))
 
 

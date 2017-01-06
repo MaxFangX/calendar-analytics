@@ -1,4 +1,4 @@
-from cal.models import ColorCategory, GCalendar, GEvent, Statistic, Tag
+from cal.models import Category, GCalendar, GEvent, Statistic, Tag
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
@@ -51,18 +51,18 @@ class StatisticSerializer(serializers.ModelSerializer):
         fields = ('name', 'start_time', 'end_time')
 
 
-class ColorCategorySerializer(serializers.ModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):
 
     hours = serializers.SerializerMethodField()
     category_color = serializers.SerializerMethodField()
 
     def get_fields(self, *args, **kwargs):
-        fields = super(ColorCategorySerializer, self).get_fields(*args, **kwargs)
+        fields = super(CategorySerializer, self).get_fields(*args, **kwargs)
         fields['calendar'].queryset = fields['calendar'].queryset.filter(user=self.context['request'].user)
         return fields
 
     class Meta:
-        model = ColorCategory
+        model = Category
         fields = ('id', 'label', 'hours', 'calendar', 'category_color')
 
     def get_hours(self, obj):
@@ -96,7 +96,7 @@ class TagSerializer(serializers.ModelSerializer):
         return obj.hours(calendar_ids=calendar_ids, start=start, end=end)
 
 
-class ColorCategoryTimeSeriesSerializer(serializers.ModelSerializer):
+class CategoryTimeSeriesSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = ('timezone')
