@@ -15,12 +15,12 @@ function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
 
   $scope.$on('calendarFilter:updated', function(event, data) {
     /* jshint unused:vars */
-    var rangeData = CalendarFilterService.getFilter();
+    var filterData = CalendarFilterService.getFilter();
     if (!_this.isCumulative) {
-      TagService.getTags(rangeData.timeRange, rangeData.start, rangeData.end)
+      TagService.getTags(filterData.filterKey, filterData.start, filterData.end)
         .then(function(tags) {
           _this.tags = tags;
-          _this.timeRange = rangeData.timeRange;
+          _this.filterKey = filterData.filterKey;
           _this.tags.dataLoaded = true;
         });
       }
@@ -32,8 +32,8 @@ function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
     if (this.isCumulative) {
       tagsPromise = TagService.getTags('cumulative', null, null);
     } else {
-      var initialTimeRange = CalendarFilterService.getFilter();
-      tagsPromise = TagService.getTags(initialTimeRange.timeRange, initialTimeRange.start, initialTimeRange.end);
+      var initialFilterData = CalendarFilterService.getFilter();
+      tagsPromise = TagService.getTags(initialFilterData.filterKey, initialFilterData.start, initialFilterData.end);
     }
     tagsPromise.then(function(tags) {
       _this.tags = tags;
@@ -255,12 +255,12 @@ function CategoryListCtrl($scope, $http, CalendarFilterService, CategoryService)
 
   $scope.$on('calendarFilter:updated', function(event, data) {
     /* jshint unused:vars */
-    var rangeData = CalendarFilterService.getFilter();
+    var filterData = CalendarFilterService.getFilter();
     if (!_this.isCumulative) {
-      CategoryService.getCategories(rangeData.timeRange, rangeData.start, rangeData.end)
+      CategoryService.getCategories(filterData.filterKey, filterData.start, filterData.end)
         .then(function(categories) {
           _this.categories = categories;
-          _this.timeRange = rangeData.timeRange;
+          _this.filterKey = filterData.filterKey;
           _this.categories.dataLoaded = true;
         });
     }
@@ -274,9 +274,9 @@ function CategoryListCtrl($scope, $http, CalendarFilterService, CategoryService)
     if (this.isCumulative) {
       categoriesPromise = CategoryService.getCategories('cumulative', null, null);
     } else {
-      var initialTimeRange = CalendarFilterService.getFilter();
-      categoriesPromise = CategoryService.getCategories(initialTimeRange.timeRange, initialTimeRange.start, initialTimeRange.end);
-      _this.timeRange = initialTimeRange.timeRange;
+      var initialFilterData = CalendarFilterService.getFilter();
+      categoriesPromise = CategoryService.getCategories(initialFilterData.filterKey, initialFilterData.start, initialFilterData.end);
+      _this.filterKey = initialFilterData.filterKey;
     }
     categoriesPromise.then(function(categories) {
       _this.categories = categories;
@@ -569,8 +569,8 @@ analyticsApp.controller('CalendarCtrl', function CalendarCtrl($scope, $http, $q,
     }, function gcalError(response) {
       console.log("Ajax call to gcalendars failed: " + response);
     });
-
   };
+
   $scope.eventRender = function(event, element, view) {
     /* jshint unused:vars */
     var location = '';
@@ -598,8 +598,10 @@ analyticsApp.controller('CalendarCtrl', function CalendarCtrl($scope, $http, $q,
 
   this.viewRender = function(view, element) {
     /* jshint unused:vars */
-    CalendarFilterService.setFilter(view.start, view.end, view.type);
-  };
+    CalendarFilterService.setFilter(view.start,
+                                    view.end,
+                                    this.getEnabledCalendarIds());
+  }.bind(this);
 
   $scope.uiConfig = {
     calendar:{
@@ -623,16 +625,36 @@ analyticsApp.controller('CalendarCtrl', function CalendarCtrl($scope, $http, $q,
     }
   };
 
+  // Converts the dict of calendarIds to an array of ids of enabled calendars
+  this.getEnabledCalendarIds = function() {
+    var calendarIds = Object.values(_this.calendars)
+      .filter(function(cal) {
+        return cal.enabled ? true : false;
+      })
+      .map(function(cal) {
+        return cal.calendar_id;
+      })
+      .sort();
+    return calendarIds;
+  };
+
   this.toggleEnabled = function(calendarPrimaryKey) {
     $http({
       method: 'GET',
       url: "/v1/gcalendars/" + calendarPrimaryKey + "/toggle-enabled/"
     }).then(
-      function toggledSuccess(data) {/* jshint unused:vars */},
+      function toggledSuccess(data) {
+        /* jshint unused:vars */
+      },
       function toggledFail(data) {
         /* jshint unused:vars */
         console.log("Could not save preferences for calendar " + calendarPrimaryKey);
-      });
+      }
+    ).then(function() {
+      CalendarFilterService.setFilter(null,
+                                      null,
+                                      _this.getEnabledCalendarIds());
+    });
   };
 
   this.eventSources = [this.events];
