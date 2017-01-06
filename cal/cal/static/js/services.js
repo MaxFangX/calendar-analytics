@@ -226,12 +226,12 @@ analyticsApp.service('QueryService', function() {
       var hours = event[1];
       if (hours > maxYValue) {
         maxYValue = hours;
-      };
+      }
       events.push({
         x: date,
         y: hours
       });
-    };
+    }
     ctrlDetails = [{
       values: events,
       key: type + ' Graph',
