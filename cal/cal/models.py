@@ -600,13 +600,9 @@ class Category(models.Model, EventCollection):
         return set(qs)
 
     def query(self, calendar_ids=None, start=None, end=None):
-        if calendar_ids and self.calendar:
-            message = "Calendar ids can only be specified for Categories without a calendar field attached."
-            raise InvalidParameterException(message)
-
-        if self.calendar:
+        if self.calendar:  # Calendar Category
             calendars = [self.calendar]
-        else:
+        else:  # Color Category
             calendars = self.user.profile.get_calendars_for_calendarids(calendar_ids)
 
         querysets = [
