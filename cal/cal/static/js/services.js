@@ -3,8 +3,8 @@
 
 var analyticsApp = window.angular.module('analyticsApp.services', []);
 
-analyticsApp.factory('CalendarRangeService', ['$rootScope', function CalendarRangeService($rootScope) {
-  var rangeData =  {
+analyticsApp.factory('CalendarFilterService', ['$rootScope', function CalendarFilterService($rootScope) {
+  var filterData =  {
     start: undefined, // ISO String
     end: undefined, // ISO String
     timeRange: undefined,
@@ -12,15 +12,15 @@ analyticsApp.factory('CalendarRangeService', ['$rootScope', function CalendarRan
   };
 
   return {
-    getRange: function() {
-      return rangeData;
+    getFilter: function() {
+      return filterData;
     },
-    setRange: function(start, end, type) {
-      rangeData.start = start;
-      rangeData.end = end;
-      rangeData.type = type;
-      rangeData.timeRange = rangeData.start.toISOString() + " " + rangeData.end.toISOString();
-      $rootScope.$broadcast('calendarRange:updated');
+    setFilter: function(start, end, type) {
+      filterData.start = start;
+      filterData.end = end;
+      filterData.type = type;
+      filterData.timeRange = filterData.start.toISOString() + " " + filterData.end.toISOString();
+      $rootScope.$broadcast('calendarFilter:updated');
     }
   };
 }]);
@@ -226,12 +226,12 @@ analyticsApp.service('QueryService', function() {
       var hours = event[1];
       if (hours > maxYValue) {
         maxYValue = hours;
-      };
+      }
       events.push({
         x: date,
         y: hours
       });
-    };
+    }
     ctrlDetails = [{
       values: events,
       key: type + ' Graph',

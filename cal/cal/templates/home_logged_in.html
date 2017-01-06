@@ -57,7 +57,7 @@
         <span class="caret"></span>
       </button>
       <ul class="dropdown-menu">
-        <li ng-repeat="cal in calendars">
+        <li ng-repeat="cal in $ctrl.calendars">
           <a href="#">
             <input type="checkbox" ng-model="cal.enabled"
                    ng-click="$ctrl.toggleEnabled(cal.id); $ctrl.refresh('panalytics');">

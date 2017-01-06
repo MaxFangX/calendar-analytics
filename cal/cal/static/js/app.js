@@ -6,16 +6,16 @@ var analyticsApp = window.angular.module('analyticsApp', ['analyticsApp.services
 analyticsApp.controller('LoggedInCtrl', function LoggedInController() {
 });
 
-function TagListCtrl($scope, $http, CalendarRangeService, TagService) {
+function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
 
   var _this = this;
 
   this.tags = [];
   this.tags.dataLoaded = false;
 
-  $scope.$on('calendarRange:updated', function(event, data) {
+  $scope.$on('calendarFilter:updated', function(event, data) {
     /* jshint unused:vars */
-    var rangeData = CalendarRangeService.getRange();
+    var rangeData = CalendarFilterService.getFilter();
     if (!_this.isCumulative) {
       TagService.getTags(rangeData.timeRange, rangeData.start, rangeData.end)
         .then(function(tags) {
@@ -32,7 +32,7 @@ function TagListCtrl($scope, $http, CalendarRangeService, TagService) {
     if (this.isCumulative) {
       tagsPromise = TagService.getTags('cumulative', null, null);
     } else {
-      var initialTimeRange = CalendarRangeService.getRange();
+      var initialTimeRange = CalendarFilterService.getFilter();
       tagsPromise = TagService.getTags(initialTimeRange.timeRange, initialTimeRange.start, initialTimeRange.end);
     }
     tagsPromise.then(function(tags) {
@@ -111,7 +111,7 @@ function TagListCtrl($scope, $http, CalendarRangeService, TagService) {
 
 analyticsApp.component('tagList', {
   templateUrl: '/static/templates/tag-list.html',
-  controller: ['$scope', '$http', 'CalendarRangeService', 'TagService', TagListCtrl],
+  controller: ['$scope', '$http', 'CalendarFilterService', 'TagService', TagListCtrl],
   controllerAs: '$ctrl',
   bindings: {
     isCumulative: '<?',
@@ -152,7 +152,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
         xAxis: {
           axisLabel: 'Date',
           tickFormat: function(d) {
-            return d3.time.format('%m/%d/%y')(d)
+            return d3.time.format('%m/%d/%y')(d);
           },
         },
         yAxis: {
@@ -228,12 +228,12 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
           start: (new Date(event.start)).toString(),
           name: event.name,
         });
-      };
+      }
       _this.tagEvents.dataLoaded = true;
     });
   }.bind(this);
   this.initialize();
-};
+}
 
 
 analyticsApp.component('tagDetails', {
@@ -246,16 +246,16 @@ analyticsApp.component('tagDetails', {
   }
 });
 
-function CategoryListCtrl($scope, $http, CalendarRangeService, CategoryService) {
+function CategoryListCtrl($scope, $http, CalendarFilterService, CategoryService) {
 
   var _this = this;
 
   this.categories = [];
   this.categories.dataLoaded = false;
 
-  $scope.$on('calendarRange:updated', function(event, data) {
+  $scope.$on('calendarFilter:updated', function(event, data) {
     /* jshint unused:vars */
-    var rangeData = CalendarRangeService.getRange();
+    var rangeData = CalendarFilterService.getFilter();
     if (!_this.isCumulative) {
       CategoryService.getCategories(rangeData.timeRange, rangeData.start, rangeData.end)
         .then(function(categories) {
@@ -274,7 +274,7 @@ function CategoryListCtrl($scope, $http, CalendarRangeService, CategoryService) 
     if (this.isCumulative) {
       categoriesPromise = CategoryService.getCategories('cumulative', null, null);
     } else {
-      var initialTimeRange = CalendarRangeService.getRange();
+      var initialTimeRange = CalendarFilterService.getFilter();
       categoriesPromise = CategoryService.getCategories(initialTimeRange.timeRange, initialTimeRange.start, initialTimeRange.end);
       _this.timeRange = initialTimeRange.timeRange;
     }
@@ -363,7 +363,7 @@ function CategoryListCtrl($scope, $http, CalendarRangeService, CategoryService) 
 
 analyticsApp.component('categoryList', {
   templateUrl: '/static/templates/category-list.html',
-  controller: ['$scope', '$http', 'CalendarRangeService', 'CategoryService', CategoryListCtrl],
+  controller: ['$scope', '$http', 'CalendarFilterService', 'CategoryService', CategoryListCtrl],
   controllerAs: '$ctrl',
   bindings: {
     isCumulative: '<?',
@@ -403,7 +403,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
         xAxis: {
           axisLabel: 'Date',
           tickFormat: function(d) {
-            return d3.time.format('%m/%d/%y')(d)
+            return d3.time.format('%m/%d/%y')(d);
           },
         },
         yAxis: {
@@ -479,13 +479,13 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
           start: (new Date(event.start)).toString(),
           name: event.name,
         });
-      };
+      }
       _this.categoryEvents.dataLoaded = true;
     });
   }.bind(this);
 
   this.initialize();
-};
+}
 
 analyticsApp.component('categoryDetails', {
   templateUrl: '/static/templates/categoryDetails.html',
@@ -497,9 +497,10 @@ analyticsApp.component('categoryDetails', {
   }
 });
 
-analyticsApp.controller('CalendarCtrl', function CalendarCtrl($scope, $http, $q, uiCalendarConfig, CalendarRangeService) {
+analyticsApp.controller('CalendarCtrl', function CalendarCtrl($scope, $http, $q, uiCalendarConfig, CalendarFilterService) {
 
-  $scope.calendars = {};
+  this.calendars = {};
+  var _this = this;
 
   this.events = function(start, end, timezone, callback) {
     var query_timezone = '';
@@ -521,9 +522,9 @@ analyticsApp.controller('CalendarCtrl', function CalendarCtrl($scope, $http, $q,
       var eventPromises = response.data.results.map(function(gcal) {
 
         // Initialize cached calendars
-        if ($scope.calendars[gcal.calendar_id] === undefined) {
-          $scope.calendars[gcal.calendar_id] = gcal;
-          $scope.calendars[gcal.calendar_id].enabled = gcal.enabled_by_default;
+        if (_this.calendars[gcal.calendar_id] === undefined) {
+          _this.calendars[gcal.calendar_id] = gcal;
+          _this.calendars[gcal.calendar_id].enabled = gcal.enabled_by_default;
         }
 
         return $http({
@@ -553,7 +554,7 @@ analyticsApp.controller('CalendarCtrl', function CalendarCtrl($scope, $http, $q,
             });
           });
 
-          if ($scope.calendars[gcal.calendar_id].enabled) {
+          if (_this.calendars[gcal.calendar_id].enabled) {
             collectedEvents = collectedEvents.concat(events);
           }
         }, function eventError(response) {
@@ -597,7 +598,7 @@ analyticsApp.controller('CalendarCtrl', function CalendarCtrl($scope, $http, $q,
 
   this.viewRender = function(view, element) {
     /* jshint unused:vars */
-    CalendarRangeService.setRange(view.start, view.end, view.type);
+    CalendarFilterService.setFilter(view.start, view.end, view.type);
   };
 
   $scope.uiConfig = {
