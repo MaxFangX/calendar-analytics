@@ -176,6 +176,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
     }).
     success(function successCallback(data) {
       _this.timeStep = "day";
+      // round(... * 100) / 100 necessary to round average hours to two decimal
       _this.averageHours = Math.round(((_this.tagHours / data.length) * 100)) / 100;
       var eventData = QueryService.populateData(data, 'Tag');
       _this.ctrlGraphData = eventData[0];
@@ -193,6 +194,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
     }).
     success(function successCallback(data) {
       _this.timeStep = "week";
+      // round(... * 100) / 100 necessary to round average hours to two decimal
       _this.averageHours = Math.round(((_this.tagHours / data.length) * 100)) / 100;
       var eventData = QueryService.populateData(data, 'Tag');
       _this.ctrlGraphData = eventData[0];
@@ -443,6 +445,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
     }).
     success(function successCallback(data) {
       _this.timeStep = "week";
+      // round(... * 100) / 100 neceessary to round average hours to two decimal
       _this.averageHours = Math.round(((_this.categoryHours / data.length) * 100)) / 100;
       var eventData = QueryService.populateData(data, 'Category');
       _this.ctrlGraphData = eventData[0];
