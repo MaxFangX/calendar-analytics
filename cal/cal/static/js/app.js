@@ -314,7 +314,7 @@ function CategoryListCtrl($scope, $http, CalendarRangeService, CategoryService) 
       .then(function(returnedCategory) {
         category.label = returnedCategory.label;
         category.hours = returnedCategory.hours;
-        $scope.categories.dataLoaded = true;
+        _this.categories.dataLoaded = true;
       });
   };
 
@@ -333,8 +333,8 @@ function CategoryListCtrl($scope, $http, CalendarRangeService, CategoryService) 
         _this.categories = _this.categories.filter(function(category) {
           return category.id !== categoryId;
         });
+      _this.categories.dataLoaded = true;
       });
-      $scope.categories.dataLoaded = true;
   };
 
   // categories pie chart
