@@ -228,14 +228,14 @@ analyticsApp.service('QueryService', function() {
       var hours = event[1];
       if (hours > maxYValue) {
         maxYValue = hours;
-      };
+      }
       xLabels.push(date);
       yLabels.push(hours);
       events.push({
         x: date,
         y: hours
       });
-    };
+    }
     var xSeries = d3.range(1, xLabels.length + 1);
     var leastSquaresCoeff = leastSquares(xSeries, yLabels);
 
