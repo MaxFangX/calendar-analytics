@@ -1,10 +1,10 @@
 <div>
-  <h3 class="well">Average hours per {{$ctrl.timeStep}}: {{ $ctrl.averageHours }}<h3>
-  <button ng-click='$ctrl.showDaily()'>Daily</button>
-  <button ng-click='$ctrl.showWeekly()'>Weekly</button>
-  <button ng-click='$ctrl.showMonthly()'>Monthly</button>
   <div ng-hide="$ctrl.categoryEvents.dataLoaded" class="preloader"></div>
   <div ng-if="$ctrl.categoryEvents.dataLoaded">
+    <h3 class="well">Average hours per {{$ctrl.timeStep}}: {{ $ctrl.averageHours }}<h3>
+    <button ng-click='$ctrl.showDaily()'>Daily</button>
+    <button ng-click='$ctrl.showWeekly()'>Weekly</button>
+    <button ng-click='$ctrl.showMonthly()'>Monthly</button>
     <nvd3 options="$ctrl.categoryLine" data="$ctrl.ctrlGraphData"></nvd3>
   </div>
   <h3 class="well">Contained Events</h3>

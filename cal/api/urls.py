@@ -11,6 +11,7 @@ urlpatterns = patterns(
     url(r'^v1/gcalendars/$', views.GCalendarList.as_view()),
     url(r'^v1/gcalendars/(?P<pk>[0-9]+)/toggle-enabled/?$',
         views.GCalendarToggleEnabled.as_view()),
+    url(r'^v1/toggle-privacy', views.toggle_privacy),
     url(r'^v1/gevents/$', views.GEventList.as_view()),
     url(r'^v1/categories/$', views.CategoryList.as_view()),
     url(r'^v1/categories/(?P<pk>[0-9]+)/?$', views.CategoryDetail.as_view()),

@@ -151,7 +151,6 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
         },
         x: function(d){ return d.x; },
         y: function(d){ return d.y; },
-        useInteractiveGuideline: true,
         xScale: d3.time.scale(),
         xAxis: {
           axisLabel: 'Date',
@@ -181,7 +180,8 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
     }).
     success(function successCallback(data) {
       _this.timeStep = "day";
-      _this.averageHours = _this.tagHours / data.length;
+      // round(... * 100) / 100 necessary to round average hours to two decimal
+      _this.averageHours = Math.round(((_this.tagHours / data.length) * 100)) / 100;
       var eventData = QueryService.populateData(data, 'Tag');
       _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
@@ -198,7 +198,8 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
     }).
     success(function successCallback(data) {
       _this.timeStep = "week";
-      _this.averageHours = _this.tagHours / data.length;
+      // round(... * 100) / 100 necessary to round average hours to two decimal
+      _this.averageHours = Math.round(((_this.tagHours / data.length) * 100)) / 100;
       var eventData = QueryService.populateData(data, 'Tag');
       _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
@@ -215,7 +216,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
     }).
     success(function successCallback(data) {
       _this.timeStep = "month";
-      _this.averageHours = _this.tagHours / data.length;
+      _this.averageHours = Math.round(((_this.tagHours / data.length) * 100)) / 100;
       var eventData = QueryService.populateData(data, 'Tag');
       _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
@@ -228,7 +229,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
     success(function successCallback(data) {
       for (var i = 0; i < data.results.length; i++) {
         var event = data.results[i];
-        _this.tagEvents.push({
+        _this.tagEvents.unshift({
           start: (new Date(event.start)).toString(),
           name: event.name,
         });
@@ -324,7 +325,7 @@ function CategoryListCtrl($scope, $http, CalendarFilterService, CategoryService)
       .then(function(returnedCategory) {
         category.label = returnedCategory.label;
         category.hours = returnedCategory.hours;
-        $scope.categories.dataLoaded = true;
+        _this.categories.dataLoaded = true;
       });
   };
 
@@ -343,8 +344,8 @@ function CategoryListCtrl($scope, $http, CalendarFilterService, CategoryService)
         _this.categories = _this.categories.filter(function(category) {
           return category.id !== categoryId;
         });
+      _this.categories.dataLoaded = true;
       });
-      $scope.categories.dataLoaded = true;
   };
 
   // categories pie chart
@@ -408,7 +409,6 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
         },
         x: function(d){ return d.x; },
         y: function(d){ return d.y; },
-        useInteractiveGuideline: true,
         xScale: d3.time.scale(),
         xAxis: {
           axisLabel: 'Date',
@@ -438,8 +438,8 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
     }).
     success(function successCallback(data) {
       _this.timeStep = "day";
-      _this.averageHours = _this.categoryHours / data.length;
-      var eventData = QueryService.populateData(data, 'Tag');
+      _this.averageHours = Math.round(((_this.categoryHours / data.length) * 100)) / 100;
+      var eventData = QueryService.populateData(data, 'Category');
       _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
     });
@@ -455,8 +455,9 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
     }).
     success(function successCallback(data) {
       _this.timeStep = "week";
-      _this.averageHours = _this.categoryHours / data.length;
-      var eventData = QueryService.populateData(data, 'Tag');
+      // round(... * 100) / 100 neceessary to round average hours to two decimal
+      _this.averageHours = Math.round(((_this.categoryHours / data.length) * 100)) / 100;
+      var eventData = QueryService.populateData(data, 'Category');
       _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
     });
@@ -472,8 +473,8 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
     }).
     success(function successCallback(data) {
       _this.timeStep = "month";
-      _this.averageHours = _this.categoryHours / data.length;
-      var eventData = QueryService.populateData(data, 'Tag');
+      _this.averageHours = Math.round(((_this.categoryHours / data.length) * 100)) / 100;
+      var eventData = QueryService.populateData(data, 'Category');
       _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
     });
@@ -485,7 +486,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
     success(function successCallback(data) {
       for (var i = 0; i < data.results.length; i++) {
         var event = data.results[i];
-        _this.categoryEvents.push({
+        _this.categoryEvents.unshift({
           start: (new Date(event.start)).toString(),
           name: event.name,
         });

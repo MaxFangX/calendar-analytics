@@ -29,6 +29,7 @@ class Profile(models.Model):
     locale = models.CharField(max_length=10, default='en')
     main_calendar = models.ForeignKey("GCalendar", null=True)
     authed = models.BooleanField(default=False, help_text="If the user's oauth credentials are currently valid")
+    private_event_names = models.BooleanField(default=False, help_text="If the user's event names will return as dummy text.")
     analysis_start = models.DateTimeField(null=True, blank=True, help_text="When the analysis of the user's calendar will start")
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -182,10 +183,13 @@ class GCalendar(models.Model):
 
             g.updated = parse_datetime(event['updated'])
 
-            # Sometimes Google is stupid and fails to return the mandatory 'created' field
-            if event.get('created'):
-                g.created = parse_datetime(event['created'])
-            else:
+            try: # Deal with faulty creation dates (i.e. '0000-12-29T00:00:00.000Z')
+                # Sometimes Google is stupid and fails to return the mandatory 'created' field
+                if event.get('created'):
+                    g.created = parse_datetime(event['created'])
+                else:
+                    g.created = g.updated
+            except ValueError as e:
                 g.created = g.updated
 
             g.calendar = self
@@ -589,8 +593,8 @@ class Category(models.Model, EventCollection):
 
     def hours(self, calendar_ids=None, start=None, end=None):
         events = self.get_events(calendar_ids=calendar_ids, start=start, end=end)
-
-        return EventCollection(lambda: events).total_time() / 3600
+        # round(float(...)) necessary to display hours to two decimal points
+        return round(float(EventCollection(lambda: events).total_time()) / 3600, 2)
 
     def category_color(self):
         return get_color(self.calendar, self.color_index)['background']
@@ -655,8 +659,8 @@ class Tag(models.Model, EventCollection):
 
     def hours(self, calendar_ids=None, start=None, end=None):
         events = self.get_events(calendar_ids=calendar_ids, start=start, end=end)
-
-        return EventCollection(lambda: events).total_time() / 3600
+        # round(float(...)) necessary to display hours to two decimal points
+        return round(float(EventCollection(lambda: events).total_time()) / 3600, 2)
 
     def get_events(self, calendar_ids=None, start=None, end=None):
         """
@@ -681,7 +685,7 @@ class Tag(models.Model, EventCollection):
 
         querysets = [
                 GEvent.objects
-                .filter(calendar=calendar, name__regex=r'\b(?i)[#]?'+keyword+r'\b')
+                .filter(calendar=calendar, name__regex=r'(?i)[^a-zA-Z\d:]?'+keyword+r'(?i)[^a-zA-Z\d:]?')
                 .exclude(all_day_event=True)
                 for keyword in keywords
                 for calendar in calendars
