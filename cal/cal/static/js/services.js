@@ -1,243 +1,639 @@
 /*jslint devel: true, browser: true, jquery: true */
-/*global getCookie */
+/*global d3, moment */
 
-var analyticsApp = window.angular.module('analyticsApp.services', []);
+var analyticsApp = window.angular.module('analyticsApp', ['analyticsApp.services', 'nvd3', 'ui.calendar']);
 
-analyticsApp.factory('CalendarRangeService', ['$rootScope', function CalendarRangeService($rootScope) {
-  var rangeData =  {
-    start: undefined, // ISO String
-    end: undefined, // ISO String
-    timeRange: undefined,
-    type: undefined,
-  };
+analyticsApp.controller('LoggedInCtrl', function LoggedInController() {
+});
 
-  return {
-    getRange: function() {
-      return rangeData;
-    },
-    setRange: function(start, end, type) {
-      rangeData.start = start;
-      rangeData.end = end;
-      rangeData.type = type;
-      rangeData.timeRange = rangeData.start.toISOString() + " " + rangeData.end.toISOString();
-      $rootScope.$broadcast('calendarRange:updated');
-    }
-  };
-}]);
-
-analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
+function TagListCtrl($scope, $http, CalendarRangeService, TagService) {
 
   var _this = this;
 
-  this.tags = {};
+  this.tags = [];
+  this.tags.dataLoaded = false;
 
-  this.getTags = function(timeRange, start, end) {
-
-    if (!timeRange) {
-      throw "timeRange must always be supplied";
-    }
-
-    if (start || end) {
-      // If the start and end time match the given timeRange
-      if (timeRange !== start.toISOString() + " " + end.toISOString()) {
-        throw "timeRange doesn't match given start and end times";
-      }
-    }
-
-    // Attempt to return cached tags
-    if (_this.tags[timeRange]) {
-      return $q.when(_this.tags[timeRange]);
-    }
-
-    // Request the tags and return a promise
-    return $http({
-      method: 'GET',
-      url: '/v1/tags.json',
-      cache: true,
-      params: {
-        start: (start)? start.toISOString() : null,
-        end: (end)? end.toISOString() : null,
-      }
-    }).then(function successCallback(response) {
-      _this.tags[timeRange] = [];
-      for (var i = 0; i < response.data.results.length; i++) {
-        var tag = response.data.results[i];
-        _this.tags[timeRange].push({
-          id: tag.id,
-          label: tag.label,
-          keywords: tag.keywords,
-          hours: tag.hours
+  $scope.$on('calendarRange:updated', function(event, data) {
+    /* jshint unused:vars */
+    var rangeData = CalendarRangeService.getRange();
+    if (!_this.isCumulative) {
+      TagService.getTags(rangeData.timeRange, rangeData.start, rangeData.end)
+        .then(function(tags) {
+          _this.tags = tags;
+          _this.timeRange = rangeData.timeRange;
+          _this.tags.dataLoaded = true;
         });
       }
-      return _this.tags[timeRange];
-    }, function errorCallback(response) {
-      /* jshint unused:vars */
-      console.log("Failed to get tags");
-    });
-  };
+  });
 
-  this.createTag = function(label, keywords) {
-    return $http({
-      method: 'POST',
-      url: '/v1/tags.json',
-      data: $.param({
-        label: label,
-        keywords: keywords,
-        csrfmiddlewaretoken: getCookie('csrftoken')
-      }),
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
-    });
-  };
-
-  this.editTag = function(tagId, newLabel, newKeywords) {
-    return $http({
-      method: 'POST',
-      url: '/v1/tags/' + tagId,
-      data: $.param({
-        label: newLabel,
-        keywords: newKeywords,
-        csrfmiddlewaretoken: getCookie('csrftoken'),
-        _method: 'PATCH'
-      }),
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
-    }).then(function successCallback(response) {
-      return response.data;
-    }, function errorCallback() {
-      console.log("Failed to edit tag with id " + tagId);
-      return null;
-    });
-  };
-
-  this.deleteTag = function(tagId) {
-    return $http({
-      method: 'POST',
-      url: '/v1/tags/' + tagId,
-      data: $.param({
-        csrfmiddlewaretoken: getCookie('csrftoken'),
-        _method: 'DELETE'
-      }),
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
-    });
-  };
-
-}]);
-
-analyticsApp.service('CategoryService', ['$http', '$q', function($http, $q) {
-
-  var _this = this;
-
-  this.categories = {};
-
-  this.getCategories = function(timeRange, start, end) {
-    if (!timeRange) {
-      throw "timeRange must always be supplied";
+  // Initialization
+  this.initialize = function() {
+    var tagsPromise;
+    if (this.isCumulative) {
+      tagsPromise = TagService.getTags('cumulative', null, null);
+    } else {
+      var initialTimeRange = CalendarRangeService.getRange();
+      tagsPromise = TagService.getTags(initialTimeRange.timeRange, initialTimeRange.start, initialTimeRange.end);
     }
+    tagsPromise.then(function(tags) {
+      _this.tags = tags;
+      _this.tags.dataLoaded = true;
+    });
+  }.bind(this);
 
-    if (start || end) {
-      // If the start and end time match the given timeRange
-      if (timeRange !== start.toISOString() + " " + end.toISOString()) {
-        throw "timeRange doesn't match given start and end times";
-      }
+  this.initialize();
+
+  this.hideZeroHoursFilter = function (value, index, array) {
+    /* jshint unused:vars */
+    if (this.hideZeroHours && value.hours === 0) {
+      return false;
+    } else {
+      return true;
     }
+  }.bind(this);
 
-    // Attempt to return cached categories
-    if (_this.categories[timeRange]) {
-      return $q.when(_this.categories[timeRange]);
-    }
-
-    // Request the categories and return a promise
-    return $http({
-      method: 'GET',
-      url: '/v1/colorcategories.json',
-      cache: true,
-      params: {
-        start: (start)? start.toISOString() : null,
-        end: (end)? end.toISOString() : null,
-      }
-    }).then(function successCallback(response) {
-      _this.categories[timeRange] = [];
-      for (var i = 0; i < response.data.results.length; i++) {
-        var category = response.data.results[i];
-        _this.categories[timeRange].push({
-          id: category.id,
-          label: category.label,
-          hours: category.hours,
-          include: true,
-          color: category.category_color,
+  this.create = function(tag) {
+    TagService.createTag(tag.label, tag.keywords)
+      .success(function addToList(data) {
+        _this.tags.push({
+          id: data.id,
+          label: data.label,
+          keywords: data.keywords,
+          hours: data.hours,
+          editing: false
         });
-      }
-      return _this.categories[timeRange];
-    }, function errorCallback(response) {
-      /* jshint unused:vars */
-      console.log("Failed to get categories");
-    });
-  };
-
-  this.editCategory = function(categoryId, newLabel) {
-    return $http({
-      method: 'POST',
-      url: '/v1/colorcategories/' + categoryId,
-      data: $.param({
-        label: newLabel,
-        csrfmiddlewaretoken: getCookie('csrftoken'),
-        _method: 'PATCH'
-      }),
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
-    }).then(function successCallback(response) {
-      return response.data;
-    }, function errorCallback() {
-      console.log("Failed to edit category with id " + categoryId);
-      return null;
-    });
-  };
-
-  this.deleteCategory = function(categoryId) {
-    return $http({
-      method: 'POST',
-      url: '/v1/colorcategories/' + categoryId,
-      data: $.param({
-        csrfmiddlewaretoken: getCookie('csrftoken'),
-        _method: 'DELETE'
-      }),
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      }
-    });
-  };
-
-}]);
-
-analyticsApp.service('QueryService', function() {
-  this.populateData = function(data, type) {
-    var ctrlDetails = [];
-    var maxYValue = 0;
-    var events = [];
-    for (var i = 0; i < data.length; i++) {
-      var event = data[i];
-      var date = new Date(event[0]);
-      var hours = event[1];
-      if (hours > maxYValue) {
-        maxYValue = hours;
-      }
-      events.push({
-        x: date,
-        y: hours
+      _this.tags.dataLoaded = true;
       });
-    }
-    ctrlDetails = [{
-      values: events,
-      key: type + ' Graph',
-      color: '#003057',
-      strokeWidth: 2,
-    }];
-    return [ctrlDetails, maxYValue];
+  }.bind(this);
+
+  this.startEdit = function(tagId) {
+    var tag = this.tags.find(function(tag, index, array) {
+      /* jshint unused:vars */
+      return tag.id == tagId;
+    });
+    tag.newLabel = tag.label;
+    tag.newKeywords = tag.keywords;
+    tag.editing = true;
   };
+
+  this.submitEdit = function(tagId) {
+    var tag = this.tags.find(function(tag, index, array) {
+      /* jshint unused:vars */
+      return tag.id == tagId;
+    });
+    tag.editing = false;
+    TagService.editTag(tagId, tag.newLabel, tag.newKeywords)
+      .then(function(returnedTag) {
+        tag.label = returnedTag.label;
+        tag.keywords = returnedTag.keywords;
+        tag.hours = returnedTag.hours;
+      });
+  }.bind(this);
+
+  this.cancelEdit = function(tagId) {
+    var tag = this.tags.find(function(tag, index, array) {
+      /* jshint unused:vars */
+      return tag.id == tagId;
+    });
+    tag.editing = false;
+  }.bind(this);
+
+  this.delete = function(tagId) {
+    TagService.deleteTag(tagId)
+      .success(function removeFromList() {
+        _this.tags = _this.tags.filter(function(tag) {
+          return tag.id !== tagId;
+        });
+        _this.tags.dataLoaded = true;
+      });
+  };
+}
+
+analyticsApp.component('tagList', {
+  templateUrl: '/static/templates/tag-list.html',
+  controller: ['$scope', '$http', 'CalendarRangeService', 'TagService', TagListCtrl],
+  controllerAs: '$ctrl',
+  bindings: {
+    isCumulative: '<?',
+    displayName: '@',
+    hideZeroHours: '<?'
+  }
+});
+
+function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
+  var _this = this;
+  var tagUrl = '/v1/tags/' + this.tagId + '/events';
+  var timeseriesWeek = '/v1/tags/' + this.tagId + '/timeseries/week';
+  var timeseriesMonth = '/v1/tags/' + this.tagId + '/timeseries/month';
+  var timeseriesDay = '/v1/tags/' + this.tagId + '/timeseries/day';
+  var query_timezone = moment.tz.guess();
+  this.tagEvents = [];
+  this.tagEvents.dataLoaded = false;
+  this.averageHours = 0;
+  this.timeStep = "";
+
+  // Refreshes the line graph
+  this.showGraph = function(maxYValue) {
+    // line graph
+    _this.tagLine = {
+      chart: {
+        type: 'lineChart',
+        height: 450,
+        margin : {
+          top: 20,
+          right: 20,
+          bottom: 40,
+          left: 55
+        },
+        x: function(d){ return d.x; },
+        y: function(d){ return d.y; },
+        xScale: d3.time.scale(),
+        xAxis: {
+          axisLabel: 'Date',
+          tickFormat: function(d) {
+            return d3.time.format('%m/%d/%y')(d)
+          },
+        },
+        yAxis: {
+          axisLabel: 'Hours',
+          tickFormat: function(d){
+            return d3.format('.02f')(d);
+          },
+          axisLabelDistance: -10,
+        },
+        forceY: [0, maxYValue + 1],
+      },
+    };
+  }.bind(this);
+
+  this.showDaily = function() {
+    $http({
+      method: 'GET',
+      url: timeseriesDay + '.json',
+      params: {
+        timezone: query_timezone,
+      }
+    }).
+    success(function successCallback(data) {
+      _this.timeStep = "day";
+      // round(... * 100) / 100 necessary to round average hours to two decimal
+      _this.averageHours = Math.round(((_this.tagHours / data.length) * 100)) / 100;
+      var eventData = QueryService.populateData(data, 'Tag');
+      _this.ctrlGraphData = eventData[0];
+      _this.showGraph(eventData[1]);
+    });
+  };
+
+  this.showWeekly = function() {
+    $http({
+      method: 'GET',
+      url: timeseriesWeek + '.json',
+      params: {
+        timezone: query_timezone,
+      }
+    }).
+    success(function successCallback(data) {
+      _this.timeStep = "week";
+      // round(... * 100) / 100 necessary to round average hours to two decimal
+      _this.averageHours = Math.round(((_this.tagHours / data.length) * 100)) / 100;
+      var eventData = QueryService.populateData(data, 'Tag');
+      _this.ctrlGraphData = eventData[0];
+      _this.showGraph(eventData[1]);
+    });
+  };
+
+  this.showMonthly = function() {
+    $http({
+      method: 'GET',
+      url: timeseriesMonth + '.json',
+      params: {
+        timezone: query_timezone,
+      }
+    }).
+    success(function successCallback(data) {
+      _this.timeStep = "month";
+      _this.averageHours = Math.round(((_this.tagHours / data.length) * 100)) / 100;
+      var eventData = QueryService.populateData(data, 'Tag');
+      _this.ctrlGraphData = eventData[0];
+      _this.showGraph(eventData[1]);
+    });
+  };
+
+  this.initialize = function() {
+    this.showWeekly();
+    $http({method: 'GET', url: tagUrl + '.json' }).
+    success(function successCallback(data) {
+      for (var i = 0; i < data.results.length; i++) {
+        var event = data.results[i];
+        _this.tagEvents.unshift({
+          start: (new Date(event.start)).toString(),
+          name: event.name,
+        });
+      };
+      _this.tagEvents.dataLoaded = true;
+    });
+  }.bind(this);
+  this.initialize();
+};
+
+
+analyticsApp.component('tagDetails', {
+  templateUrl: '/static/templates/tagDetails.html',
+  controller: ['$scope', '$interpolate', '$http', 'QueryService', TagsDetailCtrl],
+  controllerAs: '$ctrl',
+  bindings: {
+    tagId: '@',
+    tagHours: '@'
+  }
+});
+
+function CategoryListCtrl($scope, $http, CalendarRangeService, CategoryService) {
+
+  var _this = this;
+
+  this.categories = [];
+  this.categories.dataLoaded = false;
+
+  $scope.$on('calendarRange:updated', function(event, data) {
+    /* jshint unused:vars */
+    var rangeData = CalendarRangeService.getRange();
+    if (!_this.isCumulative) {
+      CategoryService.getCategories(rangeData.timeRange, rangeData.start, rangeData.end)
+        .then(function(categories) {
+          _this.categories = categories;
+          _this.timeRange = rangeData.timeRange;
+          _this.categories.dataLoaded = true;
+        });
+    }
+  });
+
+  // Initialization
+  this.initialize = function() {
+
+    var categoriesPromise;
+
+    if (this.isCumulative) {
+      categoriesPromise = CategoryService.getCategories('cumulative', null, null);
+    } else {
+      var initialTimeRange = CalendarRangeService.getRange();
+      categoriesPromise = CategoryService.getCategories(initialTimeRange.timeRange, initialTimeRange.start, initialTimeRange.end);
+      _this.timeRange = initialTimeRange.timeRange;
+    }
+    categoriesPromise.then(function(categories) {
+      _this.categories = categories;
+      _this.categories.dataLoaded = true;
+    });
+  }.bind(this);
+  this.initialize();
+
+  this.hideZeroHoursFilter = function(value, index, array) {
+    /* jshint unused:vars */
+    if (this.hideZeroHours && value.hours === 0) {
+      return false;
+    } else {
+      return true;
+    }
+  }.bind(this);
+
+  this.startEdit = function(categoryId) {
+    var category = _this.categories.find(function(category, index, array) {
+      /* jshint unused:vars */
+      return category.id == categoryId;
+    });
+    category.newLabel = category.label;
+    category.editing = true;
+  };
+
+  this.submitEdit = function(categoryId) {
+    var category = _this.categories.find(function(category, index, array) {
+      /* jshint unused:vars */
+      return category.id == categoryId;
+    });
+    category.editing = false;
+
+    CategoryService.editCategory(categoryId, category.newLabel)
+      .then(function(returnedCategory) {
+        category.label = returnedCategory.label;
+        category.hours = returnedCategory.hours;
+        $scope.categories.dataLoaded = true;
+      });
+  };
+
+  this.cancelEdit = function(categoryId) {
+    var category = this.categories.find(function(category, index, array) {
+      /* jshint unused:vars */
+      return category.id == categoryId;
+    });
+    category.editing = false;
+  }.bind(this);
+
+  this.delete = function(categoryId) {
+    CategoryService.deleteCategory(categoryId)
+      .success(function removeFromList(data) {
+        /* jshint unused:vars */
+        _this.categories = _this.categories.filter(function(category) {
+          return category.id !== categoryId;
+        });
+      });
+      $scope.categories.dataLoaded = true;
+  };
+
+  // categories pie chart
+  this.categoryPie = {
+    chart: {
+      type: 'pieChart',
+      height: 400,
+      x: function(d){return d.label;},
+      y: function(d){return d.hours;},
+      showLabels: false,
+      growOnHover: true,
+      duration: 500,
+      labelThreshold: 0.01,
+      labelSunbeamLayout: true,
+      legend: {
+        margin: {
+          top: 5,
+          right: 0,
+          bottom: 0,
+          left: 0
+        }
+      },
+    },
+  };
+}
+
+analyticsApp.component('categoryList', {
+  templateUrl: '/static/templates/category-list.html',
+  controller: ['$scope', '$http', 'CalendarRangeService', 'CategoryService', CategoryListCtrl],
+  controllerAs: '$ctrl',
+  bindings: {
+    isCumulative: '<?',
+    displayName: '@',
+    hideZeroHours: '<?'
+  }
+});
+
+function CategoriesDetailCtrl($scope, $http, QueryService){
+  var _this = this;
+  var categoryUrl = '/v1/colorcategories/' + this.categoryId + '/events';
+  var timeseriesWeek = '/v1/colorcategories/' + this.categoryId + '/timeseries/week';
+  var timeseriesMonth = '/v1/colorcategories/' + this.categoryId + '/timeseries/month';
+  var timeseriesDay = '/v1/colorcategories/' + this.categoryId + '/timeseries/day';
+  var query_timezone = moment.tz.guess();
+  this.categoryEvents = [];
+  this.categoryEvents.dataLoaded = false;
+  this.averageHours = 0;
+  this.timeStep = "";
+
+  // line graph
+  this.showGraph = function(maxYValue) {
+    this.categoryLine = {
+      chart: {
+        type: 'lineChart',
+        height: 450,
+        margin : {
+          top: 20,
+          right: 20,
+          bottom: 40,
+          left: 55
+        },
+        x: function(d){ return d.x; },
+        y: function(d){ return d.y; },
+        xScale: d3.time.scale(),
+        xAxis: {
+          axisLabel: 'Date',
+          tickFormat: function(d) {
+            return d3.time.format('%m/%d/%y')(d)
+          },
+        },
+        yAxis: {
+          axisLabel: 'Hours',
+          tickFormat: function(d){
+            return d3.format('.02f')(d);
+          },
+          axisLabelDistance: -10
+        },
+        forceY: [0, maxYValue + 1],
+      },
+    };
+  }.bind(this);
+
+  this.showDaily = function() {
+    $http({
+      method: 'GET',
+      url: timeseriesDay + '.json',
+      params: {
+        timezone: query_timezone,
+      }
+    }).
+    success(function successCallback(data) {
+      _this.timeStep = "day";
+      _this.averageHours = Math.round(((_this.categoryHours / data.length) * 100)) / 100;
+      var eventData = QueryService.populateData(data, 'Category');
+      _this.ctrlGraphData = eventData[0];
+      _this.showGraph(eventData[1]);
+    });
+  };
+
+  this.showWeekly = function() {
+    $http({
+      method: 'GET',
+      url: timeseriesWeek + '.json',
+      params: {
+        timezone: query_timezone,
+      }
+    }).
+    success(function successCallback(data) {
+      _this.timeStep = "week";
+      // round(... * 100) / 100 neceessary to round average hours to two decimal
+      _this.averageHours = Math.round(((_this.categoryHours / data.length) * 100)) / 100;
+      var eventData = QueryService.populateData(data, 'Category');
+      _this.ctrlGraphData = eventData[0];
+      _this.showGraph(eventData[1]);
+    });
+  };
+
+  this.showMonthly = function() {
+    $http({
+      method: 'GET',
+      url: timeseriesMonth + '.json',
+      params: {
+        timezone: query_timezone,
+      }
+    }).
+    success(function successCallback(data) {
+      _this.timeStep = "month";
+      _this.averageHours = Math.round(((_this.categoryHours / data.length) * 100)) / 100;
+      var eventData = QueryService.populateData(data, 'Category');
+      _this.ctrlGraphData = eventData[0];
+      _this.showGraph(eventData[1]);
+    });
+  };
+
+  this.initialize = function() {
+    this.showWeekly();
+    $http({method: 'GET', url: categoryUrl + '.json' }).
+    success(function successCallback(data) {
+      for (var i = 0; i < data.results.length; i++) {
+        var event = data.results[i];
+        _this.categoryEvents.unshift({
+          start: (new Date(event.start)).toString(),
+          name: event.name,
+        });
+      };
+      _this.categoryEvents.dataLoaded = true;
+    });
+  }.bind(this);
+
+  this.initialize();
+};
+
+analyticsApp.component('categoryDetails', {
+  templateUrl: '/static/templates/categoryDetails.html',
+  controller: ['$scope', '$http', 'QueryService', CategoriesDetailCtrl],
+  controllerAs: '$ctrl',
+  bindings: {
+    categoryId: '@',
+    categoryHours: '@'
+  }
+});
+
+analyticsApp.controller('CalendarCtrl', function CalendarCtrl($scope, $http, $q, uiCalendarConfig, CalendarRangeService) {
+
+  $scope.calendars = {};
+
+  this.events = function(start, end, timezone, callback) {
+    var query_timezone = '';
+    if (!timezone) {
+      query_timezone = 'UTC';
+    } else if (timezone === 'local') {
+      query_timezone = moment.tz.guess();
+    } else {
+      query_timezone = timezone;
+    }
+
+    $http({
+      method: 'GET',
+      url: "/v1/gcalendars.json",
+      cache: true,
+    }).then(function gcalSuccess(response) {
+
+      var collectedEvents = [];
+      var eventPromises = response.data.results.map(function(gcal) {
+
+        // Initialize cached calendars
+        if ($scope.calendars[gcal.calendar_id] === undefined) {
+          $scope.calendars[gcal.calendar_id] = gcal;
+          $scope.calendars[gcal.calendar_id].enabled = gcal.enabled_by_default;
+        }
+
+        return $http({
+          method: 'GET',
+          url: "/v1/gevents.json",
+          cache: true,
+          params: {
+            calendarId: gcal.calendar_id,
+            start: start.toISOString(),
+            end: end.toISOString(),
+            timezone: query_timezone,
+            edge: 'truncated'
+          },
+        }).then(function eventSuccess(response) {
+          var events = [];
+          $.each(response.data.results, function(index, gevent) {
+            events.push({
+              title: gevent.name,
+              start: gevent.start,
+              end: gevent.end,
+              allDay: gevent.all_day_event,
+              backgroundColor: gevent.color.background,
+              textColor: gevent.color.foreground,
+              borderColor: gevent.color.foreground,
+              description: gevent.description,
+              location: gevent.location,
+            });
+          });
+
+          if ($scope.calendars[gcal.calendar_id].enabled) {
+            collectedEvents = collectedEvents.concat(events);
+          }
+        }, function eventError(response) {
+          console.log("Ajax call to gevents failed: " + response);
+        });
+      });
+
+      $q.all(eventPromises).then(function() {
+        callback(collectedEvents);
+      });
+
+    }, function gcalError(response) {
+      console.log("Ajax call to gcalendars failed: " + response);
+    });
+
+  };
+  $scope.eventRender = function(event, element, view) {
+    /* jshint unused:vars */
+    var location = '';
+    if (event.location !== '') {
+      location = '<i>' + event.location + '</i><br>';
+    }
+    element.qtip({
+      content: '<b>' + event.title + '</b><br>' + location + event.description,
+      show: 'click',
+      hide: 'unfocus',
+      position: {
+        target: 'mouse',
+        viewport: $(window),
+        adjust: {
+          mouse: false,
+          method: 'flip shift'
+        }
+      },
+      style: {
+        classes: 'cal-section-info'
+      },
+    });
+    return element;
+  };
+
+  this.viewRender = function(view, element) {
+    /* jshint unused:vars */
+    CalendarRangeService.setRange(view.start, view.end, view.type);
+  };
+
+  $scope.uiConfig = {
+    calendar:{
+      defaultView: 'agendaWeek',
+      timezone: 'local',
+      header:{
+        left: 'title',
+        center: '',
+        right: 'agendaDay,agendaWeek,month today prev,next'
+      },
+      firstDay: 1,
+      eventClick: $scope.alertOnEventClick,
+      eventRender: $scope.eventRender,
+      viewRender: this.viewRender,
+    }
+  };
+
+  this.refresh = function(calendarName) {
+    if(uiCalendarConfig.calendars[calendarName] !== undefined){
+      uiCalendarConfig.calendars[calendarName].fullCalendar('refetchEvents');
+    }
+  };
+
+  this.toggleEnabled = function(calendarPrimaryKey) {
+    $http({
+      method: 'GET',
+      url: "/v1/gcalendars/" + calendarPrimaryKey + "/toggle-enabled/"
+    }).then(
+      function toggledSuccess(data) {/* jshint unused:vars */},
+      function toggledFail(data) {
+        /* jshint unused:vars */
+        console.log("Could not save preferences for calendar " + calendarPrimaryKey);
+      });
+  };
+
+  this.eventSources = [this.events];
 });
