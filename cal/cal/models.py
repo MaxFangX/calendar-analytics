@@ -26,6 +26,7 @@ class Profile(models.Model):
     locale = models.CharField(max_length=10, default='en')
     main_calendar = models.ForeignKey("GCalendar", null=True)
     authed = models.BooleanField(default=False, help_text="If the user's oauth credentials are currently valid")
+    private_event_names = models.BooleanField(default=False, help_text="If the user's event names will return as dummy text.")
     analysis_start = models.DateTimeField(null=True, blank=True, help_text="When the analysis of the user's calendar will start")
 
     created_at = models.DateTimeField(auto_now_add=True)

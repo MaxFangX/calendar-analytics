@@ -19,6 +19,8 @@ class GCalendarSerializer(serializers.ModelSerializer):
 
 class GEventSerializer(serializers.ModelSerializer):
 
+    name = serializers.SerializerMethodField()
+
     class Meta:
         model = GEvent
         fields = ('id', 'name', 'start', 'end', 'location', 'created', 'updated',
@@ -26,6 +28,11 @@ class GEventSerializer(serializers.ModelSerializer):
                   'status', 'transparency', 'all_day_event', 'timezone',
                   'end_time_unspecified', 'recurring_event_id', 'color')
         # color = serializers.SerializerMethodField()
+
+    def get_name(self, obj):
+        if self.context['request'].user.profile.private_event_names:
+            return "EECS EECS EECS"
+        return obj.name
 
     class GCalendarField(serializers.Field):
         def to_representation(self, obj):
@@ -40,6 +47,7 @@ class GEventSerializer(serializers.ModelSerializer):
                 return {}
 
     calendar = GCalendarField(read_only=True, required=False)
+
 
 
 class StatisticSerializer(serializers.ModelSerializer):
