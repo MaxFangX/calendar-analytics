@@ -1,5 +1,5 @@
 /*jslint devel: true, browser: true, jquery: true */
-/*global getCookie */
+/*global d3, getCookie */
 
 var analyticsApp = window.angular.module('analyticsApp.services', []);
 
@@ -220,6 +220,8 @@ analyticsApp.service('QueryService', function() {
     var ctrlDetails = [];
     var maxYValue = 0;
     var events = [];
+    var xLabels = [];
+    var yLabels = [];
     for (var i = 0; i < data.length; i++) {
       var event = data[i];
       var date = new Date(event[0]);
@@ -227,17 +229,60 @@ analyticsApp.service('QueryService', function() {
       if (hours > maxYValue) {
         maxYValue = hours;
       };
+      xLabels.push(date);
+      yLabels.push(hours);
       events.push({
         x: date,
         y: hours
       });
     };
-    ctrlDetails = [{
+    var xSeries = d3.range(1, xLabels.length + 1);
+    var leastSquaresCoeff = leastSquares(xSeries, yLabels);
+
+    // apply the results of the least squares regression
+    var x1 = xLabels[0];
+    var y1 = leastSquaresCoeff[0] + leastSquaresCoeff[1];
+    var x2 = xLabels[xLabels.length - 1];
+    var y2 = leastSquaresCoeff[0] * xSeries.length + leastSquaresCoeff[1];
+    var trendData = [{x:x1,y:y1},{x:x2,y:y2}];
+
+    ctrlDetails.push({
       values: events,
       key: type + ' Graph',
       color: '#003057',
-      strokeWidth: 2,
-    }];
+      strokeWidth: 1,
+    });
+
+    ctrlDetails.push({
+      values: trendData,
+      key: 'Trend Line',
+      color: '#FDB515',
+      strokeWidth: 3,
+    });
+
     return [ctrlDetails, maxYValue];
   };
+
+  // returns slope, intercept and r-square of the line
+  function leastSquares(xSeries, ySeries) {
+    var reduceSumFunc = function(prev, cur) { return prev + cur; };
+
+    var xBar = xSeries.reduce(reduceSumFunc) * 1.0 / xSeries.length;
+    var yBar = ySeries.reduce(reduceSumFunc) * 1.0 / ySeries.length;
+
+    var ssXX = xSeries.map(function(d) { return Math.pow(d - xBar, 2); })
+    .reduce(reduceSumFunc);
+
+    var ssYY = ySeries.map(function(d) { return Math.pow(d - yBar, 2); })
+    .reduce(reduceSumFunc);
+
+    var ssXY = xSeries.map(function(d, i) { return (d - xBar) * (ySeries[i] - yBar); })
+    .reduce(reduceSumFunc);
+
+    var slope = ssXY / ssXX;
+    var intercept = yBar - (xBar * slope);
+    var rSquare = Math.pow(ssXY, 2) / (ssXX * ssYY);
+
+    return [slope, intercept, rSquare];
+  }
 });
