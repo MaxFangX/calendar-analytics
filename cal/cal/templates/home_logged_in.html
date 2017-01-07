@@ -56,12 +56,14 @@
         Select Calendars
         <span class="caret"></span>
       </button>
-      <ul class="dropdown-menu">
+      <ul class="dropdown-menu" ng-click="$event.stopPropagation()">
         <li ng-repeat="cal in calendars">
           <a href="#">
-            <input type="checkbox" ng-model="cal.enabled"
-                   ng-click="$ctrl.toggleEnabled(cal.id); $ctrl.refresh('panalytics');">
-            {% verbatim %} {{ cal.summary }} {% endverbatim %}
+            <label>
+              <input type="checkbox" ng-model="cal.enabled"
+                ng-click="$ctrl.toggleEnabled(cal.id); $ctrl.refresh('panalytics');">
+                {% verbatim %} {{ cal.summary }} {% endverbatim %}
+            </label>
           </a>
         </li>
       </ul>
