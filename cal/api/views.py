@@ -21,7 +21,9 @@ def toggle_privacy(request):
     request.user.profile.private_event_names = \
             not request.user.profile.private_event_names
     request.user.profile.save()
-    return Response({})
+
+    return Response("Event names are now {}"
+        .format("private" if request.user.profile.private_event_names else "visible"))
 
 
 @api_view(('GET',))
