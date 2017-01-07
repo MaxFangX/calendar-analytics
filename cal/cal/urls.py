@@ -5,7 +5,6 @@ urlpatterns = patterns(
 
     '',
     url(r'^$|^sync', 'cal.views.home', name='home'),
-    # url(r'^sync', 'cal.views.home', name='home'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^admin/', include('loginas.urls')),
     url(r'^admin/generate-categories', 'cal.views.generate_categories',

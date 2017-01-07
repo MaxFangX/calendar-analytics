@@ -36,6 +36,7 @@ def sync(request, format=None):
             calendar.sync(full_sync=True)
         else:
             calendar.sync()
+
     return HttpResponseRedirect("/sync?no_sync=true")
 
 
