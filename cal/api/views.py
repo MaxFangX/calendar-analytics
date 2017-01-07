@@ -1,6 +1,7 @@
 from api.serializers import GCalendarSerializer, GEventSerializer, StatisticSerializer, ColorCategorySerializer, TagSerializer, ColorCategoryTimeSeriesSerializer, TagTimeSeriesSerializer
 from cal.helpers import handle_time_string, truncated_queryset
 from cal.models import ColorCategory, GCalendar, GEvent, Statistic, Profile, Tag
+from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from rest_framework import generics, status
 from rest_framework.decorators import api_view
@@ -18,7 +19,6 @@ def api_root(request, format=None):
 
 @api_view(('GET',))
 def sync(request, format=None):
-
     if not request.user:
         return Response("Not logged in")
 
@@ -36,8 +36,7 @@ def sync(request, format=None):
             calendar.sync(full_sync=True)
         else:
             calendar.sync()
-
-    return HttpResponseRedirect("/")
+    return HttpResponseRedirect("/sync?no_sync=true")
 
 
 class GCalendarList(generics.ListAPIView):

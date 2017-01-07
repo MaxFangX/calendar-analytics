@@ -237,85 +237,86 @@ class GCalendar(models.Model):
                 recurring_event_id=event.get('recurringEventId', ''))
 
     def sync(self, full_sync=False):
-        result = None
-        creds = self.user.googlecredentials
-        service = creds.get_service()
+        if self.summary != "Questbridge" and self.summary != "cinddkaitie@gmail.com" and self.summary != "cindytung96@gmail.com":
+            result = None
+            creds = self.user.googlecredentials
+            service = creds.get_service()
 
-        default_list_args = {
-                'calendarId': self.calendar_id,
-                'singleEvents': True,
-                'maxResults': 2500,
-                }
-        list_args_with_constraints = {
-                # Only sync up to two months in the future
-                'timeMax': ensure_timezone_awareness(datetime.now() + timedelta(days=60)).isoformat(),
-                }
-        list_args_with_constraints.update(default_list_args)
+            default_list_args = {
+                    'calendarId': self.calendar_id,
+                    'singleEvents': True,
+                    'maxResults': 2500,
+                    }
+            list_args_with_constraints = {
+                    # Only sync up to two months in the future
+                    'timeMax': ensure_timezone_awareness(datetime.now() + timedelta(days=60)).isoformat(),
+                    }
+            list_args_with_constraints.update(default_list_args)
 
-        next_page_token = None
-        if full_sync:
-            # Full sync - initial request without sync token or page token
-            result = service.events().list(**list_args_with_constraints).execute()
-            old_events = GEvent.objects.filter(calendar=self)
-            for event in old_events:
-                event.delete()
-            # Delete the DeletedEvents and get a fresh copy from Google
-            deleted_events = DeletedEvent.objects.filter(calendar=self)
-            for event in deleted_events:
-                event.delete()
-        else:
-            # Incremental sync, initial request needs syncToken
-            try:
-                # Google API doesn't accept constraints for the first request in incremental sync
-                result = service.events().list(syncToken=creds.next_sync_token, **default_list_args).execute()
-            except Exception as e:
-                t, v, tb = sys.exc_info()
-                if hasattr(e, 'resp') and e.resp.status == 410:
-                    # Sync token is no longer valid, perform full sync
-                    result = service.events().list(**list_args_with_constraints).execute()
-                else:
-                    raise t, v, tb
+            next_page_token = None
+            if full_sync:
+                # Full sync - initial request without sync token or page token
+                result = service.events().list(**list_args_with_constraints).execute()
+                old_events = GEvent.objects.filter(calendar=self)
+                for event in old_events:
+                    event.delete()
+                # Delete the DeletedEvents and get a fresh copy from Google
+                deleted_events = DeletedEvent.objects.filter(calendar=self)
+                for event in deleted_events:
+                    event.delete()
+            else:
+                # Incremental sync, initial request needs syncToken
+                try:
+                    # Google API doesn't accept constraints for the first request in incremental sync
+                    result = service.events().list(syncToken=creds.next_sync_token, **default_list_args).execute()
+                except Exception as e:
+                    t, v, tb = sys.exc_info()
+                    if hasattr(e, 'resp') and e.resp.status == 410:
+                        # Sync token is no longer valid, perform full sync
+                        result = service.events().list(**list_args_with_constraints).execute()
+                    else:
+                        raise t, v, tb
 
-        # Run the first iteration, for the first request
-        for item in result['items']:
-            self.api_event_to_gevent(item)
-
-        # Paginate through the rest, if applicable
-        while True:
-            next_page_token = result.get('nextPageToken')
-
-            if not next_page_token:
-                # We've reached the last page. Store the sync token.
-                creds.next_sync_token = result['nextSyncToken']
-                creds.save()
-                break
-
-            result = service.events().list(pageToken=next_page_token, **list_args_with_constraints).execute()
-
-            # Assume at this point it's a correctly formatted event
+            # Run the first iteration, for the first request
             for item in result['items']:
                 self.api_event_to_gevent(item)
 
-        # Make this calendar consistent with existing DeletedEvents
-        deleted_events = DeletedEvent.objects.filter(calendar=self)
-        for d_event in deleted_events:
-            d_event.apply()
+            # Paginate through the rest, if applicable
+            while True:
+                next_page_token = result.get('nextPageToken')
 
-        print "Successfully synced calendar."
+                if not next_page_token:
+                    # We've reached the last page. Store the sync token.
+                    creds.next_sync_token = result['nextSyncToken']
+                    creds.save()
+                    break
 
-        # Some additional sanity checks
-        # Check for non-duplicate events with the same recurring_event_id
-        start_times = {}
-        for recurrence in GEvent.objects.filter(calendar=self).exclude(recurrence=''):
-            if recurrence.start in start_times.get(recurrence.recurring_event_id, set()):
-                print "Error: Multiple GEvents found with the same start and recurring_event_id"
-                dupe_ids = [str(dupe.id) for dupe in GEvent.objects.filter(recurring_event_id=recurrence.recurring_event_id,
-                                                                start=recurrence.start)]
-                print "IDs are {} at time {}".format(", ".join(dupe_ids), recurrence.start)
+                result = service.events().list(pageToken=next_page_token, **list_args_with_constraints).execute()
 
-            if not start_times.get(recurrence.recurring_event_id, None):
-                start_times[recurrence.recurring_event_id] = set()
-            start_times[recurrence.recurring_event_id].add(recurrence.start)
+                # Assume at this point it's a correctly formatted event
+                for item in result['items']:
+                    self.api_event_to_gevent(item)
+
+            # Make this calendar consistent with existing DeletedEvents
+            deleted_events = DeletedEvent.objects.filter(calendar=self)
+            for d_event in deleted_events:
+                d_event.apply()
+
+            print "Successfully synced calendar."
+
+            # Some additional sanity checks
+            # Check for non-duplicate events with the same recurring_event_id
+            start_times = {}
+            for recurrence in GEvent.objects.filter(calendar=self).exclude(recurrence=''):
+                if recurrence.start in start_times.get(recurrence.recurring_event_id, set()):
+                    print "Error: Multiple GEvents found with the same start and recurring_event_id"
+                    dupe_ids = [str(dupe.id) for dupe in GEvent.objects.filter(recurring_event_id=recurrence.recurring_event_id,
+                                                                    start=recurrence.start)]
+                    print "IDs are {} at time {}".format(", ".join(dupe_ids), recurrence.start)
+
+                if not start_times.get(recurrence.recurring_event_id, None):
+                    start_times[recurrence.recurring_event_id] = set()
+                start_times[recurrence.recurring_event_id].add(recurrence.start)
 
     def find_gaps(self, start=None, end=None):
         qs = GEvent.objects.filter(calendar=self)

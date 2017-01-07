@@ -10,13 +10,19 @@ from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 from oauth2client.client import OAuth2WebServerFlow, AccessTokenCredentials
 from oauth2client.django_orm import Storage
 
+from rest_framework.decorators import api_view
+
 from social.apps.django_app.utils import psa
 
 
+@api_view(('GET',))
 @ensure_csrf_cookie
 def home(request):
     if request.user.is_authenticated():
-        return render(request, template_name='home_logged_in.html')
+        if request.query_params.get('no_sync'):
+            return render(request, template_name='home_logged_in.html')
+        else:
+            return HttpResponseRedirect("/v1/sync?sync_all=true")
     else:
         return render(request, template_name='home_logged_out.html')
 
