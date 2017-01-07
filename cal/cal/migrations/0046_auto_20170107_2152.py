@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('cal', '0044_gcalendar_enabled_by_default'),
+        ('cal', '0045_profile_private_event_names'),
     ]
 
     operations = [

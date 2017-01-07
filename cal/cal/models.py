@@ -189,7 +189,7 @@ class GCalendar(models.Model):
                     g.created = parse_datetime(event['created'])
                 else:
                     g.created = g.updated
-            except ValueError as e:
+            except ValueError:
                 g.created = g.updated
 
             g.calendar = self
