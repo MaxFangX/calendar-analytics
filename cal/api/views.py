@@ -1,7 +1,6 @@
 from api.serializers import GCalendarSerializer, GEventSerializer, StatisticSerializer, ColorCategorySerializer, TagSerializer, ColorCategoryTimeSeriesSerializer, TagTimeSeriesSerializer
 from cal.helpers import handle_time_string, truncated_queryset
 from cal.models import ColorCategory, GCalendar, GEvent, Statistic, Profile, Tag
-from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 from rest_framework import generics, status
 from rest_framework.decorators import api_view
