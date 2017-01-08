@@ -2,13 +2,21 @@
 
 
 ## About
-Django, Angular, pg
+If you use your calendar often, then you must have a decent timeline of how you spend your time. Why not analyze it?
+
+Tip: If you fill in the gaps, your stats will be even more meaningful!
+
+Connect your Google Calendar and immediately see stats on how you've been spending your time.
+
+Mostly built for fun!
 
 
 ## Features and Usage
 
 
-## Running the App on Your Local Machine
+## Development
+
+Want to help contribute, fix a bug, or enhance an existing feature? Great! Here's how you can run Calendar Analytics on your local machine.
 
 ### Installation
 
@@ -34,6 +42,7 @@ Install the following, if you haven't already:
 
 - If you're using bash, add the following as your environment variables in ~/.bashrc
 	```
+	export CJ_DJANGO_SECRET="still-secret"
 	export CJ_GOOGLE_CALENDAR_API_CLIENT_ID="YOUR_CLIENT_ID_HERE"
 	export CJ_GOOGLE_CALENDAR_API_CLIENT_SECRET="YOUR_CLIENT_SECRET_HERE"
 	export APP_ENVIRONMENT="dev"
@@ -42,15 +51,15 @@ Install the following, if you haven't already:
 - Refresh your command line so that the secret keys are in your environment. You can also run `source ~/.bashrc`. You can check that it work with `echo $APP_ENVIRONMENT`
 
 - Cd into the project directory and run the following:
-```
-pip install -r requirements.txt
-```
+	```
+	pip install -r requirements.txt
+	```
 
 - Run the following:
-```
-python manage.py bower install
-```
-Select "d3#^3.4.4 which resolved to 3.5.17 and is required by nvd3#1.8.5" for the right d3 version
+	```
+	python manage.py bower install
+	```
+	Select "d3#^3.4.4 which resolved to 3.5.17 and is required by nvd3#1.8.5" for the right d3 version
 
 
 ### Running the App
@@ -142,18 +151,37 @@ python manage.py bower update
 
 Be sure to choose “d3#^3.4.4 which resolved to 3.5.17 and is required by nvd3#1.8.5”!
 
+### Another issue?
+Feel free to add a issue to this repo, and someone will get back to you!
 
-## Acknowledgements
 
+## Built on
+- Django
+- Angular
+- Postgresql
+- Angular-NVD3
+- FullCalendar
+- Angular UI Calendar
+- JQuery - Ajax
+- Moment
+- Google Auth
+- Bower
+
+## Our Team
+- [Max Fang](http://maxfangx.com/): Full-Stack Developer, Creator
+- [Tiffany Qi](http://tiffanyqi.com/): Product Manager, Front-End Developer
+- [James Uejio](http://jamesuejio.com/): Full-Stack Developer
+- [Cindy Tung](https://www.linkedin.com/in/cindytung96): Full-Stack Developer
+- [David Nguyen](https://www.linkedin.com/in/dnguyenv): Visual Designer
+- [Andrew Huang](http://andrewhuang.tk): Full-Stack Developer
 
 ## License
+The MIT License (MIT)
 
-## old stuff to incorporate
+Copyright (c) 2016-2017 Calendar Analytics Team
 
-If you use your calendar often, then you must have a decent timeline of how you spend your time. Why not analyze it?
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-Tip: If you fill in the gaps, your stats will be even more meaningful!
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
-Connect your Google Calendar and immediately see stats on how you've been spending your time.
-
-Mostly built for fun!
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
