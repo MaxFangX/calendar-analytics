@@ -420,7 +420,7 @@ class GEvent(Event):
     # TODO handle transparency being counted in time
 
     def __str__(self):
-        return "{} | {}".format(self.id, self.name)
+        return "{} | {}".format(self.id, self.name.encode('utf-8').strip())
 
     @property
     def color(self):
