@@ -15,15 +15,10 @@ Django, Angular, pg
 #### Required Downloads
 
 Install the following, if you haven't already:
-
 - [Virtualenv](https://virtualenv.pypa.io/en/stable/) in a separate folder
-
 - [Django](https://www.djangoproject.com/). We use Python 2.7
-
 - [Sass](http://sass-lang.com/install) for front-end
-
 - [Bower](https://bower.io/)
-
 - Fork or clone this app at https://github.com/MaxFangX/calendar-analytics
 
 
@@ -47,45 +42,63 @@ Install the following, if you haven't already:
 - Refresh your command line so that the secret keys are in your environment. You can also run `source ~/.bashrc`. You can check that it work with `echo $APP_ENVIRONMENT`
 
 - Cd into the project directory and run the following:
-```pip install -r requirements.txt```
+```
+pip install -r requirements.txt
+```
 
 - Run the following:
-```python manage.py bower install```
+```
+python manage.py bower install
+```
 Select "d3#^3.4.4 which resolved to 3.5.17 and is required by nvd3#1.8.5" for the right d3 version
 
 
 ### Running the App
 Run the virtualenv by entering the virtualenv directory, and run:
-```source ENV-NAME/bin/./activate```
+```
+source ENV-NAME/bin/./activate
+```
 
 Enter the calendar-analytics/cal directory
 
 Set up the database by running
-```python manage.py migrate```
+```
+python manage.py migrate
+```
 
 Run the app itself by running
-```python manage.py runserver```
+```
+python manage.py runserver
+```
 
-Finally, to live update the front-end when you make a change, run
-```sass-watch .``` or 
-```sass --watch .```
+Finally, to live update the front-end when you make a change, run one of the following:
+```
+sass-watch
+sass --watch .
+```
 
 
 ### Issues
 
 #### Google Client ID is not found
-Your bashrc is not configured. Yo ensure bashrc is being utilized correctly, run:
-```$echo PATH```
+Your bashrc is not configured. To ensure bashrc is being utilized correctly, run:
+```
+$echo PATH
+```
 
 #### Angular 404 Message
 Try running the following: 
-```python manage.py bower install```
+```
+python manage.py bower install
+```
 
-Make sure you select `d3#^3.4.4 which resolved to 3.5.17 and is required by nvd3#1.8.5` !
+Make sure you select "d3#^3.4.4 which resolved to 3.5.17 and is required by nvd3#1.8.5"!
 
 #### Egg info failed error
 May be specific to what dependency is being downloaded, but if for “postgresql”, brew install it instead with: 
-```brew install postgresql```
+```
+brew install postgresql
+```
 
 #### 'Module_six_moves_urllib_parse' object has no attribute 'urlparse'
 According to [Google](https://developers.google.com/google-apps/tasks/quickstart/python), 'this error can occur in Mac OSX where the default installation of the "six" module (a dependency of this library) is loaded before the one that pip installed.' There are a variety of different methods to fix this, and you can try any or all of the following methods:
@@ -93,13 +106,19 @@ According to [Google](https://developers.google.com/google-apps/tasks/quickstart
 - Add pip's install location to the PYTHONPATH system environment variable:
 	
 	Determine pip's install location with the following command:
-	```pip show six | grep "Location:" | cut -d " " -f2```
+	```
+	pip show six | grep "Location:" | cut -d " " -f2
+	```
 	
 	Add the following line to your ~/.bashrc file, replacing <pip_install_path> with the value determined above:
-	```export PYTHONPATH=$PYTHONPATH:<pip_install_path>```
+	```
+	export PYTHONPATH=$PYTHONPATH:<pip_install_path>
+	```
 	
 	Reload your ~/.bashrc file in any open terminal windows using the following command
-	```source ~/.bashrc```
+	```
+	source ~/.bashrc
+	```
 	
 	If this doesn't work, try running the command again, or editing the pip_install_path then running the command again, this value might change. (Example of one that works: export PYTHONPATH=/Users/tiffanyqi/Desktop/env/env/lib/python2.7/site-packages)
 
@@ -117,7 +136,9 @@ According to [Google](https://developers.google.com/google-apps/tasks/quickstart
 
 #### Category20 undefined
 Run the following: 
-```python manage.py bower update```
+```
+python manage.py bower update
+```
 
 Be sure to choose “d3#^3.4.4 which resolved to 3.5.17 and is required by nvd3#1.8.5”!
 
