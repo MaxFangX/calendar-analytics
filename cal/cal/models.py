@@ -194,7 +194,7 @@ class GCalendar(models.Model):
             g.google_id = event['id']
             g.i_cal_uid = event['iCalUID']
             g.color_index = event.get('colorId', '')
-            g.description = event.get('description', '')
+            g.description = event.get('description', '').encode('utf-8').strip()
             g.status = event.get('status', 'confirmed')
             g.transparency = event.get('transparency', 'opaque')
             g.all_day_event = True if event['start'].get('date', None) else False
@@ -436,7 +436,7 @@ class GEvent(Event):
     def save(self, *args, **kwargs):
         if self.name is None:
             self.name = ""
-        self.name = self.name[:150]
+        self.name = self.name[:150].encode('utf-8').strip()
 
         if self.description is None:
             self.description = ""
