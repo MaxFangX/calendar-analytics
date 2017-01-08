@@ -31,6 +31,7 @@ analyticsApp.factory('CalendarFilterService', ['$rootScope', function CalendarFi
         filterData.end.toISOString() + " " +
         filterData.calendarIds.join(' ');
 
+
       $rootScope.$broadcast('calendarFilter:updated');
     }
   };
@@ -56,7 +57,6 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
         throw "filterKey doesn't match given start and end times";
       }
     }
-
     // Attempt to return cached tags
     if (_this.tags[filterKey]) {
       return $q.when(_this.tags[filterKey]);

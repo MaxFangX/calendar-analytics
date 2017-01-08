@@ -15,6 +15,7 @@ function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
 
   $scope.$on('calendarFilter:updated', function(event, data) {
     /* jshint unused:vars */
+    _this.tags.dataLoaded = false;
     var filterData = CalendarFilterService.getFilter();
     if (!_this.isCumulative) {
       TagService.getTags(filterData.filterKey, filterData.start, filterData.end,
@@ -24,28 +25,15 @@ function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
           _this.filterKey = filterData.filterKey;
           _this.tags.dataLoaded = true;
         });
-      }
-  });
-
-  // Initialization
-  this.initialize = function() {
-    var tagsPromise;
-    var initialFilterData = CalendarFilterService.getFilter();
-    if (this.isCumulative) {
-      tagsPromise = TagService.getTags('cumulative', null, null,
-        initialFilterData.calendarIds);
     } else {
-      tagsPromise = TagService.getTags(initialFilterData.filterKey,
-        initialFilterData.start, initialFilterData.end,
-        initialFilterData.calendarIds);
+      TagService.getTags('cumulative', null, null,
+                         filterData.calendarIds)
+        .then(function(tags) {
+          _this.tags = tags;
+          _this.tags.dataLoaded = true;
+        });
     }
-    tagsPromise.then(function(tags) {
-      _this.tags = tags;
-      _this.tags.dataLoaded = true;
-    });
-  }.bind(this);
-
-  this.initialize();
+  });
 
   this.hideZeroHoursFilter = function (value, index, array) {
     /* jshint unused:vars */
@@ -124,17 +112,26 @@ analyticsApp.component('tagList', {
   }
 });
 
-function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
+function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, QueryService) {
   var _this = this;
   var tagUrl = '/v1/tags/' + this.tagId + '/events';
   var timeseriesWeek = '/v1/tags/' + this.tagId + '/timeseries/week';
   var timeseriesMonth = '/v1/tags/' + this.tagId + '/timeseries/month';
   var timeseriesDay = '/v1/tags/' + this.tagId + '/timeseries/day';
   var query_timezone = moment.tz.guess();
+  var calendarIds = {"calendar_ids":[]};
   this.tagEvents = [];
   this.tagEvents.dataLoaded = false;
   this.averageHours = 0;
   this.timeStep = "";
+
+  $scope.$on('calendarFilter:updated', function(event, data) {
+    var filterData = CalendarFilterService.getFilter();
+    calendarIds = {"calendar_ids":filterData.calendarIds};
+    if (filterData.calendarIds.length > 0) {
+      _this.refresh();
+    }
+  });
 
   // Refreshes the line graph
   this.showGraph = function(maxYValue) {
@@ -176,6 +173,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
       url: timeseriesDay + '.json',
       params: {
         timezone: query_timezone,
+        calendar_ids: calendarIds,
       }
     }).
     success(function successCallback(data) {
@@ -194,6 +192,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
       url: timeseriesWeek + '.json',
       params: {
         timezone: query_timezone,
+        calendar_ids: calendarIds,
       }
     }).
     success(function successCallback(data) {
@@ -212,6 +211,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
       url: timeseriesMonth + '.json',
       params: {
         timezone: query_timezone,
+        calendar_ids: calendarIds,
       }
     }).
     success(function successCallback(data) {
@@ -223,10 +223,17 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
     });
   };
 
-  this.initialize = function() {
+  this.refresh = function() {
     this.showWeekly();
-    $http({method: 'GET', url: tagUrl + '.json' }).
+    $http({
+      method: 'GET',
+      url: tagUrl + '.json',
+      params: {
+        calendar_ids: calendarIds,
+      }
+    }).
     success(function successCallback(data) {
+      _this.tagEvents = []
       for (var i = 0; i < data.results.length; i++) {
         var event = data.results[i];
         _this.tagEvents.unshift({
@@ -237,13 +244,12 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
       _this.tagEvents.dataLoaded = true;
     });
   }.bind(this);
-  this.initialize();
 }
 
 
 analyticsApp.component('tagDetails', {
   templateUrl: '/static/templates/tagDetails.html',
-  controller: ['$scope', '$interpolate', '$http', 'QueryService', TagsDetailCtrl],
+  controller: ['$scope', '$interpolate', '$http', 'CalendarFilterService', 'QueryService', TagsDetailCtrl],
   controllerAs: '$ctrl',
   bindings: {
     tagId: '@',
@@ -614,6 +620,7 @@ analyticsApp.controller('CalendarCtrl', function CalendarCtrl($scope, $http, $q,
   };
 
   this.viewRender = function(view, element) {
+
     /* jshint unused:vars */
     // The first time viewRender is called, the GCalendars haven't been
     // populated yet.

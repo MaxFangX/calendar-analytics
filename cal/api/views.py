@@ -7,6 +7,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+import ast
 
 @api_view(('GET',))
 def api_root(request, format=None):
@@ -240,8 +241,13 @@ class TagDetailEvents(generics.ListAPIView):
     serializer_class = GEventSerializer
 
     def get_queryset(self):
+        query_calendar = self.request.query_params.get('calendar_ids')
+        if query_calendar != '':
+            calendar_ids = ast.literal_eval(query_calendar)['calendar_ids']
+        else:
+            calendar_ids = []
         tag = Tag.objects.get(user=self.request.user, id=self.kwargs['pk'])
-        return tag.query()
+        return tag.query(calendar_ids)
 
 
 class TagDetailEventTimeSeries(APIView):
@@ -249,5 +255,10 @@ class TagDetailEventTimeSeries(APIView):
     serializer_class = TagTimeSeriesSerializer
 
     def get(self, request, *args, **kw):
+        query_calendar = self.request.query_params.get('calendar_ids')
+        if query_calendar != '':
+            calendar_ids = ast.literal_eval(query_calendar)['calendar_ids']
+        else:
+            calendar_ids = []
         tag = Tag.objects.get(user=self.request.user, id=self.kwargs['pk'])
-        return Response(tag.get_time_series(self.request.query_params.get('timezone'), time_step=self.kwargs['time_step']))
+        return Response(tag.get_time_series(self.request.query_params.get('timezone'), time_step=self.kwargs['time_step'], calendar_ids=calendar_ids))

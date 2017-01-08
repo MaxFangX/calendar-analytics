@@ -1,0 +1,26 @@
+<div ng-controller="CalendarCtrl as $ctrl" class="cal-calendar col-md-8">
+  <!-- Enable / disable calendars button -->
+  <div id="select-calendar-button">
+    <div class="btn-group" >
+    <button type="button"
+      class="btn btn-default dropdown-toggle"
+      data-toggle="dropdown"
+      aria-haspopup="true"
+      aria-expanded="false">
+      Select Calendars
+      <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu" ng-click="$event.stopPropagation()">
+      <li ng-repeat="cal in $ctrl.calendars">
+        <a href="#">
+          <label>
+            <input type="checkbox" ng-model="cal.enabled"
+              ng-click="$ctrl.toggleEnabled(cal.id); $ctrl.refresh('panalytics');">
+              {{ cal.summary }}
+          </label>
+        </a>
+      </li>
+    </ul>
+    </div>
+  </div>
+</div>
