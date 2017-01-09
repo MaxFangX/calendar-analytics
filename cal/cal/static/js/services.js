@@ -238,10 +238,11 @@ analyticsApp.service('QueryService', function() {
     var ctrlDetails = [];
     var maxYValue = 0;
     var events = [];
+    var movingAverage = [];
     var xLabels = [];
     var yLabels = [];
-    for (var i = 0; i < data.length; i++) {
-      var event = data[i];
+    for (var i = 0; i < data[0].length; i++) {
+      var event = data[0][i];
       var date = new Date(event[0]);
       var hours = event[1];
       if (hours > maxYValue) {
@@ -250,6 +251,15 @@ analyticsApp.service('QueryService', function() {
       xLabels.push(date);
       yLabels.push(hours);
       events.push({
+        x: date,
+        y: hours
+      });
+    }
+    for (var i = 0; i < data[1].length; i++) {
+      var event = data[1][i];
+      var date = new Date(event[0]);
+      var hours = event[1];
+      movingAverage.push({
         x: date,
         y: hours
       });
@@ -267,14 +277,21 @@ analyticsApp.service('QueryService', function() {
     ctrlDetails.push({
       values: events,
       key: type + ' Graph',
-      color: '#003057',
-      strokeWidth: 1,
+      color: '#DDD5C7',
+      strokeWidth: 2,
     });
 
     ctrlDetails.push({
       values: trendData,
       key: 'Trend Line',
       color: '#FDB515',
+      strokeWidth: 3,
+    });
+
+    ctrlDetails.push({
+      values: movingAverage,
+      key: 'Moving Average Line',
+      color: '#003057',
       strokeWidth: 3,
     });
 

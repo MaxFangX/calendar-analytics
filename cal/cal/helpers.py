@@ -73,13 +73,15 @@ def get_time_series(model, timezone='UTC', time_step='week', calendar_ids=None, 
     `weekly`, or `monthly` which will aggregate accordingly. Splices events that overlap times.
     """
     week_hours = []
+    moving_average_lst = []
     events = model.query(calendar_ids, start, end).order_by('start')
-    i = 0
     # Convert start to local time
     start = events[0].start.astimezone(pytz.timezone(timezone))
+    # Default week view even if `time_step` is off
+    increment = relativedelta(days=7)
     if time_step == 'day':
         # To indicate do nothing if Daily is passed in
-        pass
+        increment = relativedelta(days=1)
     if time_step == 'week':
         # Change start date to be Monday beginning of week
         while start.weekday() != 0:
@@ -88,18 +90,22 @@ def get_time_series(model, timezone='UTC', time_step='week', calendar_ids=None, 
         # Change start date to beginning of month
         while start.day != 1:
             start = start - timedelta(days=1)
+        increment = relativedelta(months=1)
     start = start.replace(hour=0, minute=0, second=0, microsecond=0)
     # Convert back to UTC
     start = start.astimezone(pytz.utc)
     # Rollover takes care of events that overlap time periods
     rollover = 0
+    i = 0
+
+    # For moving average
+    data_point = 0
+    period_total = 0
+    # Change period to change number of data points for average
+    period = 5
+
     while i < len(events):
-        if time_step == 'day':
-            end = start + relativedelta(days=1)
-        if time_step == 'week':
-            end = start + relativedelta(days=7)
-        if time_step == 'month':
-            end = start + relativedelta(months=1)
+        end = start + increment
         # Deal with daylight savings time
         if end.astimezone(pytz.timezone(timezone)).hour != 0:
             end = end + timedelta(hours=1)
@@ -113,9 +119,34 @@ def get_time_series(model, timezone='UTC', time_step='week', calendar_ids=None, 
             else:
                 total += (events[i].end - events[i].start).total_seconds() / 3600
             i += 1
+
+        # For moving average. Basically iterates back and adds average
+        data_point += 1
+        period_total += total
+        if data_point % period == 0:
+            average = float(period_total) / period
+            period_start = start
+            sub_range = []
+            for _ in range(period):
+                sub_range = [(period_start, average)] + sub_range
+                period_start -= increment
+            moving_average_lst += sub_range
+            period_total = 0
+
         week_hours.append((start, total))
         start = end
-    return week_hours
+
+    # Deals with edge case if number of data points not divisible by period
+    if data_point % period != 0:
+        average = float(period_total) / (data_point % period)
+        period_start = start - increment
+        sub_range = []
+        for _ in range(data_point % period):
+            sub_range = [(period_start, average)] + sub_range
+            period_start -= increment
+        moving_average_lst += sub_range
+
+    return (week_hours, moving_average_lst)
 
 
 EDGE_OPTIONS = set(['inclusive', 'exclusive', 'truncated'])
