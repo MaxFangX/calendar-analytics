@@ -57,7 +57,7 @@
         <span class="caret"></span>
       </button>
       <ul class="dropdown-menu" ng-click="$event.stopPropagation()">
-        <li ng-repeat="cal in calendars">
+        <li ng-repeat="cal in $ctrl.calendars">
           <a href="#">
             <label>
               <input type="checkbox" ng-model="cal.enabled"
@@ -77,9 +77,7 @@
   <div class="col-md-4">
 
     <category-list is-cumulative="false" display-name="Weekly" hide-zero-hours="true"></category-list>
-
     <tag-list is-cumulative="false" display-name="Weekly" hide-zero-hours="true"></tag-list>
-
     <category-list is-cumulative="true" display-name="Cumulative"></category-list>
     <tag-list is-cumulative="true" display-name="Cumulative"></tag-list>
 

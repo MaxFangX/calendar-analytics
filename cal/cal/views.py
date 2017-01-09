@@ -1,4 +1,4 @@
-from cal.models import GoogleCredentials, GoogleFlow, Profile, ColorCategory, Tag
+from cal.models import GoogleCredentials, GoogleFlow, Profile, Category, Tag
 
 from django.conf import settings
 from django.contrib.auth import login, logout
@@ -24,7 +24,7 @@ def home(request):
 def category_detail(request, pk):
     context = {}
     try:
-        context['category'] = ColorCategory.objects.get(user=request.user, id=pk)
+        context['category'] = Category.objects.get(user=request.user, id=pk)
     except Exception:
         # TODO gracefully handle this
         pass

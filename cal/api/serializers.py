@@ -1,6 +1,8 @@
-from cal.models import ColorCategory, GCalendar, GEvent, Statistic, Tag
+from cal.models import Category, GCalendar, GEvent, Statistic, Tag
 from django.contrib.auth.models import User
 from rest_framework import serializers
+
+import ast
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -57,22 +59,26 @@ class StatisticSerializer(serializers.ModelSerializer):
         fields = ('name', 'start_time', 'end_time')
 
 
-class ColorCategorySerializer(serializers.ModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):
 
     hours = serializers.SerializerMethodField()
     category_color = serializers.SerializerMethodField()
 
     def get_fields(self, *args, **kwargs):
-        fields = super(ColorCategorySerializer, self).get_fields(*args, **kwargs)
+        fields = super(CategorySerializer, self).get_fields(*args, **kwargs)
         fields['calendar'].queryset = fields['calendar'].queryset.filter(user=self.context['request'].user)
         return fields
 
     class Meta:
-        model = ColorCategory
+        model = Category
         fields = ('id', 'label', 'hours', 'calendar', 'category_color')
 
     def get_hours(self, obj):
-        calendar_ids = self.context['calendar_ids']
+        if self.context.get('calendar_ids') is not None:
+            # literal_evel converts str representation of list into Python list
+            calendar_ids = ast.literal_eval(self.context['calendar_ids'])
+        else:
+            calendar_ids = []
         start = self.context['start']
         end = self.context['end']
         return obj.hours(calendar_ids=calendar_ids, start=start, end=end)
@@ -90,13 +96,16 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ('id', 'label', 'keywords', 'hours')
 
     def get_hours(self, obj):
-        calendar_ids = self.context.get('calendar_ids')
+        if self.context.get('calendar_ids') is not None:
+            calendar_ids = ast.literal_eval(self.context['calendar_ids'])
+        else:
+            calendar_ids = []
         start = self.context.get('start')
         end = self.context.get('end')
         return obj.hours(calendar_ids=calendar_ids, start=start, end=end)
 
 
-class ColorCategoryTimeSeriesSerializer(serializers.ModelSerializer):
+class CategoryTimeSeriesSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = ('timezone')

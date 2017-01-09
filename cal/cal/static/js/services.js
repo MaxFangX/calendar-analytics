@@ -3,24 +3,35 @@
 
 var analyticsApp = window.angular.module('analyticsApp.services', []);
 
-analyticsApp.factory('CalendarRangeService', ['$rootScope', function CalendarRangeService($rootScope) {
-  var rangeData =  {
-    start: undefined, // ISO String
-    end: undefined, // ISO String
-    timeRange: undefined,
-    type: undefined,
+analyticsApp.factory('CalendarFilterService', ['$rootScope', function CalendarFilterService($rootScope) {
+  var filterData =  {
+    start: undefined, // Moment object
+    end: undefined, // Moment object
+    calendarIds: undefined, // array of ids of enabled calendars
+    filterKey: undefined,
   };
 
   return {
-    getRange: function() {
-      return rangeData;
+    getFilter: function() {
+      return filterData;
     },
-    setRange: function(start, end, type) {
-      rangeData.start = start;
-      rangeData.end = end;
-      rangeData.type = type;
-      rangeData.timeRange = rangeData.start.toISOString() + " " + rangeData.end.toISOString();
-      $rootScope.$broadcast('calendarRange:updated');
+    setFilter: function(start, end, calendarIds) {
+      if (start !== null && start !== undefined) {
+        filterData.start = start;
+      }
+      if (end !== null && end !== undefined) {
+        filterData.end = end;
+      }
+      if (calendarIds !== null && calendarIds !== undefined) {
+        filterData.calendarIds = calendarIds;
+      }
+
+      // Key must be unique per selection of start/end/calendarIds
+      filterData.filterKey = filterData.start.toISOString() + " " +
+        filterData.end.toISOString() + " " +
+        filterData.calendarIds.join(' ');
+
+      $rootScope.$broadcast('calendarFilter:updated');
     }
   };
 }]);
@@ -31,22 +42,24 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
 
   this.tags = {};
 
-  this.getTags = function(timeRange, start, end) {
+  this.getTags = function(filterKey, start, end, calendarIds) {
 
-    if (!timeRange) {
-      throw "timeRange must always be supplied";
+    if (!filterKey) {
+      throw "filterKey must always be supplied";
     }
 
     if (start || end) {
-      // If the start and end time match the given timeRange
-      if (timeRange !== start.toISOString() + " " + end.toISOString()) {
-        throw "timeRange doesn't match given start and end times";
+      // If the start and end time match the given filterKey
+      var keyFromParameters = start.toISOString() + " " + end.toISOString() +
+        " " + calendarIds.join(' ');
+      if (filterKey !== keyFromParameters) {
+        throw "filterKey doesn't match given start and end times";
       }
     }
 
     // Attempt to return cached tags
-    if (_this.tags[timeRange]) {
-      return $q.when(_this.tags[timeRange]);
+    if (_this.tags[filterKey]) {
+      return $q.when(_this.tags[filterKey]);
     }
 
     // Request the tags and return a promise
@@ -57,22 +70,24 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
       params: {
         start: (start)? start.toISOString() : null,
         end: (end)? end.toISOString() : null,
+        calendar_ids: JSON.stringify(calendarIds)
       }
     }).then(function successCallback(response) {
-      _this.tags[timeRange] = [];
+      _this.tags[filterKey] = [];
       for (var i = 0; i < response.data.results.length; i++) {
         var tag = response.data.results[i];
-        _this.tags[timeRange].push({
+        _this.tags[filterKey].push({
           id: tag.id,
           label: tag.label,
           keywords: tag.keywords,
           hours: tag.hours
         });
       }
-      return _this.tags[timeRange];
+      return _this.tags[filterKey];
     }, function errorCallback(response) {
       /* jshint unused:vars */
-      console.log("Failed to get tags");
+      console.log("Failed to get tags:");
+      console.log(response);
     });
   };
 
@@ -134,37 +149,40 @@ analyticsApp.service('CategoryService', ['$http', '$q', function($http, $q) {
 
   this.categories = {};
 
-  this.getCategories = function(timeRange, start, end) {
-    if (!timeRange) {
-      throw "timeRange must always be supplied";
+  this.getCategories = function(filterKey, start, end, calendarIds) {
+    if (!filterKey) {
+      throw "filterKey must always be supplied";
     }
 
     if (start || end) {
-      // If the start and end time match the given timeRange
-      if (timeRange !== start.toISOString() + " " + end.toISOString()) {
-        throw "timeRange doesn't match given start and end times";
+      // If the start and end time match the given filterKey
+      var keyFromParameters = start.toISOString() + " " + end.toISOString() +
+        " " + calendarIds.join(' ');
+      if (filterKey !== keyFromParameters) {
+        throw "filterKey doesn't match given start, end, and calendarIds";
       }
     }
 
     // Attempt to return cached categories
-    if (_this.categories[timeRange]) {
-      return $q.when(_this.categories[timeRange]);
+    if (_this.categories[filterKey]) {
+      return $q.when(_this.categories[filterKey]);
     }
 
     // Request the categories and return a promise
     return $http({
       method: 'GET',
-      url: '/v1/colorcategories.json',
+      url: '/v1/categories.json',
       cache: true,
       params: {
         start: (start)? start.toISOString() : null,
         end: (end)? end.toISOString() : null,
+        calendar_ids: JSON.stringify(calendarIds)
       }
     }).then(function successCallback(response) {
-      _this.categories[timeRange] = [];
+      _this.categories[filterKey] = [];
       for (var i = 0; i < response.data.results.length; i++) {
         var category = response.data.results[i];
-        _this.categories[timeRange].push({
+        _this.categories[filterKey].push({
           id: category.id,
           label: category.label,
           hours: category.hours,
@@ -172,7 +190,7 @@ analyticsApp.service('CategoryService', ['$http', '$q', function($http, $q) {
           color: category.category_color,
         });
       }
-      return _this.categories[timeRange];
+      return _this.categories[filterKey];
     }, function errorCallback(response) {
       /* jshint unused:vars */
       console.log("Failed to get categories");
@@ -182,7 +200,7 @@ analyticsApp.service('CategoryService', ['$http', '$q', function($http, $q) {
   this.editCategory = function(categoryId, newLabel) {
     return $http({
       method: 'POST',
-      url: '/v1/colorcategories/' + categoryId,
+      url: '/v1/categories/' + categoryId,
       data: $.param({
         label: newLabel,
         csrfmiddlewaretoken: getCookie('csrftoken'),
@@ -202,7 +220,7 @@ analyticsApp.service('CategoryService', ['$http', '$q', function($http, $q) {
   this.deleteCategory = function(categoryId) {
     return $http({
       method: 'POST',
-      url: '/v1/colorcategories/' + categoryId,
+      url: '/v1/categories/' + categoryId,
       data: $.param({
         csrfmiddlewaretoken: getCookie('csrftoken'),
         _method: 'DELETE'
