@@ -16,16 +16,16 @@ function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
   $scope.$on('calendarFilter:updated', function(event, data) {
     /* jshint unused:vars */
     var filterData = CalendarFilterService.getFilter();
-    if (!_this.isCumulative) {
+    if (!this.isCumulative) {
       TagService.getTags(filterData.filterKey, filterData.start, filterData.end,
                          filterData.calendarIds)
         .then(function(tags) {
-          _this.tags = tags;
-          _this.filterKey = filterData.filterKey;
-          _this.tags.dataLoaded = true;
+          this.tags = tags;
+          this.filterKey = filterData.filterKey;
+          this.tags.dataLoaded = true;
         });
       }
-  });
+  }.bind(this));
 
   // Initialization
   this.initialize = function() {
