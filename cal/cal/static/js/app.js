@@ -26,7 +26,7 @@ function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
           _this.tags.dataLoaded = true;
         });
     } else {
-      TagService.getTags('cumulative', null, null,
+      TagService.getTags('cumulative' + filterData.filterKey, null, null,
                          filterData.calendarIds)
         .then(function(tags) {
           _this.tags = tags;
