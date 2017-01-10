@@ -75,7 +75,10 @@ def get_time_series(model, timezone='UTC', time_step='week', calendar_ids=None, 
     week_hours = []
     events = model.query(calendar_ids, start, end).order_by('start')
     i = 0
-    # Convert start to local time
+    # Takes care of Tags with no hours
+    if not events:
+        return [(0,0)]
+    # Convert start to local times
     start = events[0].start.astimezone(pytz.timezone(timezone))
     if time_step == 'day':
         # To indicate do nothing if Daily is passed in
