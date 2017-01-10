@@ -728,6 +728,7 @@ class Tag(models.Model, EventCollection):
                     ]
 
             events_qs = reduce(lambda qs1, qs2: qs1 | qs2, querysets)
+            events_qs = events_qs.order_by('start')
 
             if start:
                 events_qs = events_qs.filter(end__gt=start)
@@ -736,11 +737,11 @@ class Tag(models.Model, EventCollection):
             else:
                 events_qs = events_qs.filter(start__lt=datetime.now(pytz.utc))
 
-            hours = round(EventCollection(lambda:[e for e in events_qs]).total_time() / 3600, 2)
+            hours = round(EventCollection(lambda:[e for e in events_qs]).total_time() / 3600.0, 2)
             for i in range(1, len(events_qs)):
                 if (events_qs[i-1].end - events_qs[i].start).total_seconds() > 0:
                     # events overlap
-                    hours -= round((events_qs[i-1].end - events_qs[i].start).total_seconds() / 3600, 2)
+                    hours -= round((events_qs[i-1].end - events_qs[i].start).total_seconds() / 3600.0, 2)
 
             category_hours.append((category.label, category.category_color(), hours))
 
