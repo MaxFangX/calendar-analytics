@@ -75,6 +75,7 @@ class CategorySerializer(serializers.ModelSerializer):
 
     def get_hours(self, obj):
         if self.context.get('calendar_ids') is not None:
+            # literal_evel converts str representation of list into Python list
             calendar_ids = ast.literal_eval(self.context['calendar_ids'])
         else:
             calendar_ids = []
