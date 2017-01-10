@@ -59,7 +59,7 @@ class Profile(models.Model):
         if calendar_ids:
             for calendar_str in calendar_ids:
                 try:
-                    c = GCalendar.objects.get(calendar_id=calendar_str)
+                    c = GCalendar.objects.filter(calendar_id=calendar_str).first()
                 except GCalendar.DoesNotExist:
                     raise InvalidParameterException("Provided calendar {} does not exist".format(calendar_str))
                 if c.user != self.user:
@@ -240,7 +240,6 @@ class GCalendar(models.Model):
                 recurring_event_id=event.get('recurringEventId', ''))
 
     def sync(self, full_sync=False):
-        result = None
         creds = self.user.googlecredentials
         service = creds.get_service()
 
@@ -738,6 +737,10 @@ class Tag(models.Model, EventCollection):
                 events_qs = events_qs.filter(start__lt=datetime.now(pytz.utc))
 
             hours = round(float(EventCollection(lambda:[e for e in events_qs]).total_time()) / 3600, 2)
+            for i in range(1, len(events_qs)):
+                if (events_qs[i-1].end - events_qs[i].start).total_seconds() > 0:
+                    # events overlap
+                    hours -= round(float((events_qs[i-1].end - events_qs[i].start).total_seconds()) / 3600, 2)
 
             category_hours.append((category.label, hours))
 
