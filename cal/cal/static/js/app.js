@@ -114,12 +114,14 @@ analyticsApp.component('tagList', {
 
 function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, QueryService) {
   var _this = this;
-  var tagUrl = '/v1/tags/' + this.tagId + '/events';
+  var tagUrl = '/v1/tags/' + this.tagId;
+  var tagEvent = '/v1/tags/' + this.tagId + '/events';
   var timeseriesWeek = '/v1/tags/' + this.tagId + '/timeseries/week';
   var timeseriesMonth = '/v1/tags/' + this.tagId + '/timeseries/month';
   var timeseriesDay = '/v1/tags/' + this.tagId + '/timeseries/day';
   var query_timezone = moment.tz.guess();
-  var calendarIds = {"calendar_ids":[]};
+  var calendarIds = [];
+  this.tagHours = 0
   this.tagEvents = [];
   this.tagEvents.dataLoaded = false;
   this.averageHours = 0;
@@ -127,7 +129,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
 
   $scope.$on('calendarFilter:updated', function(event, data) {
     var filterData = CalendarFilterService.getFilter();
-    calendarIds = {"calendar_ids":filterData.calendarIds};
+    calendarIds = filterData.calendarIds;
     if (filterData.calendarIds.length > 0) {
       _this.refresh();
     }
@@ -173,7 +175,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
       url: timeseriesDay + '.json',
       params: {
         timezone: query_timezone,
-        calendar_ids: calendarIds,
+        calendar_ids: JSON.stringify(calendarIds),
       }
     }).
     success(function successCallback(data) {
@@ -192,7 +194,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
       url: timeseriesWeek + '.json',
       params: {
         timezone: query_timezone,
-        calendar_ids: calendarIds,
+        calendar_ids: JSON.stringify(calendarIds),
       }
     }).
     success(function successCallback(data) {
@@ -211,7 +213,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
       url: timeseriesMonth + '.json',
       params: {
         timezone: query_timezone,
-        calendar_ids: calendarIds,
+        calendar_ids: JSON.stringify(calendarIds),
       }
     }).
     success(function successCallback(data) {
@@ -224,12 +226,24 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
   };
 
   this.refresh = function() {
-    this.showWeekly();
     $http({
       method: 'GET',
       url: tagUrl + '.json',
       params: {
-        calendar_ids: calendarIds,
+        calendar_ids: JSON.stringify(calendarIds),
+      }
+    }).
+    success(function successCallback(data) {
+      _this.tagHours = data.hours
+    });
+
+    this.showWeekly();
+
+    $http({
+      method: 'GET',
+      url: tagEvent + '.json',
+      params: {
+        calendar_ids: JSON.stringify(calendarIds),
       }
     }).
     success(function successCallback(data) {
@@ -253,7 +267,6 @@ analyticsApp.component('tagDetails', {
   controllerAs: '$ctrl',
   bindings: {
     tagId: '@',
-    tagHours: '@'
   }
 });
 

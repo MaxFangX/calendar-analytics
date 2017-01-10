@@ -243,7 +243,7 @@ class TagDetailEvents(generics.ListAPIView):
     def get_queryset(self):
         query_calendar = self.request.query_params.get('calendar_ids')
         if query_calendar != '':
-            calendar_ids = ast.literal_eval(query_calendar)['calendar_ids']
+            calendar_ids = ast.literal_eval(query_calendar)
         else:
             calendar_ids = []
         tag = Tag.objects.get(user=self.request.user, id=self.kwargs['pk'])
@@ -257,7 +257,7 @@ class TagDetailEventTimeSeries(APIView):
     def get(self, request, *args, **kw):
         query_calendar = self.request.query_params.get('calendar_ids')
         if query_calendar != '':
-            calendar_ids = ast.literal_eval(query_calendar)['calendar_ids']
+            calendar_ids = ast.literal_eval(query_calendar)
         else:
             calendar_ids = []
         tag = Tag.objects.get(user=self.request.user, id=self.kwargs['pk'])
