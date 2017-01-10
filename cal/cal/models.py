@@ -711,7 +711,7 @@ class Tag(models.Model, EventCollection):
         return get_time_series(self, timezone, time_step, calendar_ids, start, end)
 
 
-    def get_category_stats(self, categories, calendar_ids=None, start=None, end=None):
+    def get_category_stats(self, categories, start=None, end=None):
         """
         Returns a list of category-hour tuples corresponding to the number of hours per category
         that corresponds to this Tag.
