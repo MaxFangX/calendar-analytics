@@ -253,7 +253,6 @@ class TagDetailEventTimeSeries(APIView):
 
     def get(self, request, *args, **kw):
         query_calendar = self.request.query_params.get('calendar_ids')
-        else:
         calendar_ids = ast.literal_eval(query_calendar)
         tag = Tag.objects.get(user=self.request.user, id=self.kwargs['pk'])
         return Response(tag.get_time_series(self.request.query_params.get('timezone'), time_step=self.kwargs['time_step'], calendar_ids=calendar_ids))
