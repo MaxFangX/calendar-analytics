@@ -68,19 +68,29 @@ def handle_time_string(time_str, timezone_str):
 
 def get_time_series(model, timezone='UTC', time_step='week', calendar_ids=None, start=None, end=None):
     """
-    Returns a list of week-hour tuples corresponding to the events in the `model`. Takes in
-    timezone in order to accurately aggregate events. Includes time_step input either `daily`,
-    `weekly`, or `monthly` which will aggregate accordingly. Splices events that overlap times.
+    Returns two lists: `week_hours` and `moving_average_lst`. Both are in the same
+    function because of efficiency, we only need to iterate through the events once.
+
+    `week_hours` is used to populate the graph with data per `time_step`.
+    This could be data per `day`, `week`, or `month`. Returned as list of time-hour tuples.
+    Iterates starting from first event and keeps adding hours until it hits the end of the
+    time step. However if an event overlaps both time steps, it splits it and adds the hours
+    accordingly. This is why `rollover` is used.
+
+    `moving_average_lst` is a list of time-hour tuples. However each time corresponds to the
+    average of `period` points. To this efficiently, while iterating through the events
+    when we hit the end of a `period`, we loop backwards and add last `period` events and the
+    average hours to `moving_average_lst`. We also need to take care of the edge case where
+    the number of points is not evenly divisibly by `period`.
     """
     week_hours = []
     moving_average_lst = []
-    events = model.query(calendar_ids, start, end).order_by('start')
+    events = model.query(calendar_ids, start, end)
     # Convert start to local time
     start = events[0].start.astimezone(pytz.timezone(timezone))
     # Default week view even if `time_step` is off
     increment = relativedelta(days=7)
     if time_step == 'day':
-        # To indicate do nothing if Daily is passed in
         increment = relativedelta(days=1)
     if time_step == 'week':
         # Change start date to be Monday beginning of week
@@ -102,7 +112,7 @@ def get_time_series(model, timezone='UTC', time_step='week', calendar_ids=None, 
     data_point = 0
     period_total = 0
     # Change period to change number of data points for average
-    period = 5
+    period = 5.0
 
     while i < len(events):
         end = start + increment
@@ -120,14 +130,14 @@ def get_time_series(model, timezone='UTC', time_step='week', calendar_ids=None, 
                 total += (events[i].end - events[i].start).total_seconds() / 3600
             i += 1
 
-        # For moving average. Basically iterates back and adds average
+        # For moving average. Basically iterates back and adds average. See docstring
         data_point += 1
         period_total += total
         if data_point % period == 0:
-            average = float(period_total) / period
+            average = period_total / period
             period_start = start
             sub_range = []
-            for _ in range(period):
+            for _ in range(int(period)):
                 sub_range = [(period_start, average)] + sub_range
                 period_start -= increment
             moving_average_lst += sub_range
@@ -138,10 +148,10 @@ def get_time_series(model, timezone='UTC', time_step='week', calendar_ids=None, 
 
     # Deals with edge case if number of data points not divisible by period
     if data_point % period != 0:
-        average = float(period_total) / (data_point % period)
+        average = period_total / (data_point % period)
         period_start = start - increment
         sub_range = []
-        for _ in range(data_point % period):
+        for _ in range(int(data_point % period)):
             sub_range = [(period_start, average)] + sub_range
             period_start -= increment
         moving_average_lst += sub_range

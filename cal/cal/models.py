@@ -554,7 +554,7 @@ class Category(models.Model, EventCollection):
     Calendar, not tied to any particular calendar. In Google Calendar, default
     event colors actually have no value and defer to the color of the
     associated calendar, so this is why a Color Category must have a
-    non-default color. 
+    non-default color.
 
     To enforce the above, the `save` function will throw an error if both a
     calendar and a non-default color are specified. Accordingly, you can
@@ -593,8 +593,8 @@ class Category(models.Model, EventCollection):
 
     def hours(self, calendar_ids=None, start=None, end=None):
         events = self.get_events(calendar_ids=calendar_ids, start=start, end=end)
-        # round(float(...)) necessary to display hours to two decimal points
-        return round(float(EventCollection(lambda: events).total_time()) / 3600, 2)
+        # round(...) necessary to display hours to two decimal points
+        return round(EventCollection(lambda: events).total_time() / 3600.0, 2)
 
     def category_color(self):
         return get_color(self.calendar, self.color_index)['background']
@@ -659,8 +659,8 @@ class Tag(models.Model, EventCollection):
 
     def hours(self, calendar_ids=None, start=None, end=None):
         events = self.get_events(calendar_ids=calendar_ids, start=start, end=end)
-        # round(float(...)) necessary to display hours to two decimal points
-        return round(float(EventCollection(lambda: events).total_time()) / 3600, 2)
+        # round(...) necessary to display hours to two decimal points
+        return round(EventCollection(lambda: events).total_time() / 3600.0, 2)
 
     def get_events(self, calendar_ids=None, start=None, end=None):
         """
