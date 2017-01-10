@@ -22,6 +22,7 @@ urlpatterns = patterns(
     url(r'^v1/tags/(?P<pk>[0-9]+)/?$', views.TagDetail.as_view()),
     url(r'^v1/tags/(?P<pk>[0-9]+)/events/?$', views.TagDetailEvents.as_view()),
     url(r'^v1/tags/(?P<pk>[0-9]+)/timeseries/(?P<time_step>\w+)/?$', views.TagDetailEventTimeSeries.as_view()),
+    url(r'^v1/tags/(?P<pk>[0-9]+)/category-tags/?$', views.TagsByCategories.as_view()),
 
 )
 

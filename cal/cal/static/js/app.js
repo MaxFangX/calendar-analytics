@@ -130,11 +130,13 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
   var timeseriesWeek = '/v1/tags/' + this.tagId + '/timeseries/week';
   var timeseriesMonth = '/v1/tags/' + this.tagId + '/timeseries/month';
   var timeseriesDay = '/v1/tags/' + this.tagId + '/timeseries/day';
+  var categoryTags = '/v1/tags/' + this.tagId + '/category-tags';
   var query_timezone = moment.tz.guess();
   this.tagEvents = [];
   this.tagEvents.dataLoaded = false;
   this.averageHours = 0;
   this.timeStep = "";
+  this.tagsByCategoriesData = [];
 
   // Refreshes the line graph
   this.showGraph = function(maxYValue) {
@@ -223,8 +225,49 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
     });
   };
 
+  this.showCategoryPie = function() {
+    this.categoryPie = {
+      chart: {
+        type: 'pieChart',
+        height: 400,
+        x: function(d){return d.label;},
+        y: function(d){return d.hours;},
+        showLabels: false,
+        growOnHover: true,
+        duration: 500,
+        labelThreshold: 0.01,
+        labelSunbeamLayout: true,
+        legend: {
+          margin: {
+            top: 5,
+            right: 0,
+            bottom: 0,
+            left: 0
+          }
+        },
+      },
+    };
+  };
+
+  this.showTagsByCategories = function() {
+    $http({
+      method: 'GET',
+      url: categoryTags + '.json',
+    }).success(function successCallback(data) {
+      for (var i = 0; i < data.length; i++) {
+        var category = data[i];
+        _this.tagsByCategoriesData.push({
+          label: category[0],
+          hours: category[1]
+        });
+      }
+      _this.showCategoryPie();
+    });
+  };
+
   this.initialize = function() {
     this.showWeekly();
+    this.showTagsByCategories();
     $http({method: 'GET', url: tagUrl + '.json' }).
     success(function successCallback(data) {
       for (var i = 0; i < data.results.length; i++) {
@@ -237,6 +280,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
       _this.tagEvents.dataLoaded = true;
     });
   }.bind(this);
+
   this.initialize();
 }
 

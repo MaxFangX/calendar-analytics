@@ -554,7 +554,7 @@ class Category(models.Model, EventCollection):
     Calendar, not tied to any particular calendar. In Google Calendar, default
     event colors actually have no value and defer to the color of the
     associated calendar, so this is why a Color Category must have a
-    non-default color. 
+    non-default color.
 
     To enforce the above, the `save` function will throw an error if both a
     calendar and a non-default color are specified. Accordingly, you can
@@ -709,6 +709,39 @@ class Tag(models.Model, EventCollection):
         The dates are spaced out by the time_step.
         """
         return get_time_series(self, timezone, time_step, calendar_ids, start, end)
+
+
+    def get_category_stats(self, categories, calendar_ids=None, start=None, end=None):
+        """
+        Returns a list of category-hour tuples corresponding to the number of hours per category
+        that corresponds to this Tag.
+        """
+        category_hours = []
+        keywords = self.keywords.split(',')
+
+        for category in categories:
+            querysets = [
+                    GEvent.objects
+                    .filter(calendar__user=category.user, calendar=category.calendar,
+                            name__regex=r'(?i)[^a-zA-Z\d:]?'+keyword+r'(?i)[^a-zA-Z\d:]?',
+                            color_index=category.color_index)
+                    for keyword in keywords
+                    ]
+
+            events_qs = reduce(lambda qs1, qs2: qs1 | qs2, querysets)
+
+            if start:
+                events_qs = events_qs.filter(end__gt=start)
+            if end:
+                events_qs = events_qs.filter(start__lt=end)
+            else:
+                events_qs = events_qs.filter(start__lt=datetime.now(pytz.utc))
+
+            hours = round(float(EventCollection(lambda:[e for e in events_qs]).total_time()) / 3600, 2)
+
+            category_hours.append((category.label, hours))
+
+        return category_hours
 
 
 class Statistic(models.Model):

@@ -1,5 +1,6 @@
 <div>
   <div ng-hide="$ctrl.tagEvents.dataLoaded" class="preloader"></div>
+  <nvd3 options="$ctrl.categoryPie" data="$ctrl.tagsByCategoriesData"></nvd3>
   <div ng-if="$ctrl.tagEvents.dataLoaded">
     <h3 class="well">Average hours per {{$ctrl.timeStep}}: {{ $ctrl.averageHours }}<h3>
     <button ng-click='$ctrl.showDaily()'>Daily</button>
