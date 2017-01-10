@@ -258,7 +258,8 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
         var category = data[i];
         _this.tagsByCategoriesData.push({
           label: category[0],
-          hours: category[1]
+          color: category[1],
+          hours: category[2]
         });
       }
       _this.showCategoryPie();

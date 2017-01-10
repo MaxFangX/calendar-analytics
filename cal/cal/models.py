@@ -740,9 +740,9 @@ class Tag(models.Model, EventCollection):
             for i in range(1, len(events_qs)):
                 if (events_qs[i-1].end - events_qs[i].start).total_seconds() > 0:
                     # events overlap
-                    hours -= round(float((events_qs[i-1].end - events_qs[i].start).total_seconds()) / 3600, 2)
+                    hours -= round((events_qs[i-1].end - events_qs[i].start).total_seconds() / 3600, 2)
 
-            category_hours.append((category.label, hours))
+            category_hours.append((category.label, category.category_color(), hours))
 
         return category_hours
 
