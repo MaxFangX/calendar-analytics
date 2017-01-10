@@ -223,9 +223,8 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
     });
   };
 
-  this.initialize = function() {
-    this.showWeekly();
-    $http({method: 'GET', url: tagUrl + '.json' }).
+  this.getEvents = function(pageNum) {
+    $http({method: 'GET', url: tagUrl + '.json', params:{page:pageNum}}).
     success(function successCallback(data) {
       for (var i = 0; i < data.results.length; i++) {
         var event = data.results[i];
@@ -234,9 +233,20 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
           name: event.name,
         });
       }
-      _this.tagEvents.dataLoaded = true;
+      if (data.next !== null) {
+        pageNum += 1;
+        _this.getEvents(pageNum);
+      } else {
+        _this.tagEvents.dataLoaded = true;
+      }
     });
+  };
+
+  this.initialize = function() {
+    this.showWeekly();
+    this.getEvents(1);
   }.bind(this);
+
   this.initialize();
 }
 
@@ -480,9 +490,8 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
     });
   };
 
-  this.initialize = function() {
-    this.showWeekly();
-    $http({method: 'GET', url: categoryUrl + '.json' }).
+  this.getEvents = function(pageNum) {
+    $http({method: 'GET', url: categoryUrl + '.json', params:{page:pageNum}}).
     success(function successCallback(data) {
       for (var i = 0; i < data.results.length; i++) {
         var event = data.results[i];
@@ -491,8 +500,18 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
           name: event.name,
         });
       }
-      _this.categoryEvents.dataLoaded = true;
+      if (data.next !== null) {
+        pageNum += 1;
+        _this.getEvents(pageNum);
+      } else {
+        _this.categoryEvents.dataLoaded = true;
+      }
     });
+  };
+
+  this.initialize = function() {
+    this.showWeekly();
+    this.getEvents(1);
   }.bind(this);
 
   this.initialize();

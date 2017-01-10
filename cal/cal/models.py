@@ -554,7 +554,7 @@ class Category(models.Model, EventCollection):
     Calendar, not tied to any particular calendar. In Google Calendar, default
     event colors actually have no value and defer to the color of the
     associated calendar, so this is why a Color Category must have a
-    non-default color. 
+    non-default color.
 
     To enforce the above, the `save` function will throw an error if both a
     calendar and a non-default color are specified. Accordingly, you can
