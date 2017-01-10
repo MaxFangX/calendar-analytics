@@ -132,9 +132,13 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
   var timeseriesDay = '/v1/tags/' + this.tagId + '/timeseries/day';
   var query_timezone = moment.tz.guess();
   this.tagEvents = [];
+  this.pageEvents = [];
   this.tagEvents.dataLoaded = false;
   this.averageHours = 0;
   this.timeStep = "";
+  this.currentPage = 0;
+  this.pageSize = 25;
+  this.lastPage = 0;
 
   // Refreshes the line graph
   this.showGraph = function(maxYValue) {
@@ -223,6 +227,15 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
     });
   };
 
+  this.showPageEvents = function() {
+    var start = this.currentPage * this.pageSize;
+    var end = (start + this.pageSize > this.tagEvents.length) ? this.tagEvents.length : start + this.pageSize;
+    this.pageEvents = [];
+    for (var i = start; i < end; i++) {
+      this.pageEvents.push(_this.tagEvents[i]);
+    }
+  }.bind(this);
+
   this.getEvents = function(pageNum) {
     $http({method: 'GET', url: tagUrl + '.json', params:{page:pageNum}}).
     success(function successCallback(data) {
@@ -237,6 +250,8 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
         pageNum += 1;
         _this.getEvents(pageNum);
       } else {
+        _this.lastPage = Math.ceil(_this.tagEvents.length / _this.pageSize);
+        _this.showPageEvents();
         _this.tagEvents.dataLoaded = true;
       }
     });
@@ -401,9 +416,13 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
   var timeseriesDay = '/v1/categories/' + this.categoryId + '/timeseries/day';
   var query_timezone = moment.tz.guess();
   this.categoryEvents = [];
+  this.pageEvents = [];
   this.categoryEvents.dataLoaded = false;
   this.averageHours = 0;
   this.timeStep = "";
+  this.currentPage = 0;
+  this.pageSize = 25;
+  this.lastPage = 0;
 
   // line graph
   this.showGraph = function(maxYValue) {
@@ -490,6 +509,15 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
     });
   };
 
+  this.showPageEvents = function() {
+    var start = this.currentPage * this.pageSize;
+    var end = (start + this.pageSize > this.categoryEvents.length) ? this.categoryEvents.length : start + this.pageSize;
+    this.pageEvents = [];
+    for (var i = start; i < end; i++) {
+      this.pageEvents.push(_this.categoryEvents[i]);
+    }
+  }.bind(this);
+
   this.getEvents = function(pageNum) {
     $http({method: 'GET', url: categoryUrl + '.json', params:{page:pageNum}}).
     success(function successCallback(data) {
@@ -504,6 +532,8 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
         pageNum += 1;
         _this.getEvents(pageNum);
       } else {
+        _this.lastPage = Math.ceil(_this.categoryEvents.length / _this.pageSize);
+        _this.showPageEvents();
         _this.categoryEvents.dataLoaded = true;
       }
     });
