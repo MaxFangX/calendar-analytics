@@ -26,7 +26,7 @@ function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
           _this.tags.dataLoaded = true;
         });
     } else {
-      TagService.getTags('cumulative' + filterData.filterKey, null, null,
+      TagService.getTags('cumulative ' + filterData.filterKey, null, null,
                          filterData.calendarIds)
         .then(function(tags) {
           _this.tags = tags;
@@ -139,7 +139,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
   // Refreshes the line graph
   this.showGraph = function(maxYValue) {
     // line graph
-    _this.tagLine = {
+    this.tagLine = {
       chart: {
         type: 'lineChart',
         height: 450,
