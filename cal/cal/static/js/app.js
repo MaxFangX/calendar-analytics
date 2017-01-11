@@ -237,7 +237,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, QueryService) {
   }.bind(this);
 
   this.getEvents = function(pageNum) {
-    $http({method: 'GET', url: tagUrl + '.json', params:{page:pageNum}}).
+    $http({method: 'GET', url: tagUrl + '.json', params: {page: pageNum }}).
     success(function successCallback(data) {
       for (var i = 0; i < data.results.length; i++) {
         var event = data.results[i];
@@ -519,7 +519,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
   }.bind(this);
 
   this.getEvents = function(pageNum) {
-    $http({method: 'GET', url: categoryUrl + '.json', params:{page:pageNum}}).
+    $http({method: 'GET', url: categoryUrl + '.json', params: { page:pageNum }}).
     success(function successCallback(data) {
       for (var i = 0; i < data.results.length; i++) {
         var event = data.results[i];
