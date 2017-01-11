@@ -6,6 +6,17 @@ var analyticsApp = window.angular.module('analyticsApp', ['analyticsApp.services
 analyticsApp.controller('LoggedInCtrl', function LoggedInController() {
 });
 
+analyticsApp.component('tagList', {
+  templateUrl: '/static/templates/tag-list.html',
+  controller: ['$scope', '$http', 'CalendarFilterService', 'TagService', TagListCtrl],
+  controllerAs: '$ctrl',
+  bindings: {
+    isCumulative: '<?',
+    displayName: '@',
+    hideZeroHours: '<?'
+  }
+});
+
 function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
 
   var _this = this;
@@ -37,12 +48,8 @@ function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
 
   this.hideZeroHoursFilter = function (value, index, array) {
     /* jshint unused:vars */
-    if (this.hideZeroHours && value.hours === 0) {
-      return false;
-    } else {
-      return true;
-    }
-  }.bind(this);
+    return !(_this.hideZeroHours && values.hours === 0)
+  }
 
   this.create = function(tag) {
     TagService.createTag(tag.label, tag.keywords)
@@ -101,14 +108,12 @@ function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
   };
 }
 
-analyticsApp.component('tagList', {
-  templateUrl: '/static/templates/tag-list.html',
-  controller: ['$scope', '$http', 'CalendarFilterService', 'TagService', TagListCtrl],
+analyticsApp.component('tagDetails', {
+  templateUrl: '/static/templates/tagDetails.html',
+  controller: ['$scope', '$interpolate', '$http', 'CalendarFilterService', 'QueryService', TagsDetailCtrl],
   controllerAs: '$ctrl',
   bindings: {
-    isCumulative: '<?',
-    displayName: '@',
-    hideZeroHours: '<?'
+    tagId: '@',
   }
 });
 
@@ -293,12 +298,14 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
 }
 
 
-analyticsApp.component('tagDetails', {
-  templateUrl: '/static/templates/tagDetails.html',
-  controller: ['$scope', '$interpolate', '$http', 'CalendarFilterService', 'QueryService', TagsDetailCtrl],
+analyticsApp.component('categoryList', {
+  templateUrl: '/static/templates/category-list.html',
+  controller: ['$scope', '$http', 'CalendarFilterService', 'CategoryService', CategoryListCtrl],
   controllerAs: '$ctrl',
   bindings: {
-    tagId: '@',
+    isCumulative: '<?',
+    displayName: '@',
+    hideZeroHours: '<?'
   }
 });
 
@@ -349,12 +356,8 @@ function CategoryListCtrl($scope, $http, CalendarFilterService, CategoryService)
 
   this.hideZeroHoursFilter = function(value, index, array) {
     /* jshint unused:vars */
-    if (this.hideZeroHours && value.hours === 0) {
-      return false;
-    } else {
-      return true;
-    }
-  }.bind(this);
+    return !(_this.hideZeroHours && value.hours === 0);
+  }
 
   this.startEdit = function(categoryId) {
     var category = _this.categories.find(function(category, index, array) {
@@ -375,7 +378,6 @@ function CategoryListCtrl($scope, $http, CalendarFilterService, CategoryService)
     CategoryService.editCategory(categoryId, category.newLabel)
       .then(function(returnedCategory) {
         category.label = returnedCategory.label;
-        category.hours = returnedCategory.hours;
         _this.categories.dataLoaded = true;
       });
   };
@@ -423,14 +425,13 @@ function CategoryListCtrl($scope, $http, CalendarFilterService, CategoryService)
   };
 }
 
-analyticsApp.component('categoryList', {
-  templateUrl: '/static/templates/category-list.html',
-  controller: ['$scope', '$http', 'CalendarFilterService', 'CategoryService', CategoryListCtrl],
+analyticsApp.component('categoryDetails', {
+  templateUrl: '/static/templates/categoryDetails.html',
+  controller: ['$scope', '$http', 'QueryService', CategoriesDetailCtrl],
   controllerAs: '$ctrl',
   bindings: {
-    isCumulative: '<?',
-    displayName: '@',
-    hideZeroHours: '<?'
+    categoryId: '@',
+    categoryHours: '@'
   }
 });
 
@@ -578,16 +579,6 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
   this.initialize();
 }
 
-analyticsApp.component('categoryDetails', {
-  templateUrl: '/static/templates/categoryDetails.html',
-  controller: ['$scope', '$http', 'QueryService', CategoriesDetailCtrl],
-  controllerAs: '$ctrl',
-  bindings: {
-    categoryId: '@',
-    categoryHours: '@'
-  }
-});
-
 analyticsApp.controller('CalendarCtrl', function CalendarCtrl($scope, $http, $q, uiCalendarConfig, CalendarFilterService) {
 
   this.calendars = {};
@@ -714,7 +705,6 @@ analyticsApp.controller('CalendarCtrl', function CalendarCtrl($scope, $http, $q,
         right: 'agendaDay,agendaWeek,month today prev,next'
       },
       firstDay: 1,
-      eventClick: $scope.alertOnEventClick,
       eventRender: $scope.eventRender,
       viewRender: this.viewRender,
     }

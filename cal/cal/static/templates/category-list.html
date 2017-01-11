@@ -1,5 +1,5 @@
 <div>
-  <h4 class="well">Categories - {{ $ctrl.displayName }}</h4>
+  <h4 class="well">Categories{{ $ctrl.displayName ? ' - ' + $ctrl.displayName : '' }}</h4>
   <div ng-hide="$ctrl.categories.dataLoaded" class="preloader"></div>
   <div ng-if="$ctrl.categories.dataLoaded">
     <nvd3 options="$ctrl.categoryPie" data="$ctrl.categories"></nvd3>

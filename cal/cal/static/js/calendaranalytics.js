@@ -26,7 +26,6 @@ $(document).ready(function() {
       data: {
       },
       success: function(data) {
-        tags = [];
         data.results.sort(function(a, b) {
           return a.label.localeCompare(b.label);
         });

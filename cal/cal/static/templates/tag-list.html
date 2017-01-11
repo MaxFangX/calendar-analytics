@@ -1,5 +1,5 @@
 <div>
-  <h4 class="well">Tags - {{ $ctrl.displayName }}</h4>
+  <h4 class="well">Tags{{ $ctrl.displayName ? ' - ' + $ctrl.displayName : '' }}</h4>
   <h3>{{ $ctrl.rangeService.type }}</h3>
   <div ng-hide="$ctrl.tags.dataLoaded" class="preloader"></div>
   <div ng-if="$ctrl.tags.dataLoaded">
@@ -55,8 +55,8 @@
            <input type="text" ng-model="tag.keywords">
           </td>
           <td class="text-right text-nowrap">
-            <button class="btn btn-primary">
-              <span class="glyphicon glyphicon-plus" ng-click="$ctrl.create(tag)"></span>
+            <button class="btn btn-primary" ng-click="$ctrl.create(tag)">
+              <span class="glyphicon glyphicon-plus"></span>
             </button>
           </td>
         </tr>
