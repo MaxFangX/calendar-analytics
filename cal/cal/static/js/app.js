@@ -320,20 +320,19 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
     }).
     success(function successCallback(data) {
       _this.tagHours = data.hours;
+      if (_this.timeStep === "day") {
+        _this.showDaily();
+      }
+      if (_this.timeStep === "week" || _this.timeStep === "") {
+        _this.showWeekly();
+      }
+      if (_this.timeStep === "month") {
+        _this.showMonthly();
+      }
+      _this.getEvents(1);
+      _this.showTagsByCategories();
     });
-
-    if (_this.timeStep === "day") {
-      this.showDaily();
-    }
-    if (_this.timeStep === "week" || _this.timeStep === "") {
-      this.showWeekly();
-    }
-    if (_this.timeStep === "month") {
-      this.showMonthly();
-    }
-    this.getEvents(1);
-    this.showTagsByCategories();
-  }.bind(this);
+  };
 }
 
 
