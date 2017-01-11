@@ -539,24 +539,29 @@ analyticsApp.controller('CalendarCtrl', function CalendarCtrl($scope, $http, $q,
       }
 
       // Trigger first CalendarFilter now that this.calendars has been set
-      CalendarFilterService.setFilter(start, end, _this.getEnabledCalendarIds());
+      CalendarFilterService.setFilter(start, end,
+        _this.getEnabledCalendarIds());
 
-      var collectedEvents = [];
-      var eventPromises = response.data.results.map(function(gcal) {
-        return $http({
-          method: 'GET',
-          url: "/v1/gevents.json",
-          cache: true,
-          params: {
-            calendarId: gcal.calendar_id,
-            start: start.toISOString(),
-            end: end.toISOString(),
-            timezone: query_timezone,
-            edge: 'truncated'
-          },
-        }).then(function eventSuccess(response) {
-          var events = [];
-          $.each(response.data.results, function(index, gevent) {
+      var calendarIds = response.data.results.map(function(cal) {
+        return cal.calendar_id;
+      }).sort();
+
+      $http({
+        method: 'GET',
+        url: "/v1/gevents.json",
+        cache: true,
+        params: {
+          calendarIds: JSON.stringify(calendarIds),
+          start: start.toISOString(),
+          end: end.toISOString(),
+          timezone: query_timezone,
+          edge: 'truncated'
+        },
+      }).then(function eventSuccess(response) {
+        var events = [];
+        for (i = 0; i < response.data.results.length; i++) {
+          var gevent = response.data.results[i];
+          if (_this.calendars[gevent.calendar.calendar_id].enabled) {
             events.push({
               title: gevent.name,
               start: gevent.start,
@@ -568,20 +573,16 @@ analyticsApp.controller('CalendarCtrl', function CalendarCtrl($scope, $http, $q,
               description: gevent.description,
               location: gevent.location,
             });
-          });
-
-          if (_this.calendars[gcal.calendar_id].enabled) {
-            collectedEvents = collectedEvents.concat(events);
           }
-        }, function eventError(response) {
-          console.log("Ajax call to gevents failed:");
-          console.log(response);
-        });
+        }
+
+        callback(events);
+
+      }, function eventError(response) {
+        console.log("Ajax call to gevents failed:");
+        console.log(response);
       });
 
-      $q.all(eventPromises).then(function() {
-        callback(collectedEvents);
-      });
 
     }, function gcalError(response) {
       console.log("Ajax call to gcalendars failed: " + response);

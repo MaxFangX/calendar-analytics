@@ -7,6 +7,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+import ast
 
 @api_view(('GET',))
 def api_root(request, format=None):
@@ -88,36 +89,36 @@ class GEventList(generics.ListAPIView):
 
     Query Parameters
 
-    `start`:      (required) a string representing a date or a datetime
-    `end`:        (required) a string representing a date or a datetime
-    `calendarId`: (optional) the calendar id from which to pull events. If a calendar id
-                  is not supplied, defaults to the user's main calendar.
-    `timezone`:   (optional) a string representing a timezone
-    `edge`:       (optional) whether events overlapping with the start/end boundaries
-                  will be included. Options are 'inclusive', 'exclusive', and 'truncated'.
-                  'truncated' means that events that overlap will be included, but will be
-                  modified so that they start or end exactly at the boundary they overlap
-                  with.
+    `start`:       (required) a string representing a date or a datetime
+    `end`:         (required) a string representing a date or a datetime
+    `calendarIds`: (optional) a list of calendar ids from which to pull events.
+                   If a calendar id is not supplied, defaults to the user's main calendar.
+    `timezone`:    (optional) a string representing a timezone
+    `edge`:        (optional) whether events overlapping with the start/end boundaries
+                   will be included. Options are 'inclusive', 'exclusive', and 'truncated'.
+                   'truncated' means that events that overlap will be included, but will be
+                   modified so that they start or end exactly at the boundary they overlap
+                   with.
     """
     serializer_class = GEventSerializer
 
     def get_queryset(self):
-        calendar_id = self.request.query_params.get('calendarId')
         start_str = self.request.query_params.get('start')
         end_str = self.request.query_params.get('end')
         timezone_str = self.request.query_params.get('timezone')
         edge_str = self.request.query_params.get('edge')
+        calendar_ids_str = self.request.query_params.get('calendarIds')
+        calendar_ids = ast.literal_eval(calendar_ids_str)
 
-        calendar = None
-        if calendar_id:
-            try:
-                calendar = GCalendar.objects.filter(user=self.request.user).get(calendar_id=calendar_id)
-            except GCalendar.DoesNotExist:
-                raise Exception("{} was not a valid calendar id".format(calendar_id))
+        if calendar_ids:
+            calendars = GCalendar.objects.filter(user=self.request.user)\
+                    .filter(calendar_id__in=calendar_ids)
+            if not calendars:
+                raise Exception("{} did not contain any valid calendar ids".format(calendar_ids_str))
         else:
-            calendar = self.request.user.profile.main_calendar
+            calendars = [self.request.user.profile.main_calendar]
 
-        qs = GEvent.objects.filter(calendar=calendar)
+        qs = GEvent.objects.filter(calendar__in=calendars)
         qs = qs.exclude(status__in=['tentative', 'cancelled'])
 
         if not start_str or not end_str:
