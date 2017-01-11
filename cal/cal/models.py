@@ -240,6 +240,7 @@ class GCalendar(models.Model):
                 recurring_event_id=event.get('recurringEventId', ''))
 
     def sync(self, full_sync=False):
+        result = None
         creds = self.user.googlecredentials
         service = creds.get_service()
 
