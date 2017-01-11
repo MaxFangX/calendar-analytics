@@ -28,7 +28,6 @@ def toggle_privacy(request):
 
 @api_view(('GET',))
 def sync(request, format=None):
-
     if not request.user:
         return Response("Not logged in")
 
@@ -47,7 +46,7 @@ def sync(request, format=None):
         else:
             calendar.sync()
 
-    return HttpResponseRedirect("/")
+    return HttpResponseRedirect("/sync?no_sync=true")
 
 
 class GCalendarList(generics.ListAPIView):
