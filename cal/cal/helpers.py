@@ -77,15 +77,16 @@ def get_time_series(model, timezone='UTC', time_step='week', calendar_ids=None, 
     time step. However if an event overlaps both time steps, it splits it and adds the hours
     accordingly. This is why `rollover` is used.
 
-    `moving_average_lst` is a list of time-hour tuples. However each time corresponds to the
-    average of `period` points. To this efficiently, while iterating through the events
-    when we hit the end of a `period`, we loop backwards and add last `period` events and the
-    average hours to `moving_average_lst`. We also need to take care of the edge case where
-    the number of points is not evenly divisibly by `period`.
+    `moving_average_lst` is a list of time-hour tuples.
+    See http://www.investopedia.com/terms/m/movingaverage.asp. `period` number of periods
+    taken into account to the moving average.
     """
     week_hours = []
     moving_average_lst = []
     events = model.query(calendar_ids, start, end)
+    # Takes care of Tags with no hours
+    if not events:
+        return [(0,0),(0,0)]
     # Convert start to local time
     start = events[0].start.astimezone(pytz.timezone(timezone))
     # Default week view even if `time_step` is off
@@ -110,9 +111,9 @@ def get_time_series(model, timezone='UTC', time_step='week', calendar_ids=None, 
 
     # For moving average
     data_point = 0
-    period_total = 0
+    moving_average = 0
     # Change period to change number of data points for average
-    period = 5.0
+    period = 30.0
 
     while i < len(events):
         end = start + increment
@@ -124,37 +125,26 @@ def get_time_series(model, timezone='UTC', time_step='week', calendar_ids=None, 
         while i < len(events) and (end - events[i].start).total_seconds() >= 0:
             # Overlapping events
             if (end - events[i].end).total_seconds() < 0:
-                total += (end - events[i].start).total_seconds() / 3600
-                rollover = (events[i].end - end).total_seconds() / 3600
+                total += (end - events[i].start).total_seconds() / 3600.0
+                rollover = (events[i].end - end).total_seconds() / 3600.0
             else:
-                total += (events[i].end - events[i].start).total_seconds() / 3600
+                total += (events[i].end - events[i].start).total_seconds() / 3600.0
             i += 1
 
-        # For moving average. Basically iterates back and adds average. See docstring
+        # Moving average logic. If it's before period just add to moving_average
+        if data_point < period:
+            moving_average += total
+        else:
+            # We need to find hours of first event to subtract off
+            first_event = week_hours[int(data_point - period)][1]
+            moving_average_lst.append((start, (moving_average - first_event + total) / period))
         data_point += 1
-        period_total += total
-        if data_point % period == 0:
-            average = period_total / period
-            period_start = start
-            sub_range = []
-            for _ in range(int(period)):
-                sub_range = [(period_start, average)] + sub_range
-                period_start -= increment
-            moving_average_lst += sub_range
-            period_total = 0
 
         week_hours.append((start, total))
         start = end
 
-    # Deals with edge case if number of data points not divisible by period
-    if data_point % period != 0:
-        average = period_total / (data_point % period)
-        period_start = start - increment
-        sub_range = []
-        for _ in range(int(data_point % period)):
-            sub_range = [(period_start, average)] + sub_range
-            period_start -= increment
-        moving_average_lst += sub_range
+    if moving_average_lst == []:
+        moving_average_lst = [(0,0)]
 
     return (week_hours, moving_average_lst)
 
