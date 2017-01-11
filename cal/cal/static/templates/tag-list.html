@@ -31,19 +31,19 @@
             <input type="text" ng-model="tag.newKeywords">
           </td>
           <td class="text-right text-nowrap" ng-show="tag.editing">
-            <button class="btn btn-success">
-              <span class="glyphicon glyphicon-ok" ng-click="$ctrl.submitEdit(tag.id)"></span>
+            <button class="btn btn-success" ng-click="$ctrl.submitEdit(tag.id)">
+              <span class="glyphicon glyphicon-ok"></span>
             </button>
-            <button class="btn btn-warning">
-              <span class="glyphicon glyphicon-remove" ng-click="$ctrl.cancelEdit(tag.id)"></span>
+            <button class="btn btn-warning" ng-click="$ctrl.cancelEdit(tag.id)">
+              <span class="glyphicon glyphicon-remove"></span>
             </button>
           </td>
           <td class="text-right text-nowrap" ng-hide="tag.editing">
-            <button class="btn btn-info">
-              <span class="glyphicon glyphicon-edit" ng-click="$ctrl.startEdit(tag.id)"></span>
+            <button class="btn btn-info" ng-click="$ctrl.startEdit(tag.id)">
+              <span class="glyphicon glyphicon-edit"></span>
             </button>
-            <button class="btn btn-danger">
-              <span class="glyphicon glyphicon-trash" ng-click="$ctrl.delete(tag.id)"></span>
+            <button class="btn btn-danger" ng-click="$ctrl.delete(tag.id)">
+              <span class="glyphicon glyphicon-trash"></span>
             </button>
           </td>
         </tr>
