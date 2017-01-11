@@ -684,7 +684,7 @@ class Tag(models.Model, EventCollection):
 
         querysets = [
                 GEvent.objects
-                .filter(calendar=calendar, name__regex=r'(?i)[^a-zA-Z\d:]?'+keyword+r'(?i)[^a-zA-Z\d:]?')
+                .filter(calendar=calendar, name__regex=r'\b(?i)[^a-zA-Z\d:]?'+keyword+r'(?i)[^a-zA-Z\d:]?\b')
                 .exclude(all_day_event=True)
                 for keyword in keywords
                 for calendar in calendars
@@ -722,7 +722,7 @@ class Tag(models.Model, EventCollection):
             querysets = [
                     GEvent.objects
                     .filter(calendar__user=category.user, calendar=category.calendar,
-                            name__regex=r'(?i)[^a-zA-Z\d:]?'+keyword+r'(?i)[^a-zA-Z\d:]?',
+                            name__regex=r'\b(?i)[^a-zA-Z\d:]?'+keyword+r'(?i)[^a-zA-Z\d:]?\b',
                             color_index=category.color_index)
                     for keyword in keywords
                     ]
