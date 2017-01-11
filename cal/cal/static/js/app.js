@@ -86,7 +86,8 @@ function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
       return tag.id == tagId;
     });
     tag.editing = false;
-    TagService.editTag(tagId, tag.newLabel, tag.newKeywords)
+    var filterData = CalendarFilterService.getFilter();
+    TagService.editTag(tagId, tag.newLabel, tag.newKeywords, filterData.filterKey)
       .then(function(returnedTag) {
         tag.label = returnedTag.label;
         tag.keywords = returnedTag.keywords;

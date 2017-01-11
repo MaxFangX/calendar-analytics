@@ -106,7 +106,7 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
     });
   };
 
-  this.editTag = function(tagId, newLabel, newKeywords) {
+  this.editTag = function(tagId, newLabel, newKeywords, filterKey) {
     return $http({
       method: 'POST',
       url: '/v1/tags/' + tagId,
@@ -120,6 +120,7 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     }).then(function successCallback(response) {
+      _this.tags[filterKey] = null;
       return response.data;
     }, function errorCallback() {
       console.log("Failed to edit tag with id " + tagId);
