@@ -122,7 +122,6 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
   var categoryTags = '/v1/tags/' + this.tagId + '/by-category';
   var query_timezone = moment.tz.guess();
   var calendarIds = [];
-  this.tagsByCategoriesData = [];
   this.tagHours = 0;
   this.tagEvents = [];
   this.pageEvents = [];
@@ -204,6 +203,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
       method: 'GET',
       url: categoryTags + '.json',
     }).success(function successCallback(data) {
+      _this.tagsByCategoriesData = [];
       for (var i = 0; i < data.length; i++) {
         var category = data[i];
         _this.tagsByCategoriesData.push({
