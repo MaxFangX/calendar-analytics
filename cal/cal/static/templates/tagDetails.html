@@ -36,8 +36,11 @@
     <button ng-click='$ctrl.showMonthly()'>Monthly</button>
     <nvd3 options="$ctrl.tagLine" data="$ctrl.ctrlGraphData"></nvd3>
     <h3 class="well">Contained Events</h3>
-    <ul class="list-group" ng-repeat="tag in $ctrl.tagEvents">
-      <li class="list-group-item">{{ tag.start }}: {{ tag.name }}</li>
+    <button ng-disabled="$ctrl.currentPage === $ctrl.lastPage - 1"
+      ng-click='$ctrl.currentPage=$ctrl.currentPage+1; $ctrl.showPageEvents();'>Previous</button>
+    <button ng-disabled="$ctrl.currentPage == 0"
+      ng-click='$ctrl.currentPage=$ctrl.currentPage-1; $ctrl.showPageEvents();'>Next</button>
+    <ul class="list-group" ng-repeat="event in $ctrl.pageEvents">
+      <li class="list-group-item">{{ event.start }}: {{ event.name }}</li>
     </ul>
-  </div>
 </div>

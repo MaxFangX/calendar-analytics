@@ -121,11 +121,14 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
   var timeseriesDay = '/v1/tags/' + this.tagId + '/timeseries/day';
   var query_timezone = moment.tz.guess();
   var calendarIds = [];
-  this.tagHours = 0
+  this.tagHours = 0;
   this.tagEvents = [];
+  this.pageEvents = [];
   this.tagEvents.dataLoaded = false;
-  this.averageHours = 0;
   this.timeStep = "";
+  this.currentPage = 0;
+  this.pageSize = 25;
+  this.lastPage = 0;
 
   $scope.$on('calendarFilter:updated', function(event, data) {
     _this.tagEvents.dataLoaded = false;
@@ -226,6 +229,44 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
     });
   };
 
+  this.showPageEvents = function() {
+    var start = this.currentPage * this.pageSize;
+    var end = (start + this.pageSize > this.tagEvents.length) ? this.tagEvents.length : start + this.pageSize;
+    this.pageEvents = [];
+    for (var i = start; i < end; i++) {
+      this.pageEvents.push(_this.tagEvents[i]);
+    }
+  }.bind(this);
+
+  this.getEvents = function(pageNum) {
+    $http({
+      method: 'GET',
+      url: tagEvent + '.json',
+      params: {
+        page: pageNum,
+        calendar_ids: JSON.stringify(calendarIds)
+      }
+    }).
+    success(function successCallback(data) {
+      _this.tagEvents = [];
+      for (var i = 0; i < data.results.length; i++) {
+        var event = data.results[i];
+        _this.tagEvents.unshift({
+          start: (new Date(event.start)).toString(),
+          name: event.name,
+        });
+      }
+      if (data.next !== null) {
+        pageNum += 1;
+        _this.getEvents(pageNum);
+      } else {
+        _this.lastPage = Math.ceil(_this.tagEvents.length / _this.pageSize);
+        _this.showPageEvents();
+        _this.tagEvents.dataLoaded = true;
+      }
+    });
+  };
+
   this.refresh = function() {
     $http({
       method: 'GET',
@@ -235,37 +276,19 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
       }
     }).
     success(function successCallback(data) {
-      _this.tagHours = data.hours
+      _this.tagHours = data.hours;
     });
 
-    if (_this.timeStep == "day") {
+    if (_this.timeStep === "day") {
       this.showDaily();
     }
-    if (_this.timeStep == "week" || _this.timeStep == "") {
+    if (_this.timeStep === "week" || _this.timeStep === "") {
       this.showWeekly();
     }
-    if (_this.timeStep == "month") {
+    if (_this.timeStep === "month") {
       this.showMonthly();
     }
-
-    $http({
-      method: 'GET',
-      url: tagEvent + '.json',
-      params: {
-        calendar_ids: JSON.stringify(calendarIds),
-      }
-    }).
-    success(function successCallback(data) {
-      _this.tagEvents = []
-      for (var i = 0; i < data.results.length; i++) {
-        var event = data.results[i];
-        _this.tagEvents.unshift({
-          start: (new Date(event.start)).toString(),
-          name: event.name,
-        });
-      }
-      _this.tagEvents.dataLoaded = true;
-    });
+    this.getEvents(1);
   }.bind(this);
 }
 
@@ -419,8 +442,12 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
   var timeseriesDay = '/v1/categories/' + this.categoryId + '/timeseries/day';
   var query_timezone = moment.tz.guess();
   this.categoryEvents = [];
+  this.pageEvents = [];
   this.categoryEvents.dataLoaded = false;
   this.timeStep = "";
+  this.currentPage = 0;
+  this.pageSize = 25;
+  this.lastPage = 0;
 
   // line graph
   this.showGraph = function(maxYValue) {
@@ -507,9 +534,23 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
     });
   };
 
-  this.initialize = function() {
-    this.showWeekly();
-    $http({method: 'GET', url: categoryUrl + '.json' }).
+  this.showPageEvents = function() {
+    var start = this.currentPage * this.pageSize;
+    var end = (start + this.pageSize > this.categoryEvents.length) ? this.categoryEvents.length : start + this.pageSize;
+    this.pageEvents = [];
+    for (var i = start; i < end; i++) {
+      this.pageEvents.push(_this.categoryEvents[i]);
+    }
+  }.bind(this);
+
+  this.getEvents = function(pageNum) {
+    $http({
+      method: 'GET',
+      url: categoryUrl + '.json',
+      params: {
+        page:pageNum
+      }
+    }).
     success(function successCallback(data) {
       for (var i = 0; i < data.results.length; i++) {
         var event = data.results[i];
@@ -518,8 +559,20 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
           name: event.name,
         });
       }
-      _this.categoryEvents.dataLoaded = true;
+      if (data.next !== null) {
+        pageNum += 1;
+        _this.getEvents(pageNum);
+      } else {
+        _this.lastPage = Math.ceil(_this.categoryEvents.length / _this.pageSize);
+        _this.showPageEvents();
+        _this.categoryEvents.dataLoaded = true;
+      }
     });
+  };
+
+  this.initialize = function() {
+    this.showWeekly();
+    this.getEvents(1);
   }.bind(this);
 
   this.initialize();
