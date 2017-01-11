@@ -125,7 +125,6 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
   this.tagEvents = [];
   this.pageEvents = [];
   this.tagEvents.dataLoaded = false;
-  this.averageHours = 0;
   this.timeStep = "";
   this.currentPage = 0;
   this.pageSize = 25;
