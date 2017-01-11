@@ -238,7 +238,15 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
       _this.tagHours = data.hours
     });
 
-    this.showWeekly();
+    if (_this.timeStep == "day") {
+      this.showDaily();
+    }
+    if (_this.timeStep == "week" || _this.timeStep == "") {
+      this.showWeekly();
+    }
+    if (_this.timeStep == "month") {
+      this.showMonthly();
+    }
 
     $http({
       method: 'GET',
@@ -412,7 +420,6 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
   var query_timezone = moment.tz.guess();
   this.categoryEvents = [];
   this.categoryEvents.dataLoaded = false;
-  this.averageHours = 0;
   this.timeStep = "";
 
   // line graph
