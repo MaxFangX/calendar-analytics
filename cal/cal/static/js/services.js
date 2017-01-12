@@ -254,15 +254,17 @@ analyticsApp.service('QueryService', function() {
         x: date,
         y: hours
       });
-    }
-    for (var i = 0; i < data[1].length; i++) {
-      var event = data[1][i];
-      var date = new Date(event[0]);
-      var hours = event[1];
-      movingAverage.push({
-        x: date,
-        y: hours
-      });
+
+      if (i < data[1].length) {
+        // MA = Moving Average
+        var MAEvent = data[1][i];
+        var MADate = new Date(MAEvent[0]);
+        var MAHours = MAEvent[1];
+        movingAverage.push({
+          x: MADate,
+          y: MAHours
+        });
+      }
     }
     var xSeries = d3.range(1, xLabels.length + 1);
     var leastSquaresCoeff = leastSquares(xSeries, yLabels);
@@ -296,7 +298,7 @@ analyticsApp.service('QueryService', function() {
         strokeWidth: 3,
       });
     }
-    
+
     return [ctrlDetails, maxYValue];
   };
 
