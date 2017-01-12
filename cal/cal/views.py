@@ -15,7 +15,7 @@ from social.apps.django_app.utils import psa
 
 @ensure_csrf_cookie
 def home(request):
-    inc_sync_flag = True
+    inc_sync_flag = False
     if request.user.is_authenticated():
         if not request.GET.get('no_sync') and inc_sync_flag:
             return HttpResponseRedirect("/v1/sync?sync_all=true")
