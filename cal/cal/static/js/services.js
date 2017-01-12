@@ -276,7 +276,7 @@ analyticsApp.service('QueryService', function() {
 
     ctrlDetails.push({
       values: events,
-      key: type + ' Graph',
+      key: type + ' Line',
       color: '#DDD5C7',
       strokeWidth: 2,
     });
@@ -288,12 +288,14 @@ analyticsApp.service('QueryService', function() {
       strokeWidth: 3,
     });
 
-    ctrlDetails.push({
-      values: movingAverage,
-      key: 'Moving Average Line',
-      color: '#003057',
-      strokeWidth: 3,
-    });
+    if (movingAverage.length != 1) {
+      ctrlDetails.push({
+        values: movingAverage,
+        key: '7D Moving Average Line',
+        color: '#003057',
+        strokeWidth: 3,
+      });
+    }
 
     return [ctrlDetails, maxYValue];
   };

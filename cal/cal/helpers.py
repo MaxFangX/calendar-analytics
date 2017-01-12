@@ -110,10 +110,9 @@ def get_time_series(model, timezone='UTC', time_step='week', calendar_ids=None, 
     i = 0
 
     # For moving average
-    data_point = 0
-    moving_average = 0
+    data_point = moving_average = 0
     # Change period to change number of data points for average
-    period = 30.0
+    period = 7.0
 
     while i < len(events):
         end = start + increment
@@ -143,6 +142,7 @@ def get_time_series(model, timezone='UTC', time_step='week', calendar_ids=None, 
         week_hours.append((start, total))
         start = end
 
+    # Take care if not enough data to offset one period
     if moving_average_lst == []:
         moving_average_lst = [(0,0)]
 
