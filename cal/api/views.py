@@ -198,7 +198,8 @@ class TagList(generics.ListCreateAPIView):
         return {
             'calendar_ids': self.request.query_params.get('calendar_ids'),
             'start': self.request.query_params.get('start'),
-            'end': self.request.query_params.get('end')
+            'end': self.request.query_params.get('end'),
+            'timezone': self.request.query_params.get('timezone')
         }
 
     def get_queryset(self):
