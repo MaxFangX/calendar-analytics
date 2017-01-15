@@ -81,6 +81,11 @@ class CategorySerializer(serializers.ModelSerializer):
             calendar_ids = []
         start = self.context['start']
         end = self.context['end']
+        timezone = self.context['timezone']
+        if start:
+            start = handle_time_string(start, timezone)
+        if end:
+            end = handle_time_string(end, timezone)
         return obj.hours(calendar_ids=calendar_ids, start=start, end=end)
 
     def get_category_color(self, obj):
@@ -103,9 +108,8 @@ class TagSerializer(serializers.ModelSerializer):
         start = self.context.get('start')
         end = self.context.get('end')
         timezone = self.context.get('timezone')
-        # Convert start and end to corresponding timezone
         if start:
-            start =  handle_time_string(start, timezone)
+            start = handle_time_string(start, timezone)
         if end:
             end = handle_time_string(end, timezone)
         return obj.hours(calendar_ids=calendar_ids, start=start, end=end)
