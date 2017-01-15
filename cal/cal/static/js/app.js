@@ -124,6 +124,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
   var timeseriesWeek = '/v1/tags/' + this.tagId + '/timeseries/week';
   var timeseriesMonth = '/v1/tags/' + this.tagId + '/timeseries/month';
   var timeseriesDay = '/v1/tags/' + this.tagId + '/timeseries/day';
+  var categoryTags = '/v1/tags/' + this.tagId + '/by-category';
   var query_timezone = moment.tz.guess();
   var calendarIds = [];
   this.tagHours = 0;
@@ -177,6 +178,48 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
       },
     };
   }.bind(this);
+
+  this.showCategoryPie = function() {
+    this.categoryPie = {
+      chart: {
+        type: 'pieChart',
+        height: 400,
+        x: function(d){return d.label;},
+        y: function(d){return d.hours;},
+        showLabels: false,
+        growOnHover: true,
+        duration: 500,
+        labelThreshold: 0.01,
+        labelSunbeamLayout: true,
+        legend: {
+          margin: {
+            top: 5,
+            right: 0,
+            bottom: 0,
+            left: 0
+          }
+        },
+      },
+    };
+  };
+
+  this.showTagsByCategories = function() {
+    $http({
+      method: 'GET',
+      url: categoryTags + '.json',
+    }).success(function successCallback(data) {
+      _this.tagsByCategoriesData = [];
+      for (var i = 0; i < data.length; i++) {
+        var category = data[i];
+        _this.tagsByCategoriesData.push({
+          label: category[0],
+          color: category[1],
+          hours: category[2]
+        });
+      }
+      _this.showCategoryPie();
+    });
+  };
 
   this.showDaily = function() {
     $http({
@@ -282,19 +325,19 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
     }).
     success(function successCallback(data) {
       _this.tagHours = data.hours;
+      if (_this.timeStep === "day") {
+        _this.showDaily();
+      }
+      if (_this.timeStep === "week" || _this.timeStep === "") {
+        _this.showWeekly();
+      }
+      if (_this.timeStep === "month") {
+        _this.showMonthly();
+      }
+      _this.getEvents(1);
+      _this.showTagsByCategories();
     });
-
-    if (_this.timeStep === "day") {
-      this.showDaily();
-    }
-    if (_this.timeStep === "week" || _this.timeStep === "") {
-      this.showWeekly();
-    }
-    if (_this.timeStep === "month") {
-      this.showMonthly();
-    }
-    this.getEvents(1);
-  }.bind(this);
+  };
 }
 
 

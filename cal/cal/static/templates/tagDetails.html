@@ -28,6 +28,7 @@
     <div ui-calendar="uiConfig.calendar" calendar="panalytics" class="calendar" ng-model="$ctrl.eventSources"></div>
   </div>
   <div ng-hide="$ctrl.tagEvents.dataLoaded" class="preloader"></div>
+  <nvd3 options="$ctrl.categoryPie" data="$ctrl.tagsByCategoriesData"></nvd3>
   <div ng-if="$ctrl.tagEvents.dataLoaded">
     <h3 class="well">Cumulative Hours: {{$ctrl.tagHours}}<h3>
     <h3 class="well">Average hours per {{$ctrl.timeStep}}: {{ $ctrl.averageHours }}<h3>
