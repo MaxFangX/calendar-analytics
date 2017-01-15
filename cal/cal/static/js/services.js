@@ -31,6 +31,7 @@ analyticsApp.factory('CalendarFilterService', ['$rootScope', function CalendarFi
         filterData.end.toISOString() + " " +
         filterData.calendarIds.join(' ');
 
+
       $rootScope.$broadcast('calendarFilter:updated');
     }
   };
@@ -56,7 +57,6 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
         throw "filterKey doesn't match given start and end times";
       }
     }
-
     // Attempt to return cached tags
     if (_this.tags[filterKey]) {
       return $q.when(_this.tags[filterKey]);
@@ -239,10 +239,11 @@ analyticsApp.service('QueryService', function() {
     var ctrlDetails = [];
     var maxYValue = 0;
     var events = [];
+    var movingAverage = [];
     var xLabels = [];
     var yLabels = [];
-    for (var i = 0; i < data.length; i++) {
-      var event = data[i];
+    for (var i = 0; i < data[0].length; i++) {
+      var event = data[0][i];
       var date = new Date(event[0]);
       var hours = event[1];
       if (hours > maxYValue) {
@@ -254,6 +255,17 @@ analyticsApp.service('QueryService', function() {
         x: date,
         y: hours
       });
+
+      if (i < data[1].length) {
+        // MA = Moving Average
+        var MAEvent = data[1][i];
+        var MADate = new Date(MAEvent[0]);
+        var MAHours = MAEvent[1];
+        movingAverage.push({
+          x: MADate,
+          y: MAHours
+        });
+      }
     }
     var xSeries = d3.range(1, xLabels.length + 1);
     var leastSquaresCoeff = leastSquares(xSeries, yLabels);
@@ -267,9 +279,9 @@ analyticsApp.service('QueryService', function() {
 
     ctrlDetails.push({
       values: events,
-      key: type + ' Graph',
-      color: '#003057',
-      strokeWidth: 1,
+      key: type + ' Line',
+      color: '#DDD5C7',
+      strokeWidth: 2,
     });
 
     ctrlDetails.push({
@@ -278,6 +290,15 @@ analyticsApp.service('QueryService', function() {
       color: '#FDB515',
       strokeWidth: 3,
     });
+
+    if (movingAverage.length != 1) {
+      ctrlDetails.push({
+        values: movingAverage,
+        key: '7D Moving Average Line',
+        color: '#003057',
+        strokeWidth: 3,
+      });
+    }
 
     return [ctrlDetails, maxYValue];
   };

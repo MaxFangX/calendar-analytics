@@ -28,7 +28,6 @@ def toggle_privacy(request):
 
 @api_view(('GET',))
 def sync(request, format=None):
-
     if not request.user:
         return Response("Not logged in")
 
@@ -47,7 +46,7 @@ def sync(request, format=None):
         else:
             calendar.sync()
 
-    return HttpResponseRedirect("/")
+    return HttpResponseRedirect("/sync?no_sync=true")
 
 
 class GCalendarList(generics.ListAPIView):
@@ -242,8 +241,10 @@ class TagDetailEvents(generics.ListAPIView):
     serializer_class = GEventSerializer
 
     def get_queryset(self):
+        calendar_ids_str = self.request.query_params.get('calendar_ids')
+        calendar_ids = ast.literal_eval(calendar_ids_str)
         tag = Tag.objects.get(user=self.request.user, id=self.kwargs['pk'])
-        return tag.query()
+        return tag.query(calendar_ids)
 
 
 class TagDetailEventTimeSeries(APIView):
@@ -251,5 +252,13 @@ class TagDetailEventTimeSeries(APIView):
     serializer_class = TagTimeSeriesSerializer
 
     def get(self, request, *args, **kw):
+        calendar_ids_str = self.request.query_params.get('calendar_ids')
+        calendar_ids = ast.literal_eval(calendar_ids_str)
         tag = Tag.objects.get(user=self.request.user, id=self.kwargs['pk'])
-        return Response(tag.get_time_series(self.request.query_params.get('timezone'), time_step=self.kwargs['time_step']))
+        return Response(tag.get_time_series(self.request.query_params.get('timezone'), time_step=self.kwargs['time_step'], calendar_ids=calendar_ids))
+
+class TagsByCategories(APIView):
+
+    def get(self, request, *args, **kw):
+        tag = Tag.objects.get(user=self.request.user, id=self.kwargs['pk'])
+        return Response(tag.get_category_stats(Category.objects.filter(user=self.request.user)))

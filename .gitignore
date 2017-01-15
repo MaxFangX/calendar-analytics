@@ -19,3 +19,7 @@ cal/cal/static/bower_components/*
 
 # NPM-debug log
 cal/cal/npm-debug.log
+
+cal/pip-selfcheck.json
+env
+setup.sh

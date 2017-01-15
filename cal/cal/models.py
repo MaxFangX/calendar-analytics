@@ -196,7 +196,7 @@ class GCalendar(models.Model):
             g.google_id = event['id']
             g.i_cal_uid = event['iCalUID']
             g.color_index = event.get('colorId', '')
-            g.description = event.get('description', '')
+            g.description = event.get('description', '').encode('utf-8').strip()
             g.status = event.get('status', 'confirmed')
             g.transparency = event.get('transparency', 'opaque')
             g.all_day_event = True if event['start'].get('date', None) else False
@@ -422,7 +422,7 @@ class GEvent(Event):
     # TODO handle transparency being counted in time
 
     def __str__(self):
-        return "{} | {}".format(self.id, self.name)
+        return "{} | {}".format(self.id, self.name.encode('utf-8').strip())
 
     @property
     def color(self):
@@ -438,7 +438,7 @@ class GEvent(Event):
     def save(self, *args, **kwargs):
         if self.name is None:
             self.name = ""
-        self.name = self.name[:150]
+        self.name = self.name[:150].encode('utf-8').strip()
 
         if self.description is None:
             self.description = ""
@@ -554,7 +554,7 @@ class Category(models.Model, EventCollection):
     Calendar, not tied to any particular calendar. In Google Calendar, default
     event colors actually have no value and defer to the color of the
     associated calendar, so this is why a Color Category must have a
-    non-default color. 
+    non-default color.
 
     To enforce the above, the `save` function will throw an error if both a
     calendar and a non-default color are specified. Accordingly, you can
@@ -593,8 +593,8 @@ class Category(models.Model, EventCollection):
 
     def hours(self, calendar_ids=None, start=None, end=None):
         events = self.get_events(calendar_ids=calendar_ids, start=start, end=end)
-        # round(float(...)) necessary to display hours to two decimal points
-        return round(float(EventCollection(lambda: events).total_time()) / 3600, 2)
+        # round(...) necessary to display hours to two decimal points
+        return round(EventCollection(lambda: events).total_time() / 3600.0, 2)
 
     def category_color(self):
         return get_color(self.calendar, self.color_index)['background']
@@ -659,8 +659,8 @@ class Tag(models.Model, EventCollection):
 
     def hours(self, calendar_ids=None, start=None, end=None):
         events = self.get_events(calendar_ids=calendar_ids, start=start, end=end)
-        # round(float(...)) necessary to display hours to two decimal points
-        return round(float(EventCollection(lambda: events).total_time()) / 3600, 2)
+        # round(...) necessary to display hours to two decimal points
+        return round(EventCollection(lambda: events).total_time() / 3600.0, 2)
 
     def get_events(self, calendar_ids=None, start=None, end=None):
         """
@@ -685,7 +685,7 @@ class Tag(models.Model, EventCollection):
 
         querysets = [
                 GEvent.objects
-                .filter(calendar=calendar, name__regex=r'(?i)[^a-zA-Z\d:]?'+keyword+r'(?i)[^a-zA-Z\d:]?')
+                .filter(calendar=calendar, name__regex=r'\b(?i)[^a-zA-Z\d:]?'+keyword+r'(?i)[^a-zA-Z\d:]?\b')
                 .exclude(all_day_event=True)
                 for keyword in keywords
                 for calendar in calendars
@@ -709,6 +709,44 @@ class Tag(models.Model, EventCollection):
         The dates are spaced out by the time_step.
         """
         return get_time_series(self, timezone, time_step, calendar_ids, start, end)
+
+
+    def get_category_stats(self, categories, start=None, end=None):
+        """
+        Returns a list of category-hour tuples corresponding to the number of hours per category
+        that corresponds to this Tag.
+        """
+        category_hours = []
+        keywords = self.keywords.split(',')
+
+        for category in categories:
+            querysets = [
+                    GEvent.objects
+                    .filter(calendar__user=category.user, calendar=category.calendar,
+                            name__regex=r'\b(?i)[^a-zA-Z\d:]?'+keyword+r'(?i)[^a-zA-Z\d:]?\b',
+                            color_index=category.color_index)
+                    for keyword in keywords
+                    ]
+
+            events_qs = reduce(lambda qs1, qs2: qs1 | qs2, querysets)
+            events_qs = events_qs.order_by('start')
+
+            if start:
+                events_qs = events_qs.filter(end__gt=start)
+            if end:
+                events_qs = events_qs.filter(start__lt=end)
+            else:
+                events_qs = events_qs.filter(start__lt=datetime.now(pytz.utc))
+
+            hours = round(EventCollection(lambda:set(events_qs)).total_time() / 3600.0, 2)
+            for i in range(1, len(events_qs)):
+                if (events_qs[i - 1].end - events_qs[i].start).total_seconds() > 0:
+                    # events overlap
+                    hours -= round((events_qs[i - 1].end - events_qs[i].start).total_seconds() / 3600.0, 2)
+
+            category_hours.append((category.label, category.category_color(), hours))
+
+        return category_hours
 
 
 class Statistic(models.Model):
