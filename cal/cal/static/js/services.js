@@ -222,6 +222,9 @@ analyticsApp.service('CategoryService', ['$http', '$q', function($http, $q) {
         csrfmiddlewaretoken: getCookie('csrftoken'),
         _method: 'PATCH'
       }),
+      params: {
+        timezone: moment.tz.guess()
+      },
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }

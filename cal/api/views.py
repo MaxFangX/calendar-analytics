@@ -166,7 +166,8 @@ class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
         context.update({
             'calendar_ids': self.request.query_params.get('calendar_ids'),
             'start': self.request.query_params.get('start'),
-            'end': self.request.query_params.get('end')
+            'end': self.request.query_params.get('end'),
+            'timezone': self.request.query_params.get('timezone')
         })
         return context
 
