@@ -1,9 +1,9 @@
 from cal.models import Category, GCalendar, GEvent, Statistic, Tag
 from django.contrib.auth.models import User
 from rest_framework import serializers
+from cal.helpers import handle_time_string
 
 import ast
-
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -81,6 +81,11 @@ class CategorySerializer(serializers.ModelSerializer):
             calendar_ids = []
         start = self.context['start']
         end = self.context['end']
+        timezone = self.context['timezone']
+        if start:
+            start = handle_time_string(start, timezone)
+        if end:
+            end = handle_time_string(end, timezone)
         return obj.hours(calendar_ids=calendar_ids, start=start, end=end)
 
     def get_category_color(self, obj):
@@ -102,6 +107,11 @@ class TagSerializer(serializers.ModelSerializer):
             calendar_ids = []
         start = self.context.get('start')
         end = self.context.get('end')
+        timezone = self.context.get('timezone')
+        if start:
+            start = handle_time_string(start, timezone)
+        if end:
+            end = handle_time_string(end, timezone)
         return obj.hours(calendar_ids=calendar_ids, start=start, end=end)
 
 

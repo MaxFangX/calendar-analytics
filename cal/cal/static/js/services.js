@@ -70,7 +70,8 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
       params: {
         start: (start)? start.toISOString() : null,
         end: (end)? end.toISOString() : null,
-        calendar_ids: JSON.stringify(calendarIds)
+        calendar_ids: JSON.stringify(calendarIds),
+        timezone: moment.tz.guess()
       }
     }).then(function successCallback(response) {
       _this.tags[filterKey] = [];
@@ -188,7 +189,8 @@ analyticsApp.service('CategoryService', ['$http', '$q', function($http, $q) {
       params: {
         start: (start)? start.toISOString() : null,
         end: (end)? end.toISOString() : null,
-        calendar_ids: JSON.stringify(calendarIds)
+        calendar_ids: JSON.stringify(calendarIds),
+        timezone: moment.tz.guess()
       }
     }).then(function successCallback(response) {
       _this.categories[filterKey] = [];
