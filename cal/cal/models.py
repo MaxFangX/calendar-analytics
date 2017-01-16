@@ -3,6 +3,7 @@ from cal.constants import GOOGLE_CALENDAR_COLORS
 from cal.helpers import EventCollection, TimeNode, TimeNodeChain, ensure_timezone_awareness, get_color, get_time_series
 from datetime import datetime, timedelta
 from django.contrib.auth.models import User
+from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_datetime
@@ -207,11 +208,13 @@ class GCalendar(models.Model):
             g.recurrence = str(event.get('recurrence', ''))
             g.recurring_event_id = event.get('recurringEventId', '')
             g.save()
-            # print "Saved {} event: {}".format(g.start, g.name)
+            if settings.VERBOSE_PRINT:
+                print "Saved {} event: {}".format(g.start, g.name)
             return g
 
         else:
-            # print "Deleting event {}".format(event['id'])
+            if settings.VERBOSE_PRINT:
+                print "Deleting event {}".format(event['id'])
 
             # Status is cancelled, create a DeletedEvent
 
@@ -470,7 +473,7 @@ class GEvent(Event):
 
         super(GEvent, self).save(*args, **kwargs)
 
-        if made_aware:
+        if made_aware and settings.VERBOSE_PRINT:
             print "Made datetime timezone aware for GEvent {} with id {}".format(self.name, self.id)
 
     def conflicts_with(self, gevent):
@@ -853,6 +856,10 @@ class GoogleCredentials(models.Model):
         self.next_sync_token = result['nextSyncToken']
 
         for item in result['items']:
+            if item['accessRole'] != 'owner':
+                # Incremental sync doesn't work for calendars belonging to others
+                continue
+
             gcal, gcal_created = GCalendar.objects.get_or_create(user=self.user, calendar_id=item['id'])
 
             # This is the primary calendar, save it as such
@@ -867,5 +874,11 @@ class GoogleCredentials(models.Model):
             gcal.save()
             if gcal_created:
                 gcal.update_meta()
+
+        calendar_ids = [cal['id'] for cal in result['items'] if cal['accessRole'] == 'owner']
+        inaccessible_calendars = GCalendar.objects.exclude(calendar_id__in=calendar_ids)
+        for i in inaccessible_calendars:
+            print "Deleting calendar '{}' because it is now inaccessible".format(i.summary)
+            i.delete()
 
         self.save()
