@@ -2,6 +2,10 @@ h1, h2, h3, h4, h5, h6, a, p {
   color: #000;
 }
 
+h4 {
+  margin-top: 20px;
+}
+
 .jumbotron h1, .jumbotron .h1 {
   color: #000;
   text-align: center;
@@ -104,11 +108,15 @@ td {
   border: none;
 }
 
-.border {
-  border: 1px solid gray;
+.group-border {
+  border: 1px solid #D3D3D3;
   padding: 5px;
   overflow-y: scroll;
-  height: 40%;
+  height: 25%;
+}
+
+.calendar-border {
+  border-right: 1px solid #D3D3D3;
 }
 
 /*# sourceMappingURL=calendaranalytics.css.map */

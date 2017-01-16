@@ -2,7 +2,7 @@
   <h4>Tags{{ $ctrl.displayName ? ' - ' + $ctrl.displayName : '' }}</h4>
   <h3>{{ $ctrl.rangeService.type }}</h3>
   <div ng-hide="$ctrl.tags.dataLoaded" class="preloader"></div>
-  <div class="border" ng-if="$ctrl.tags.dataLoaded">
+  <div class="group-border" ng-if="$ctrl.tags.dataLoaded">
     <table class="table table-hover">
       <thead>
         <th>
@@ -31,32 +31,32 @@
             <input type="text" ng-model="tag.newKeywords">
           </td>
           <td class="text-right text-nowrap" ng-show="tag.editing">
-            <button class="btn btn-success" ng-click="$ctrl.submitEdit(tag.id)">
-              <span class="glyphicon glyphicon-ok"></span>
+            <button ng-click="$ctrl.submitEdit(tag.id)">
+              <span>Confirm</span>
             </button>
-            <button class="btn btn-warning" ng-click="$ctrl.cancelEdit(tag.id)">
-              <span class="glyphicon glyphicon-remove"></span>
+            <button ng-click="$ctrl.cancelEdit(tag.id)">
+              <span>Cancel</span>
             </button>
           </td>
           <td class="text-right text-nowrap" ng-hide="tag.editing">
-            <button class="btn btn-info" ng-click="$ctrl.startEdit(tag.id)">
-              <span class="glyphicon glyphicon-edit"></span>
+            <button ng-click="$ctrl.startEdit(tag.id)">
+              <span>Edit</span>
             </button>
-            <button class="btn btn-danger" ng-click="$ctrl.delete(tag.id)">
-              <span class="glyphicon glyphicon-trash"></span>
+            <button ng-click="$ctrl.delete(tag.id)">
+              <span>Delete</span>
             </button>
           </td>
         </tr>
         <tr>
-          <td>Label<br>
+          <td><strong>Label</strong><br>
             <input type="text" ng-model="tag.label">
           </td>
-          <td>Keywords<br>
+          <td><strong>Keywords</strong><br>
            <input type="text" ng-model="tag.keywords">
           </td>
           <td class="text-right text-nowrap">
-            <button class="btn btn-primary" ng-click="$ctrl.create(tag)">
-              <span class="glyphicon glyphicon-plus"></span>
+            <button ng-click="$ctrl.create(tag)">
+              <span>Add</span>
             </button>
           </td>
         </tr>
