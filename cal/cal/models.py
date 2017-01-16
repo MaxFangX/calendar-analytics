@@ -207,11 +207,12 @@ class GCalendar(models.Model):
             g.recurrence = str(event.get('recurrence', ''))
             g.recurring_event_id = event.get('recurringEventId', '')
             g.save()
-            print "Saved {} event".format(g.start)
+            # print "Saved {} event: {}".format(g.start, g.name)
             return g
 
         else:
-            print "Deleting event {}".format(event['id'])
+            # print "Deleting event {}".format(event['id'])
+
             # Status is cancelled, create a DeletedEvent
 
             # 'event' looks like this:
@@ -240,6 +241,12 @@ class GCalendar(models.Model):
                 recurring_event_id=event.get('recurringEventId', ''))
 
     def sync(self, full_sync=False):
+        """
+        Syncs this calendar.
+        Assumes that the list of calendars for this profile is correct
+        """
+
+        print "Syncing calendar {}".format(self.summary)
         result = None
         creds = self.user.googlecredentials
         service = creds.get_service()
@@ -275,6 +282,7 @@ class GCalendar(models.Model):
                 t, v, tb = sys.exc_info()
                 if hasattr(e, 'resp') and e.resp.status == 410:
                     # Sync token is no longer valid, perform full sync
+                    print "Sync token is no longer valid, perform full sync for calendar {}".format(self.summary)
                     result = service.events().list(**list_args_with_constraints).execute()
                 else:
                     raise t, v, tb
@@ -289,6 +297,7 @@ class GCalendar(models.Model):
 
             if not next_page_token:
                 # We've reached the last page. Store the sync token.
+                print "Storing sync token for calendar {}".format(self.summary)
                 creds.next_sync_token = result['nextSyncToken']
                 creds.save()
                 break
@@ -304,7 +313,7 @@ class GCalendar(models.Model):
         for d_event in deleted_events:
             d_event.apply()
 
-        print "Successfully synced calendar."
+        print "Successfully synced calendar {}".format(self.summary)
 
         # Some additional sanity checks
         # Check for non-duplicate events with the same recurring_event_id
@@ -839,7 +848,7 @@ class GoogleCredentials(models.Model):
         #   ]
         # }
 
-        assert 'items' in result and 'nextSyncToken' in result, "import_calendars failed"
+        assert 'items' in result and 'nextSyncToken' in result, "import calendars failed"
 
         self.next_sync_token = result['nextSyncToken']
 
