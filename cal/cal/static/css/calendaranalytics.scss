@@ -88,4 +88,27 @@ input[type=text] {
   }
 }
 
+table button {
+  border: none;
+  background: white;
+}
+
+table {
+  font-size: 14px;
+  border-top: none;
+  padding: 0;
+}
+
+td {
+  padding: 0;
+  border: none;
+}
+
+.border {
+  border: 1px solid gray;
+  padding: 5px;
+  overflow-y: scroll;
+  height: 40%;
+}
+
 /*# sourceMappingURL=calendaranalytics.css.map */

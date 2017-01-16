@@ -1,8 +1,8 @@
 <div>
-  <h4 class="well">Tags{{ $ctrl.displayName ? ' - ' + $ctrl.displayName : '' }}</h4>
+  <h4>Tags{{ $ctrl.displayName ? ' - ' + $ctrl.displayName : '' }}</h4>
   <h3>{{ $ctrl.rangeService.type }}</h3>
   <div ng-hide="$ctrl.tags.dataLoaded" class="preloader"></div>
-  <div ng-if="$ctrl.tags.dataLoaded">
+  <div class="border" ng-if="$ctrl.tags.dataLoaded">
     <table class="table table-hover">
       <thead>
         <th>
