@@ -1,112 +1,41 @@
-h1, h2, h3, h4, h5, h6, a, p {
-  color: #000; }
+/*
+Error: Invalid CSS after "0": expected "{", was ""
+        on line 142 of ./cal/static/css/calendaranalytics.scss
 
-h4 {
-  margin-top: 20px; }
+137:   border-left: 1px solid #D3D3D3;
+138: }
+139: 
+140: /*# sourceMappingURL=calendaranalytics.css.map *\/
+141: 0
 
-.jumbotron h1, .jumbotron .h1 {
-  color: #000;
-  text-align: center; }
-
-.cal-category-list, .cal-tag-list {
-  margin-left: 1%;
-  margin-top: 1%; }
-
-.cal-home-logged-in .cal-calendar {
-  padding: 3% 3% 5% 3%; }
-
-.preloader {
-  padding: 70px;
-  background: url("/static/img/preloader.gif") no-repeat 50% 50% transparent; }
-
-button {
-  margin: 2px;
-  background: white;
-  border: 1px solid #D3D3D3; }
-
-.cal-section-info {
-  font-size: 14px;
-  background-color: #fff;
-  border: 1px solid #000;
-  border-radius: 5px;
-  padding: 10px;
-  margin: auto;
-  line-height: normal; }
-
-/* For mouse hover on calendar events. */
-.fc-content {
-  cursor: pointer; }
-
-#select-calendar-button {
-  float: right;
-  padding: 0 5 5 5; }
-
-input[type=text] {
-  width: 100%;
-  box-sizing: border-box;
-  -moz-box-sizing: border-box; }
-
-#google-plus-button {
-  margin-top: 10%; }
-
-.cal-home-logged-out {
-  height: 100%;
-  background-image: url("https://blogpfeifferlab.files.wordpress.com/2012/01/cf_desk_0937.jpg");
-  background-repeat: no-repeat scroll;
-  background-size: 130%; }
-  .cal-home-logged-out .cal-main-display {
-    background-color: transparent;
-    height: 100%;
-    padding: 50px;
-    min-height: 400px; }
-    .cal-home-logged-out .cal-main-display .cal-description {
-      max-width: 50%; }
-  .cal-home-logged-out .cal-call-to-action-text {
-    text-align: center; }
-  .cal-home-logged-out .cal-signin-button {
-    position: relative;
-    height: 50px;
-    left: 50%;
-    bottom: 0;
-    width: 200px;
-    margin-left: -100px;
-    font-size: 16px;
-    font-weight: 500; }
-
-table {
-  font-size: 14px;
-  border-top: none;
-  padding: 0; }
-  table button {
-    border: none;
-    background: white;
-    margin-top: -5px; }
-
-td {
-  padding: 0;
-  border: none; }
-
-.group-border, .group-border-tall {
-  overflow-y: scroll;
-  height: 25%;
-  padding: 5px;
-  border: 1px solid #D3D3D3; }
-
-.group-border-tall {
-  height: 343px;
-  overflow-x: scroll; }
-
-.group-chart {
-  padding: 5px;
-  border: 1px solid #D3D3D3;
-  margin-right: 5px; }
-
-body {
-  font-family: 'Lato', sans-serif; }
-
-.calendar-border {
-  border-right: 1px solid #D3D3D3; }
-
-/*# sourceMappingURL=calendaranalytics.css.map */
-
-/*# sourceMappingURL=calendaranalytics.css.map */
+Backtrace:
+./cal/static/css/calendaranalytics.scss:142
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.23/lib/sass/scss/parser.rb:1207:in `expected'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.23/lib/sass/scss/parser.rb:1137:in `expected'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.23/lib/sass/scss/parser.rb:1132:in `tok!'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.23/lib/sass/scss/parser.rb:665:in `block'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.23/lib/sass/scss/parser.rb:658:in `ruleset'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.23/lib/sass/scss/parser.rb:684:in `block_child'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.23/lib/sass/scss/parser.rb:677:in `block_contents'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.23/lib/sass/scss/parser.rb:125:in `stylesheet'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.23/lib/sass/scss/parser.rb:41:in `parse'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.23/lib/sass/engine.rb:406:in `_to_tree'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.23/lib/sass/engine.rb:381:in `_render_with_sourcemap'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.23/lib/sass/engine.rb:298:in `render_with_sourcemap'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.23/lib/sass/plugin/compiler.rb:492:in `update_stylesheet'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.23/lib/sass/plugin/compiler.rb:215:in `block in update_stylesheets'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.23/lib/sass/plugin/compiler.rb:209:in `each'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.23/lib/sass/plugin/compiler.rb:209:in `update_stylesheets'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.23/lib/sass/plugin/compiler.rb:473:in `on_file_changed'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.23/lib/sass/plugin/compiler.rb:331:in `block in watch'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.23/vendor/listen/lib/listen/listener.rb:252:in `call'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.23/vendor/listen/lib/listen/listener.rb:252:in `on_change'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.23/vendor/listen/lib/listen/listener.rb:290:in `block in initialize_adapter'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.23/vendor/listen/lib/listen/adapters/polling.rb:48:in `call'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.23/vendor/listen/lib/listen/adapters/polling.rb:48:in `poll_changed_directories'
+/Library/Ruby/Gems/2.0.0/gems/sass-3.4.23/vendor/listen/lib/listen/adapter.rb:299:in `block in start_poller'
+*/
+body:before {
+  white-space: pre;
+  font-family: monospace;
+  content: "Error: Invalid CSS after \"0\": expected \"{\", was \"\"\A         on line 142 of ./cal/static/css/calendaranalytics.scss\A \A 137:   border-left: 1px solid #D3D3D3;\A 138: }\A 139: \A 140: /*# sourceMappingURL=calendaranalytics.css.map */\A 141: 0"; }
