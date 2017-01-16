@@ -208,6 +208,9 @@ class TagList(generics.ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         keywords = self.request.data.get('keywords')
         label = self.request.data.get('label')
+        calendar_ids = self.request.query_params.get('calendar_ids')
+        start = self.request.query_params.get('start')
+        end = self.request.query_params.get('end')
         if not keywords or not label:
             return Response({'Missing field label or keywords'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -217,7 +220,8 @@ class TagList(generics.ListCreateAPIView):
         tag.label = label
         tag.save()
 
-        serializer = TagSerializer(tag)
+        serializer = TagSerializer(tag,
+                                   context={'start': start, 'end': end, 'calendar_ids': calendar_ids})
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
