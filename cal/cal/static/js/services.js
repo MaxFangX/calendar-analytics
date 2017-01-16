@@ -70,7 +70,8 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
       params: {
         start: (start)? start.toISOString() : null,
         end: (end)? end.toISOString() : null,
-        calendar_ids: JSON.stringify(calendarIds)
+        calendar_ids: JSON.stringify(calendarIds),
+        timezone: moment.tz.guess()
       }
     }).then(function successCallback(response) {
       _this.tags[filterKey] = [];
@@ -91,7 +92,7 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
     });
   };
 
-  this.createTag = function(label, keywords) {
+  this.createTag = function(label, keywords, isCumulative, filterData) {
     return $http({
       method: 'POST',
       url: '/v1/tags.json',
@@ -100,13 +101,18 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
         keywords: keywords,
         csrfmiddlewaretoken: getCookie('csrftoken')
       }),
+      params: {
+        start: isCumulative ? null : filterData.start.toISOString(),
+        end: isCumulative ? null : filterData.end.toISOString(),
+        calendar_ids: JSON.stringify(filterData.calendarIds)
+      },
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     });
   };
 
-  this.editTag = function(tagId, newLabel, newKeywords, filterKey) {
+  this.editTag = function(tagId, newLabel, newKeywords, isCumulative, filterData) {
     return $http({
       method: 'POST',
       url: '/v1/tags/' + tagId,
@@ -116,10 +122,16 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
         csrfmiddlewaretoken: getCookie('csrftoken'),
         _method: 'PATCH'
       }),
+      params: {
+        start: isCumulative ? null : filterData.start.toISOString(),
+        end: isCumulative ? null : filterData.end.toISOString(),
+        calendar_ids: JSON.stringify(filterData.calendarIds)
+      },
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     }).then(function successCallback(response) {
+      var filterKey = isCumulative ? 'cumulative ' + filterData.filterKey : filterData.filterKey;
       _this.tags[filterKey] = null;
       return response.data;
     }, function errorCallback() {
@@ -177,7 +189,8 @@ analyticsApp.service('CategoryService', ['$http', '$q', function($http, $q) {
       params: {
         start: (start)? start.toISOString() : null,
         end: (end)? end.toISOString() : null,
-        calendar_ids: JSON.stringify(calendarIds)
+        calendar_ids: JSON.stringify(calendarIds),
+        timezone: moment.tz.guess()
       }
     }).then(function successCallback(response) {
       _this.categories[filterKey] = [];
