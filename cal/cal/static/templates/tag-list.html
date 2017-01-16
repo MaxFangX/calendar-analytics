@@ -31,20 +31,12 @@
             <input type="text" ng-model="tag.newKeywords">
           </td>
           <td class="text-right text-nowrap" ng-show="tag.editing">
-            <button ng-click="$ctrl.submitEdit(tag.id)">
-              <span>Confirm</span>
-            </button>
-            <button ng-click="$ctrl.cancelEdit(tag.id)">
-              <span>Cancel</span>
-            </button>
+            <button ng-click="$ctrl.submitEdit(tag.id)">Confirm</button>
+            <button ng-click="$ctrl.cancelEdit(tag.id)">Cancel</button>
           </td>
           <td class="text-right text-nowrap" ng-hide="tag.editing">
-            <button ng-click="$ctrl.startEdit(tag.id)">
-              <span>Edit</span>
-            </button>
-            <button ng-click="$ctrl.delete(tag.id)">
-              <span>Delete</span>
-            </button>
+            <button ng-click="$ctrl.startEdit(tag.id)">Edit</button>
+            <button ng-click="$ctrl.delete(tag.id)">Delete</button>
           </td>
         </tr>
         <tr>
@@ -55,9 +47,7 @@
            <input type="text" ng-model="tag.keywords">
           </td>
           <td class="text-right text-nowrap">
-            <button ng-click="$ctrl.create(tag)">
-              <span>Add</span>
-            </button>
+            <button ng-click="$ctrl.create(tag)">Add</button>
           </td>
         </tr>
       </tbody>

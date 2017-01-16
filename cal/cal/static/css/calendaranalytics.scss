@@ -92,15 +92,16 @@ input[type=text] {
   }
 }
 
-table button {
-  border: none;
-  background: white;
-}
-
 table {
   font-size: 14px;
   border-top: none;
   padding: 0;
+
+  button {
+    border: none;
+    background: white;
+    margin-top: -5px;
+  }
 }
 
 td {
