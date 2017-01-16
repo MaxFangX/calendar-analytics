@@ -177,6 +177,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
           axisLabelDistance: -10,
         },
         forceY: [0, maxYValue + 1],
+        interpolate: 'cardinal'
       },
     };
   }.bind(this);
@@ -470,7 +471,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
     this.categoryLine = {
       chart: {
         type: 'lineChart',
-        height: 450,
+        height: 300,
         margin : {
           top: 20,
           right: 20,
@@ -494,6 +495,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
           axisLabelDistance: -10
         },
         forceY: [0, maxYValue + 1],
+        interpolate: 'cardinal',
       },
     };
   }.bind(this);

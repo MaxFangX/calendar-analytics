@@ -27,6 +27,8 @@ h4 {
 
 button {
   margin: 2px;
+  background: white;
+  border: 1px solid #D3D3D3;
 }
 
 .cal-section-info {
@@ -109,11 +111,24 @@ td {
   border: none;
 }
 
-.group-border {
-  border: 1px solid #D3D3D3;
-  padding: 5px;
+.group-border, .group-border-tall {
   overflow-y: scroll;
   height: 25%;
+  padding: 5px;
+  border: 1px solid #D3D3D3;
+}
+
+.group-border-tall {
+  height: 343px;
+  overflow-x: scroll;
+  width: 300px;
+}
+
+.group-chart {
+  padding: 5px;
+  border: 1px solid #D3D3D3;
+  width: 800px;
+  margin-right: 5px;
 }
 
 body {
