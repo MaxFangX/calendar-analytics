@@ -104,7 +104,8 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
       params: {
         start: isCumulative ? null : filterData.start.toISOString(),
         end: isCumulative ? null : filterData.end.toISOString(),
-        calendar_ids: JSON.stringify(filterData.calendarIds)
+        calendar_ids: JSON.stringify(filterData.calendarIds),
+        timezone: moment.tz.guess()
       },
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
@@ -125,7 +126,8 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
       params: {
         start: isCumulative ? null : filterData.start.toISOString(),
         end: isCumulative ? null : filterData.end.toISOString(),
-        calendar_ids: JSON.stringify(filterData.calendarIds)
+        calendar_ids: JSON.stringify(filterData.calendarIds),
+        timezone: moment.tz.guess()
       },
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'

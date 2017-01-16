@@ -213,6 +213,7 @@ class TagList(generics.ListCreateAPIView):
         calendar_ids = self.request.query_params.get('calendar_ids')
         start = self.request.query_params.get('start')
         end = self.request.query_params.get('end')
+        timezone = self.request.query_params.get('timezone')
         if not keywords or not label:
             return Response({'Missing field label or keywords'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -222,8 +223,13 @@ class TagList(generics.ListCreateAPIView):
         tag.label = label
         tag.save()
 
-        serializer = TagSerializer(tag,
-                                   context={'start': start, 'end': end, 'calendar_ids': calendar_ids})
+        context = {
+            'start': start,
+            'end': end,
+            'calendar_ids': calendar_ids,
+            'timezone': timezone
+        }
+        serializer = TagSerializer(tag, context=context)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -235,7 +241,8 @@ class TagDetail(generics.RetrieveUpdateDestroyAPIView):
         return {
             'calendar_ids': self.request.query_params.get('calendar_ids'),
             'start': self.request.query_params.get('start'),
-            'end': self.request.query_params.get('end')
+            'end': self.request.query_params.get('end'),
+            'timezone': self.request.query_params.get('timezone')
         }
 
     def get_queryset(self):
