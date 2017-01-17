@@ -68,18 +68,31 @@ def handle_time_string(time_str, timezone_str):
 
 def get_time_series(model, timezone='UTC', time_step='week', calendar_ids=None, start=None, end=None):
     """
-    Returns a list of week-hour tuples corresponding to the events in the `model`. Takes in
-    timezone in order to accurately aggregate events. Includes time_step input either `daily`,
-    `weekly`, or `monthly` which will aggregate accordingly. Splices events that overlap times.
+    Returns two lists: `week_hours` and `moving_average_lst`. Both are in the same
+    function because of efficiency, we only need to iterate through the events once.
+
+    `week_hours` is used to populate the graph with data per `time_step`.
+    This could be data per `day`, `week`, or `month`. Returned as list of time-hour tuples.
+    Iterates starting from first event and keeps adding hours until it hits the end of the
+    time step. However if an event overlaps both time steps, it splits it and adds the hours
+    accordingly. This is why `rollover` is used.
+
+    `moving_average_lst` is a list of time-hour tuples.
+    See http://www.investopedia.com/terms/m/movingaverage.asp. `period` number of periods
+    taken into account to the moving average.
     """
     week_hours = []
-    events = model.query(calendar_ids, start, end).order_by('start')
-    i = 0
+    moving_average_lst = []
+    events = model.query(calendar_ids, start, end)
+    # Takes care of Tags with no hours
+    if not events:
+        return [(0,0),(0,0)]
     # Convert start to local time
     start = events[0].start.astimezone(pytz.timezone(timezone))
+    # Default week view even if `time_step` is off
+    increment = relativedelta(days=7)
     if time_step == 'day':
-        # To indicate do nothing if Daily is passed in
-        pass
+        increment = relativedelta(days=1)
     if time_step == 'week':
         # Change start date to be Monday beginning of week
         while start.weekday() != 0:
@@ -88,18 +101,21 @@ def get_time_series(model, timezone='UTC', time_step='week', calendar_ids=None, 
         # Change start date to beginning of month
         while start.day != 1:
             start = start - timedelta(days=1)
+        increment = relativedelta(months=1)
     start = start.replace(hour=0, minute=0, second=0, microsecond=0)
     # Convert back to UTC
     start = start.astimezone(pytz.utc)
     # Rollover takes care of events that overlap time periods
     rollover = 0
+    i = 0
+
+    # For moving average
+    data_point = moving_average = 0
+    # Change period to change number of data points for average
+    period = 7.0
+
     while i < len(events):
-        if time_step == 'day':
-            end = start + relativedelta(days=1)
-        if time_step == 'week':
-            end = start + relativedelta(days=7)
-        if time_step == 'month':
-            end = start + relativedelta(months=1)
+        end = start + increment
         # Deal with daylight savings time
         if end.astimezone(pytz.timezone(timezone)).hour != 0:
             end = end + timedelta(hours=1)
@@ -108,14 +124,30 @@ def get_time_series(model, timezone='UTC', time_step='week', calendar_ids=None, 
         while i < len(events) and (end - events[i].start).total_seconds() >= 0:
             # Overlapping events
             if (end - events[i].end).total_seconds() < 0:
-                total += (end - events[i].start).total_seconds() / 3600
-                rollover = (events[i].end - end).total_seconds() / 3600
+                total += (end - events[i].start).total_seconds() / 3600.0
+                rollover = (events[i].end - end).total_seconds() / 3600.0
             else:
-                total += (events[i].end - events[i].start).total_seconds() / 3600
+                total += (events[i].end - events[i].start).total_seconds() / 3600.0
             i += 1
+
+        # Moving average logic. If it's before period just add to moving_average
+        if data_point < period - 1:
+            moving_average += total
+        else:
+            # We need to find hours of first event to subtract off
+            first_event = week_hours[int(data_point - period)][1]
+            moving_average = moving_average - first_event + total
+            moving_average_lst.append((start, moving_average / period))
+        data_point += 1
+
         week_hours.append((start, total))
         start = end
-    return week_hours
+
+    # Take care if not enough data to offset one period
+    if moving_average_lst == []:
+        moving_average_lst = [(0,0)]
+
+    return (week_hours, moving_average_lst)
 
 
 EDGE_OPTIONS = set(['inclusive', 'exclusive', 'truncated'])

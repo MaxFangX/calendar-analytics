@@ -7,6 +7,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+import ast
 
 @api_view(('GET',))
 def api_root(request, format=None):
@@ -27,7 +28,6 @@ def toggle_privacy(request):
 
 @api_view(('GET',))
 def sync(request, format=None):
-
     if not request.user:
         return Response("Not logged in")
 
@@ -46,7 +46,7 @@ def sync(request, format=None):
         else:
             calendar.sync()
 
-    return HttpResponseRedirect("/")
+    return HttpResponseRedirect("/sync?no_sync=true")
 
 
 class GCalendarList(generics.ListAPIView):
@@ -88,36 +88,36 @@ class GEventList(generics.ListAPIView):
 
     Query Parameters
 
-    `start`:      (required) a string representing a date or a datetime
-    `end`:        (required) a string representing a date or a datetime
-    `calendarId`: (optional) the calendar id from which to pull events. If a calendar id
-                  is not supplied, defaults to the user's main calendar.
-    `timezone`:   (optional) a string representing a timezone
-    `edge`:       (optional) whether events overlapping with the start/end boundaries
-                  will be included. Options are 'inclusive', 'exclusive', and 'truncated'.
-                  'truncated' means that events that overlap will be included, but will be
-                  modified so that they start or end exactly at the boundary they overlap
-                  with.
+    `start`:       (required) a string representing a date or a datetime
+    `end`:         (required) a string representing a date or a datetime
+    `calendarIds`: (optional) a list of calendar ids from which to pull events.
+                   If a calendar id is not supplied, defaults to the user's main calendar.
+    `timezone`:    (optional) a string representing a timezone
+    `edge`:        (optional) whether events overlapping with the start/end boundaries
+                   will be included. Options are 'inclusive', 'exclusive', and 'truncated'.
+                   'truncated' means that events that overlap will be included, but will be
+                   modified so that they start or end exactly at the boundary they overlap
+                   with.
     """
     serializer_class = GEventSerializer
 
     def get_queryset(self):
-        calendar_id = self.request.query_params.get('calendarId')
         start_str = self.request.query_params.get('start')
         end_str = self.request.query_params.get('end')
         timezone_str = self.request.query_params.get('timezone')
         edge_str = self.request.query_params.get('edge')
+        calendar_ids_str = self.request.query_params.get('calendarIds')
+        calendar_ids = ast.literal_eval(calendar_ids_str)
 
-        calendar = None
-        if calendar_id:
-            try:
-                calendar = GCalendar.objects.filter(user=self.request.user).get(calendar_id=calendar_id)
-            except GCalendar.DoesNotExist:
-                raise Exception("{} was not a valid calendar id".format(calendar_id))
+        if calendar_ids:
+            calendars = GCalendar.objects.filter(user=self.request.user)\
+                    .filter(calendar_id__in=calendar_ids)
+            if not calendars:
+                raise Exception("{} did not contain any valid calendar ids".format(calendar_ids_str))
         else:
-            calendar = self.request.user.profile.main_calendar
+            calendars = [self.request.user.profile.main_calendar]
 
-        qs = GEvent.objects.filter(calendar=calendar)
+        qs = GEvent.objects.filter(calendar__in=calendars)
         qs = qs.exclude(status__in=['tentative', 'cancelled'])
 
         if not start_str or not end_str:
@@ -148,7 +148,8 @@ class CategoryList(generics.ListAPIView):
         context.update({
             'calendar_ids': self.request.query_params.get('calendar_ids'),
             'start': self.request.query_params.get('start'),
-            'end': self.request.query_params.get('end')
+            'end': self.request.query_params.get('end'),
+            'timezone': self.request.query_params.get('timezone')
         })
         return context
 
@@ -165,7 +166,8 @@ class CategoryDetail(generics.RetrieveUpdateDestroyAPIView):
         context.update({
             'calendar_ids': self.request.query_params.get('calendar_ids'),
             'start': self.request.query_params.get('start'),
-            'end': self.request.query_params.get('end')
+            'end': self.request.query_params.get('end'),
+            'timezone': self.request.query_params.get('timezone')
         })
         return context
 
@@ -198,7 +200,8 @@ class TagList(generics.ListCreateAPIView):
         return {
             'calendar_ids': self.request.query_params.get('calendar_ids'),
             'start': self.request.query_params.get('start'),
-            'end': self.request.query_params.get('end')
+            'end': self.request.query_params.get('end'),
+            'timezone': self.request.query_params.get('timezone')
         }
 
     def get_queryset(self):
@@ -208,6 +211,10 @@ class TagList(generics.ListCreateAPIView):
     def post(self, request, *args, **kwargs):
         keywords = self.request.data.get('keywords')
         label = self.request.data.get('label')
+        calendar_ids = self.request.query_params.get('calendar_ids')
+        start = self.request.query_params.get('start')
+        end = self.request.query_params.get('end')
+        timezone = self.request.query_params.get('timezone')
         if not keywords or not label:
             return Response({'Missing field label or keywords'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -217,7 +224,13 @@ class TagList(generics.ListCreateAPIView):
         tag.label = label
         tag.save()
 
-        serializer = TagSerializer(tag)
+        context = {
+            'start': start,
+            'end': end,
+            'calendar_ids': calendar_ids,
+            'timezone': timezone
+        }
+        serializer = TagSerializer(tag, context=context)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -229,7 +242,8 @@ class TagDetail(generics.RetrieveUpdateDestroyAPIView):
         return {
             'calendar_ids': self.request.query_params.get('calendar_ids'),
             'start': self.request.query_params.get('start'),
-            'end': self.request.query_params.get('end')
+            'end': self.request.query_params.get('end'),
+            'timezone': self.request.query_params.get('timezone')
         }
 
     def get_queryset(self):
@@ -241,8 +255,10 @@ class TagDetailEvents(generics.ListAPIView):
     serializer_class = GEventSerializer
 
     def get_queryset(self):
+        calendar_ids_str = self.request.query_params.get('calendar_ids')
+        calendar_ids = ast.literal_eval(calendar_ids_str)
         tag = Tag.objects.get(user=self.request.user, id=self.kwargs['pk'])
-        return tag.query()
+        return tag.query(calendar_ids)
 
 
 class TagDetailEventTimeSeries(APIView):
@@ -250,5 +266,13 @@ class TagDetailEventTimeSeries(APIView):
     serializer_class = TagTimeSeriesSerializer
 
     def get(self, request, *args, **kw):
+        calendar_ids_str = self.request.query_params.get('calendar_ids')
+        calendar_ids = ast.literal_eval(calendar_ids_str)
         tag = Tag.objects.get(user=self.request.user, id=self.kwargs['pk'])
-        return Response(tag.get_time_series(self.request.query_params.get('timezone'), time_step=self.kwargs['time_step']))
+        return Response(tag.get_time_series(self.request.query_params.get('timezone'), time_step=self.kwargs['time_step'], calendar_ids=calendar_ids))
+
+class TagsByCategories(APIView):
+
+    def get(self, request, *args, **kw):
+        tag = Tag.objects.get(user=self.request.user, id=self.kwargs['pk'])
+        return Response(tag.get_category_stats(Category.objects.filter(user=self.request.user)))
