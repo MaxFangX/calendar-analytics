@@ -94,13 +94,11 @@ td {
 
 .group-border-tall {
   height: 343px;
-  overflow-x: scroll;
-  width: 300px; }
+  overflow-x: scroll; }
 
 .group-chart {
   padding: 5px;
   border: 1px solid #D3D3D3;
-  width: 800px;
   margin-right: 5px; }
 
 body {

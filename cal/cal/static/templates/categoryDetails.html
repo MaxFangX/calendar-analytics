@@ -2,7 +2,7 @@
   <div ng-hide="$ctrl.categoryEvents.dataLoaded" class="preloader"></div>
   <div ng-if="$ctrl.categoryEvents.dataLoaded">
     <p>Average hours per {{$ctrl.timeStep}}: {{ $ctrl.averageHours }}</p>
-    <div style="float: left">
+    <div class="col-md-8">
       <h3>Chart</h3>
       <div class="group-chart">
         <button ng-click='$ctrl.showDaily()'>Daily</button>
@@ -11,7 +11,7 @@
         <nvd3 options="$ctrl.categoryLine" data="$ctrl.ctrlGraphData"></nvd3>
       </div>
     </div>
-    <div class="group-events" style="float: left">
+    <div class="group-events col-md-4">
       <h3>Events</h3>
       <div class="group-border-tall">
         <button ng-disabled="$ctrl.currentPage === $ctrl.lastPage - 1"
