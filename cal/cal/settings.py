@@ -192,7 +192,7 @@ USE_TZ = True
 if ENVIRONMENT == 'prod':
     STATIC_ROOT = os.path.join(BASE_DIR, "..", "www", "static")
     STATIC_URL = '/static/'
-    BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, "cal", "static/")
+    BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, "..", "www", "cal", "static/")
 else:
     STATIC_ROOT = os.path.join(BASE_DIR, "static/")
     STATIC_URL = '/static/'
