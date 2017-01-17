@@ -26,7 +26,8 @@
       <script src="{% static "bower_components/angular/angular.js" %}"></script>
 
       <!-- Angular UI-Calendar -->
-      <script type="text/javascript" src="{% static "bower_components/angular-ui-calendar/src/calendar.js" %}"></script>
+      <!-- We use a minified library file because the bower angular version is not high enough -->
+      <script type="text/javascript" src="{% static "lib/js/angular-ui-calendar.min.js" %}"></script>
 
       <!-- FullCalendar -->
       <script type="text/javascript" src="{% static "bower_components/fullcalendar/dist/fullcalendar.min.js" %}"></script>

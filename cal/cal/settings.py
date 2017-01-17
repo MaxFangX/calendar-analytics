@@ -74,7 +74,6 @@ INSTALLED_APPS = (
 
 BOWER_INSTALLED_APPS = (
     'angular',
-    'angular-ui-calendar',
     'moment-timezone',
     'angular-nvd3'
 )

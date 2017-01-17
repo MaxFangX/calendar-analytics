@@ -1,5 +1,5 @@
 {
-  "name": "calendaranalytics dependencies",
+  "name": "calendaranalytics",
   "homepage": "https://github.com/maxfangx/calendar-analytics",
   "authors": [
     "Max Fang <maxfangx@gmail.com>"
@@ -15,7 +15,6 @@
     "tests"
   ],
   "dependencies": {
-    "moment-timezone": "^0.5.11",
-    "angular-ui-calendar": "^1.0.2"
+    "moment-timezone": "^0.5.11"
   }
 }
