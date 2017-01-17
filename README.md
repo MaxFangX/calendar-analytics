@@ -48,9 +48,9 @@ Install the following, if you haven't already:
 	export APP_ENVIRONMENT="dev"
 	```
 
-- Refresh your command line so that the secret keys are in your environment. You can also run `source ~/.bashrc`. You can check that it work with `echo $APP_ENVIRONMENT`
+- Refresh your command line so that the secret keys are in your environment. You can also run `source ~/.bashrc`. You can check that it works with `echo $APP_ENVIRONMENT`
 
-- Cd into the project directory and run the following:
+- `cd` into the project directory and run the following:
 	```
 	pip install -r requirements.txt
 	```
@@ -59,7 +59,6 @@ Install the following, if you haven't already:
 	```
 	python manage.py bower install
 	```
-	Select "d3#^3.4.4 which resolved to 3.5.17 and is required by nvd3#1.8.5" for the right d3 version
 
 
 ### Running the App
@@ -80,7 +79,7 @@ Run the app itself by running
 python manage.py runserver
 ```
 
-Finally, to live update the front-end when you make a change, run one of the following:
+Finally, to generate `.css` files from your `.scss` changes automatically, run one of the following:
 ```
 sass-watch
 sass --watch .
@@ -101,7 +100,6 @@ Try running the following:
 python manage.py bower install
 ```
 
-Make sure you select "d3#^3.4.4 which resolved to 3.5.17 and is required by nvd3#1.8.5"!
 
 #### Egg info failed error
 May be specific to what dependency is being downloaded, but if for “postgresql”, brew install it instead with: 
@@ -149,7 +147,6 @@ Run the following:
 python manage.py bower update
 ```
 
-Be sure to choose “d3#^3.4.4 which resolved to 3.5.17 and is required by nvd3#1.8.5”!
 
 ### Another issue?
 Feel free to add a issue to this repo, and someone will get back to you!
