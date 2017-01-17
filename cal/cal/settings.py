@@ -75,7 +75,8 @@ INSTALLED_APPS = (
 BOWER_INSTALLED_APPS = (
     'angular',
     'moment-timezone',
-    'angular-nvd3'
+    'angular-nvd3',
+    'fullcalendar',
 )
 
 # TODO make an actual login page for redirection
