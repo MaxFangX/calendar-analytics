@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "calendaranalytics dependencies",
   "homepage": "https://github.com/maxfangx/calendar-analytics",
   "authors": [
     "Max Fang <maxfangx@gmail.com>"
@@ -15,12 +15,7 @@
     "tests"
   ],
   "dependencies": {
-    "angular-nvd3": "^1.0.9",
     "moment-timezone": "^0.5.11",
-    "nvd3": "^1.8.5",
     "angular-ui-calendar": "^1.0.2"
-  },
-  "resolutions": {
-    "d3": "^4.4.1"
   }
 }

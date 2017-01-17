@@ -139,6 +139,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
   this.lastPage = 0;
 
   $scope.$on('calendarFilter:updated', function(event, data) {
+    /* jshint unused:vars */
     _this.tagEvents.dataLoaded = false;
     var filterData = CalendarFilterService.getFilter();
     calendarIds = filterData.calendarIds;
