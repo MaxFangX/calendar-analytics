@@ -153,7 +153,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
     this.tagLine = {
       chart: {
         type: 'lineChart',
-        height: 450,
+        height: 415,
         margin : {
           top: 20,
           right: 20,
