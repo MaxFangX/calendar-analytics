@@ -113,7 +113,7 @@ def google_auth(request):
     # Try to retrieve an existing flow, or create one if it doesn't exist
     gflow = GoogleFlow.objects.filter(id=request.user).last()
 
-    if gflow and gflow.flow.params['prompt'] != 'consent':
+    if gflow and gflow.flow.params.get('prompt') != 'consent':
         # Delete any flows that don't have the prompt parameter set, since that will
         # prevent the credentials from getting a refresh token
         gflow.delete()

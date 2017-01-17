@@ -300,7 +300,6 @@ class GCalendar(models.Model):
 
             if not next_page_token:
                 # We've reached the last page. Store the sync token.
-                print "Storing sync token for calendar {}".format(self.summary)
                 creds.next_sync_token = result['nextSyncToken']
                 creds.save()
                 break
