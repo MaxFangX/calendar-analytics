@@ -1,10 +1,10 @@
 {% load staticfiles %}
-{% block top_html %}
 <html ng-app="analyticsApp">
-{% endblock %}
   <head>
     <title>CalendarAnalytics</title>
-    <meta charset="utf-8">
+    {% block meta %}
+      <meta charset="utf-8">
+    {% endblock %}
 
     {% block head_css %}
       <link rel="stylesheet" href="{% static "lib/css/bootstrap.min.css" %}">
