@@ -100,6 +100,7 @@ class GEventList(generics.ListAPIView):
                    with.
     """
     serializer_class = GEventSerializer
+    paginate_by = 10000
 
     def get_queryset(self):
         start_str = self.request.query_params.get('start')
