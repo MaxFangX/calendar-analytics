@@ -197,7 +197,7 @@ class GCalendar(models.Model):
             g.google_id = event['id']
             g.i_cal_uid = event['iCalUID']
             g.color_index = event.get('colorId', '')
-            g.description = event.get('description', '').encode('utf-8').strip()
+            g.description = event.get('description', '')
             g.status = event.get('status', 'confirmed')
             g.transparency = event.get('transparency', 'opaque')
             g.all_day_event = True if event['start'].get('date', None) else False
@@ -249,7 +249,7 @@ class GCalendar(models.Model):
         Assumes that the list of calendars for this profile is correct
         """
 
-        print "Syncing calendar {}".format(self.summary)
+        print "Syncing calendar {}".format(self.summary.encode('utf-8').strip())
         result = None
         creds = self.user.googlecredentials
         service = creds.get_service()
@@ -285,7 +285,7 @@ class GCalendar(models.Model):
                 t, v, tb = sys.exc_info()
                 if hasattr(e, 'resp') and e.resp.status == 410:
                     # Sync token is no longer valid, perform full sync
-                    print "Sync token is no longer valid, perform full sync for calendar {}".format(self.summary)
+                    print "Sync token is no longer valid, perform full sync for calendar {}".format(self.summary.encode('utf-8').strip())
                     result = service.events().list(**list_args_with_constraints).execute()
                 else:
                     raise t, v, tb
@@ -315,7 +315,7 @@ class GCalendar(models.Model):
         for d_event in deleted_events:
             d_event.apply()
 
-        print "Successfully synced calendar {}".format(self.summary)
+        print "Successfully synced calendar {}".format(self.summary.encode('utf-8').strip())
 
         # Some additional sanity checks
         # Check for non-duplicate events with the same recurring_event_id
@@ -366,7 +366,7 @@ class GCalendar(models.Model):
         if result and 'id' in result:
             result.pop('id')
 
-        self.summary = result.get('summary')
+        self.summary = result.get('summary').encode('utf-8').strip()
         self.meta = result
         self.save()
 
