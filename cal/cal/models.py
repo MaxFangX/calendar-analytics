@@ -605,7 +605,11 @@ class Category(models.Model, EventCollection):
 
     def query(self, calendar_ids=None, start=None, end=None):
         if self.calendar:  # Calendar Category
-            calendars = [self.calendar]
+            # Added so deselecting calendars returns 0 hours for category
+            if not calendar_ids or (calendar_ids and self.calendar.calendar_id in calendar_ids):
+                calendars = [self.calendar]
+            else:
+                return []
         else:  # Color Category
             calendars = self.user.profile.get_calendars_for_calendarids(calendar_ids)
 
