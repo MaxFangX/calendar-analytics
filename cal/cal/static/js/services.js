@@ -27,15 +27,30 @@ analyticsApp.factory('CalendarFilterService', ['$rootScope', function CalendarFi
       }
 
       // Key must be unique per selection of start/end/calendarIds
+      // filterData.filterKey = filterData.start.toISOString() + " " +
+      //   filterData.end.toISOString() + " " +
+      //   filterData.calendarIds.join(' ');
       filterData.filterKey = filterData.start.toISOString() + " " +
-        filterData.end.toISOString() + " " +
-        filterData.calendarIds.join(' ');
+        filterData.end.toISOString();
 
 
       $rootScope.$broadcast('calendarFilter:updated');
     }
   };
 }]);
+
+analyticsApp.service("TagService", ['http', '$q', function($http, $q) {
+
+  var _this = this;
+
+  this.tags = {};
+
+  this.getTags = function(filterKey, start, end, calendarIds) {
+
+  };
+
+}]);
+
 
 analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
 
@@ -70,8 +85,7 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
       params: {
         start: (start)? start.toISOString() : null,
         end: (end)? end.toISOString() : null,
-        calendar_ids: JSON.stringify(calendarIds),
-        timezone: moment.tz.guess()
+        calendar_ids: JSON.stringify(calendarIds)
       }
     }).then(function successCallback(response) {
       _this.tags[filterKey] = [];
@@ -92,7 +106,7 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
     });
   };
 
-  this.createTag = function(label, keywords, isCumulative, filterData) {
+  this.createTag = function(label, keywords) {
     return $http({
       method: 'POST',
       url: '/v1/tags.json',
@@ -101,19 +115,13 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
         keywords: keywords,
         csrfmiddlewaretoken: getCookie('csrftoken')
       }),
-      params: {
-        start: isCumulative ? null : filterData.start.toISOString(),
-        end: isCumulative ? null : filterData.end.toISOString(),
-        calendar_ids: JSON.stringify(filterData.calendarIds),
-        timezone: moment.tz.guess()
-      },
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     });
   };
 
-  this.editTag = function(tagId, newLabel, newKeywords, isCumulative, filterData) {
+  this.editTag = function(tagId, newLabel, newKeywords) {
     return $http({
       method: 'POST',
       url: '/v1/tags/' + tagId,
@@ -123,18 +131,10 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
         csrfmiddlewaretoken: getCookie('csrftoken'),
         _method: 'PATCH'
       }),
-      params: {
-        start: isCumulative ? null : filterData.start.toISOString(),
-        end: isCumulative ? null : filterData.end.toISOString(),
-        calendar_ids: JSON.stringify(filterData.calendarIds),
-        timezone: moment.tz.guess()
-      },
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     }).then(function successCallback(response) {
-      var filterKey = isCumulative ? 'cumulative ' + filterData.filterKey : filterData.filterKey;
-      _this.tags[filterKey] = null;
       return response.data;
     }, function errorCallback() {
       console.log("Failed to edit tag with id " + tagId);
@@ -191,8 +191,7 @@ analyticsApp.service('CategoryService', ['$http', '$q', function($http, $q) {
       params: {
         start: (start)? start.toISOString() : null,
         end: (end)? end.toISOString() : null,
-        calendar_ids: JSON.stringify(calendarIds),
-        timezone: moment.tz.guess()
+        calendar_ids: JSON.stringify(calendarIds)
       }
     }).then(function successCallback(response) {
       _this.categories[filterKey] = [];
@@ -222,9 +221,6 @@ analyticsApp.service('CategoryService', ['$http', '$q', function($http, $q) {
         csrfmiddlewaretoken: getCookie('csrftoken'),
         _method: 'PATCH'
       }),
-      params: {
-        timezone: moment.tz.guess()
-      },
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
