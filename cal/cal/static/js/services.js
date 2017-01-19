@@ -76,6 +76,7 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
         _this.tags[filterKey].push({id:data});
         for (var i = 0; i < data.length; i++) {
           var tag = responses[j].data.results[i];
+          var tagId = tag.id;
           if (tags.hasOwnProperty(tagId)) {
             tags[tag.id].push(tag);
           } else {
@@ -83,21 +84,21 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
           }
         }
       }
-      // console.log(Object.keys(tags).length);
-      for (var tagId in tags) {
-        totalHours = 0;
-        for (var n = 0; n < tags[tagId].length; n++) {
-          totalHours += tags[tagId][n].hours;
+      for (var id in tags) {
+        if (tags.hasOwnProperty(id)) {
+          totalHours = 0;
+          for (var n = 0; n < tags[id].length; n++) {
+            totalHours += tags[id][n].hours;
+          }
+          tagInfo = {
+            label: tags[id][0].label,
+            id: id,
+            keywords: tags[id][0].keywords,
+            hours: totalHours
+          };
+          accumulatedTags.push(tagInfo);
         }
-        tagInfo = {
-          label: tags[tagId][0].label,
-          id: tagId,
-          keywords: tags[tagId][0].keywords,
-          hours: totalHours
-        };
-        accumulatedTags.push(tagInfo);
       }
-      // console.log(accumulatedTags);
       return accumulatedTags;
     });
   };
