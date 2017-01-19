@@ -39,18 +39,6 @@ analyticsApp.factory('CalendarFilterService', ['$rootScope', function CalendarFi
   };
 }]);
 
-analyticsApp.service("TagService", ['http', '$q', function($http, $q) {
-
-  var _this = this;
-
-  this.tags = {};
-
-  this.getTags = function(filterKey, start, end, calendarIds) {
-
-  };
-
-}]);
-
 
 analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
 
@@ -59,52 +47,101 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
   this.tags = {};
 
   this.getTags = function(filterKey, start, end, calendarIds) {
+    tags = {};
+    accumulatedTags = [];
 
-    if (!filterKey) {
-      throw "filterKey must always be supplied";
-    }
-
-    if (start || end) {
-      // If the start and end time match the given filterKey
-      var keyFromParameters = start.toISOString() + " " + end.toISOString() +
-        " " + calendarIds.join(' ');
-      if (filterKey !== keyFromParameters) {
-        throw "filterKey doesn't match given start and end times";
-      }
-    }
-    // Attempt to return cached tags
     if (_this.tags[filterKey]) {
-      return $q.when(_this.tags[filterKey]);
+      // TODO: return cached tags
     }
 
-    // Request the tags and return a promise
-    return $http({
-      method: 'GET',
-      url: '/v1/tags.json',
-      cache: true,
-      params: {
-        start: (start)? start.toISOString() : null,
-        end: (end)? end.toISOString() : null,
-        calendar_ids: JSON.stringify(calendarIds)
-      }
-    }).then(function successCallback(response) {
+    requests = [];
+    for (var i = 0; i < calendarIds.length; i++) {
+      requests.push($http({
+        method: 'GET',
+        url: '/v1/tags.json',
+        cache: true,
+        params: {
+          start: (start)? start.toISOString() : null,
+          end: (end)? end.toISOString() : null,
+          calendar_ids: JSON.stringify([calendarIds[i]]),
+          timezone: moment.tz.guess()
+        }
+      }));
+    }
+    return $q.all(requests).then(function(responses) {
       _this.tags[filterKey] = [];
-      for (var i = 0; i < response.data.results.length; i++) {
-        var tag = response.data.results[i];
-        _this.tags[filterKey].push({
-          id: tag.id,
-          label: tag.label,
-          keywords: tag.keywords,
-          hours: tag.hours
-        });
+      for (var j = 0; j < responses.length; j++) {
+        data = responses[j].data.results;
+        id = calendarIds[j];
+        _this.tags[filterKey].push({id:data});
+        for (var i = 0; i < data.length; i++) {
+          var tag = responses[j].data.results[i];
+          if (tags.hasOwnProperty(tagId)) {
+            tags[tag.id].push(tag);
+          } else {
+            tags[tag.id] = [tag];
+          }
+        }
       }
-      return _this.tags[filterKey];
-    }, function errorCallback(response) {
-      /* jshint unused:vars */
-      console.log("Failed to get tags:");
-      console.log(response);
+      // console.log(Object.keys(tags).length);
+      for (var tagId in tags) {
+        totalHours = 0;
+        for (var n = 0; n < tags[tagId].length; n++) {
+          totalHours += tags[tagId][n].hours;
+        }
+        tagInfo = {
+          label: tags[tagId][0].label,
+          id: tagId,
+          keywords: tags[tagId][0].keywords,
+          hours: totalHours
+        };
+        accumulatedTags.push(tagInfo);
+      }
+      // console.log(accumulatedTags);
+      return accumulatedTags;
     });
   };
+
+  // this.getTags = function(filterKey, start, end, calendarIds) {
+  //
+  //   if (!filterKey) {
+  //     throw "filterKey must always be supplied";
+  //   }
+  //
+  //   // Attempt to return cached tags
+  //   if (_this.tags[filterKey]) {
+  //     return $q.when(_this.tags[filterKey]);
+  //   }
+  //
+  //   // Request the tags and return a promise
+  //   return $http({
+  //     method: 'GET',
+  //     url: '/v1/tags.json',
+  //     cache: true,
+  //     params: {
+  //       start: (start)? start.toISOString() : null,
+  //       end: (end)? end.toISOString() : null,
+  //       calendar_ids: JSON.stringify(calendarIds),
+  //       timezone: moment.tz.guess()
+  //     }
+  //   }).then(function successCallback(response) {
+  //     _this.tags[filterKey] = [];
+  //     for (var i = 0; i < response.data.results.length; i++) {
+  //       var tag = response.data.results[i];
+  //       _this.tags[filterKey].push({
+  //         id: tag.id,
+  //         label: tag.label,
+  //         keywords: tag.keywords,
+  //         hours: tag.hours
+  //       });
+  //     }
+  //     return _this.tags[filterKey];
+  //   }, function errorCallback(response) {
+  //     /* jshint unused:vars */
+  //     console.log("Failed to get tags:");
+  //     console.log(response);
+  //   });
+  // };
 
   this.createTag = function(label, keywords) {
     return $http({
@@ -169,14 +206,14 @@ analyticsApp.service('CategoryService', ['$http', '$q', function($http, $q) {
       throw "filterKey must always be supplied";
     }
 
-    if (start || end) {
-      // If the start and end time match the given filterKey
-      var keyFromParameters = start.toISOString() + " " + end.toISOString() +
-        " " + calendarIds.join(' ');
-      if (filterKey !== keyFromParameters) {
-        throw "filterKey doesn't match given start, end, and calendarIds";
-      }
-    }
+    // if (start || end) {
+    //   // If the start and end time match the given filterKey
+    //   var keyFromParameters = start.toISOString() + " " + end.toISOString() +
+    //     " " + calendarIds.join(' ');
+    //   if (filterKey !== keyFromParameters) {
+    //     throw "filterKey doesn't match given start, end, and calendarIds";
+    //   }
+    // }
 
     // Attempt to return cached categories
     if (_this.categories[filterKey]) {
