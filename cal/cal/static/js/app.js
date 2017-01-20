@@ -153,7 +153,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
     this.tagLine = {
       chart: {
         type: 'lineChart',
-        height: 450,
+        height: 415,
         margin : {
           top: 20,
           right: 20,
@@ -177,6 +177,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
           axisLabelDistance: -10,
         },
         forceY: [0, maxYValue + 1],
+        interpolate: 'cardinal'
       },
     };
   }.bind(this);
@@ -185,7 +186,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
     this.categoryPie = {
       chart: {
         type: 'pieChart',
-        height: 400,
+        height: 200,
         x: function(d){return d.label;},
         y: function(d){return d.hours;},
         showLabels: false,
@@ -193,14 +194,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
         duration: 500,
         labelThreshold: 0.01,
         labelSunbeamLayout: true,
-        legend: {
-          margin: {
-            top: 5,
-            right: 0,
-            bottom: 0,
-            left: 0
-          }
-        },
+        showLegend: false
       },
     };
   };
@@ -434,7 +428,7 @@ function CategoryListCtrl($scope, $http, CalendarFilterService, CategoryService)
   this.categoryPie = {
     chart: {
       type: 'pieChart',
-      height: 400,
+      height: 200,
       x: function(d){return d.label;},
       y: function(d){return d.hours;},
       showLabels: false,
@@ -442,14 +436,7 @@ function CategoryListCtrl($scope, $http, CalendarFilterService, CategoryService)
       duration: 500,
       labelThreshold: 0.01,
       labelSunbeamLayout: true,
-      legend: {
-        margin: {
-          top: 5,
-          right: 0,
-          bottom: 0,
-          left: 0
-        }
-      },
+      showLegend: false
     },
   };
 }
@@ -484,7 +471,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
     this.categoryLine = {
       chart: {
         type: 'lineChart',
-        height: 450,
+        height: 300,
         margin : {
           top: 20,
           right: 20,
@@ -508,6 +495,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
           axisLabelDistance: -10
         },
         forceY: [0, maxYValue + 1],
+        interpolate: 'cardinal',
       },
     };
   }.bind(this);

@@ -74,13 +74,10 @@
   </div>
 
   <!-- Lists and other info on the side -->
-  <div class="col-md-4">
+  <div class="col-md-4 calendar-border">
 
     <category-list is-cumulative="false" hide-zero-hours="true"></category-list>
-    <tag-list is-cumulative="false" hide-zero-hours="true"></tag-list>
-
-    <category-list is-cumulative="true" display-name="Cumulative"></category-list>
-    <tag-list is-cumulative="true" display-name="Cumulative"></tag-list>
+    <tag-list is-cumulative="false" hide-zero-hours="false"></tag-list>
 
     <!-- For new users, needing to connect their calendars -->
     {% else %}
