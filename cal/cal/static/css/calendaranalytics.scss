@@ -77,23 +77,24 @@ input[type=text] {
 
 .cal-home-logged-out {
   height: 50%;
-  background-image: url("https://blogpfeifferlab.files.wordpress.com/2012/01/cf_desk_0937.jpg");
+  background-image: url("/static/img/dashboard.png");
   background-repeat: no-repeat scroll;
   background-size: 100%;
 
   .cal-main-display {
-    background-color: transparent;
+    background-color: rgba(0, 0, 0, .3);
     height: 100%;
     padding: 50px;
     min-height: 400px;
 
     .cal-description {
       max-width: 50%;
+      color: white;
     }
-  }
+    h1 {
+      color: white;
+    }
 
-  .cal-main-display:nth-child(even) {
-    background-color: #d3d3d3;
   }
 
   .cal-call-to-action-text {
@@ -102,13 +103,13 @@ input[type=text] {
 
   .cal-signin-button {
     position: relative;
-    height: 50px;
-    left: 50%;
-    bottom: 20px;
-    width: 200px;
-    margin-left: -100px;
+    padding: 30px;
+    float: right;
+    bottom: 50px;
     font-size: 16px;
     font-weight: 500;
+    background: white;
+    border: 0px;
   }
 }
 
