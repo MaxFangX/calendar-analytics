@@ -59,7 +59,7 @@
       <ul class="dropdown-menu" ng-click="$event.stopPropagation()">
         <li ng-repeat="cal in $ctrl.calendars">
           <a href="#">
-            <label>
+            <label class="select-calendar-id">
               <input type="checkbox" ng-model="cal.enabled"
                 ng-click="$ctrl.toggleEnabled(cal.id); $ctrl.refresh('panalytics');">
                 {% verbatim %} {{ cal.summary }} {% endverbatim %}
