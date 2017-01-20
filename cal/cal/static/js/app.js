@@ -369,6 +369,7 @@ function CategoryListCtrl($scope, $http, CalendarFilterService, CategoryService)
 
   $scope.$on('calendarFilter:updated', function(event, data) {
     /* jshint unused:vars */
+    _this.categories.dataLoaded = false;
     var filterData = CalendarFilterService.getFilter();
     if (!_this.isCumulative) {
       CategoryService.getCategories(filterData.filterKey, filterData.start,
@@ -378,32 +379,15 @@ function CategoryListCtrl($scope, $http, CalendarFilterService, CategoryService)
           _this.filterKey = filterData.filterKey;
           _this.categories.dataLoaded = true;
         });
+    } else {
+      CategoryService.getCategories('cumulative ' + filterData.filterKey, null,
+        null, filterData.calendarIds)
+        .then(function(categories) {
+          _this.categories = categories;
+          _this.categories.dataLoaded = true;
+        });
     }
   });
-
-  // Initialization
-  this.initialize = function() {
-
-    var categoriesPromise;
-    var initialFilterData = CalendarFilterService.getFilter();
-    if (this.isCumulative) {
-      categoriesPromise = CategoryService.getCategories('cumulative', null,
-        null, initialFilterData.calendarIds);
-    } else {
-      categoriesPromise = CategoryService.getCategories(
-        initialFilterData.filterKey,
-        initialFilterData.start,
-        initialFilterData.end,
-        initialFilterData.calendarIds
-      );
-      _this.filterKey = initialFilterData.filterKey;
-    }
-    categoriesPromise.then(function(categories) {
-      _this.categories = categories;
-      _this.categories.dataLoaded = true;
-    });
-  }.bind(this);
-  this.initialize();
 
   this.hideZeroHoursFilter = function(value, index, array) {
     /* jshint unused:vars */
