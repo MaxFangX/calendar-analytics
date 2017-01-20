@@ -55,6 +55,7 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
     }
 
     requests = [];
+    // console.log(filterKey);
     for (var i = 0; i < calendarIds.length; i++) {
       requests.push($http({
         method: 'GET',
@@ -73,7 +74,6 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
       for (var j = 0; j < responses.length; j++) {
         data = responses[j].data.results;
         id = calendarIds[j];
-        _this.tags[filterKey].push({id:data});
         for (var i = 0; i < data.length; i++) {
           var tag = responses[j].data.results[i];
           var tagId = tag.id;
@@ -84,6 +84,7 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
           }
         }
       }
+
       for (var id in tags) {
         if (tags.hasOwnProperty(id)) {
           totalHours = 0;
@@ -104,7 +105,7 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
   };
 
   // this.getTags = function(filterKey, start, end, calendarIds) {
-  //
+  //   // console.log(filterKey);
   //   if (!filterKey) {
   //     throw "filterKey must always be supplied";
   //   }

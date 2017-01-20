@@ -36,9 +36,6 @@ function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
           _this.filterKey = filterData.filterKey;
           _this.tags.dataLoaded = true;
         });
-      // _this.tags = TagService.getTags(filterData.filterKey, filterData.start, filterData.end,
-      //                    filterData.calendarIds);
-      // _this.tags.dataLoaded = true;
     } else {
       TagService.getTags('cumulative ' + filterData.filterKey, null, null,
                          filterData.calendarIds)
@@ -46,9 +43,6 @@ function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
           _this.tags = tags;
           _this.tags.dataLoaded = true;
         });
-      // _this.tags = TagService.getTags('cumulative ' + filterData.filterKey, null, null,
-      //                    filterData.calendarIds);
-      // _this.tags.dataLoaded = true;
     }
   });
 
