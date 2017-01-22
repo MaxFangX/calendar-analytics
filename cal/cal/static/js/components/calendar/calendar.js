@@ -5,6 +5,7 @@ analyticsApp.component('calendar', {
 
 analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarConfig, CalendarFilterService) {
    this.calendars = {};
+   this.calendars.dataLoaded = false;
    var _this = this;
 
    this.events = function(start, end, timezone, callback) {
@@ -31,11 +32,11 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
            _this.calendars[gcal.calendar_id].enabled = gcal.enabled_by_default;
          }
        }
+      _this.calendars.dataLoaded = true;
    
        // Trigger first CalendarFilter now that this.calendars has been set
        CalendarFilterService.setFilter(start, end,
          _this.getEnabledCalendarIds());
-   
        var calendarIds = response.data.results.map(function(cal) {
          return cal.calendar_id;
        }).sort();
@@ -71,6 +72,8 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
          }
    
          callback(events);
+         _this.calendars.dataLoaded = true;
+
    
        }, function eventError(response) {
          console.log("Ajax call to gevents failed:");
@@ -116,7 +119,9 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
      if(_this.calendars.length !== 0) {
        CalendarFilterService.setFilter(view.start, view.end,
                                        this.getEnabledCalendarIds());
+
      }
+    _this.calendars.dataLoaded = true;
    }.bind(this);
    
    $scope.uiConfig = {
