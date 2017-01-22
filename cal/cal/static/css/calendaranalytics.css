@@ -23,6 +23,9 @@ h4 {
 .cal-home-logged-in .select-calendar-id #checkbox {
   cursor: pointer; }
 
+.cal-home-logged-in #cal-name {
+  text-overflow: ellipsis; }
+
 .preloader {
   padding: 70px;
   background: url("/static/img/preloader.gif") no-repeat 50% 50% transparent; }
