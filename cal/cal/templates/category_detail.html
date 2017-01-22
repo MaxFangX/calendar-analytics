@@ -1,9 +1,0 @@
-{% extends "base.html" %}
-
-{% block content %}
-<div class="container">
-  <h1>Category: "{{ category.label }}"</h1>
-  <p>Cumulative hours: {{ category.hours }}</p>
-  <category-details category-id="{{ category.id }}" category-hours="{{ category.hours }}"></category-details>
-</div>
-{% endblock %}

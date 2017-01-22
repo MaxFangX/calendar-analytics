@@ -1,9 +1,0 @@
-{% extends "base.html" %}
-
-{% block content %}
-<div class="container">
-  <h1>Tag: "{{ tag.label }}"</h1>
-  <p style="margin-left: 15px">Keyword(s): {{ tag.keywords }}<p>
-  <tag-details tag-id="{{ tag.id }}"></tag-details>
-</div>
-{% endblock %}
