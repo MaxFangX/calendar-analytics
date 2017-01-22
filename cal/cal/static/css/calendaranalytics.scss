@@ -2,6 +2,10 @@ h1, h2, h3, h4, h5, h6, a, p {
   color: #000;
 }
 
+h4 {
+  margin-top: 20px;
+}
+
 .jumbotron h1, .jumbotron .h1 {
   color: #000;
   text-align: center;
@@ -23,6 +27,8 @@ h1, h2, h3, h4, h5, h6, a, p {
 
 button {
   margin: 2px;
+  background: white;
+  border: 1px solid #D3D3D3;
 }
 
 .cal-section-info {
@@ -86,6 +92,49 @@ input[type=text] {
     font-size: 16px;
     font-weight: 500;
   }
+}
+
+table {
+  font-size: 14px;
+  border-top: none;
+  padding: 0;
+
+  button {
+    border: none;
+    background: white;
+    margin-top: -5px;
+  }
+}
+
+td {
+  padding: 0;
+  border: none;
+}
+
+.group-border, .group-border-tall {
+  overflow-y: scroll;
+  height: 25%;
+  padding: 5px;
+  border: 1px solid #D3D3D3;
+}
+
+.group-border-tall {
+  height: 343px;
+  overflow-x: scroll;
+}
+
+.group-chart {
+  padding: 5px;
+  border: 1px solid #D3D3D3;
+  margin-right: 5px;
+}
+
+body {
+  font-family: 'Lato', sans-serif;
+}
+
+.calendar-border {
+  border-left: 1px solid #D3D3D3;
 }
 
 /*# sourceMappingURL=calendaranalytics.css.map */
