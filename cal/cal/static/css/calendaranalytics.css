@@ -63,7 +63,7 @@ input[type=text] {
 
 .cal-home-logged-out {
   height: 50%;
-  background-image: url("/static/img/dashboard.png");
+  background-image: url("https://images.pexels.com/photos/27893/pexels-photo-27893.jpg?w=940&h=650&auto=compress&cs=tinysrgb");
   background-repeat: no-repeat scroll;
   background-size: 100%; }
   .cal-home-logged-out .cal-main-display {
@@ -81,12 +81,14 @@ input[type=text] {
   .cal-home-logged-out .cal-signin-button {
     position: relative;
     padding: 30px;
-    float: right;
+    float: left;
     bottom: 50px;
     font-size: 16px;
     font-weight: 500;
     background: white;
     border: 0px; }
+  .cal-home-logged-out img {
+    width: 100%; }
 
 table {
   font-size: 14px;
