@@ -1,12 +1,9 @@
-/*jslint devel: true, browser: true, jquery: true */
-/* global analyticsApp moment */
-
 analyticsApp.component('calendar', {
   templateUrl: '/static/templates/calendar.html',
-  controller: ['$scope', '$http', '$q', 'uiCalendarConfig', 'CalendarFilterService', CalendarCtrl]
+  controller: 'CalendarCtrl'
 });
 
-function CalendarCtrl($scope, $http, $q, uiCalendarConfig, CalendarFilterService) {
+analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarConfig, CalendarFilterService) {
    this.calendars = {};
    var _this = this;
    
@@ -176,4 +173,4 @@ function CalendarCtrl($scope, $http, $q, uiCalendarConfig, CalendarFilterService
    };
    
    this.eventSources = [this.events];
-}
+});
