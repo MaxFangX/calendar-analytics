@@ -76,16 +76,14 @@ input[type=text] {
 }
 
 .cal-home-logged-out {
-  height: 50%;
+  height: 60%;
   background-image: url("https://images.pexels.com/photos/27893/pexels-photo-27893.jpg?w=940&h=650&auto=compress&cs=tinysrgb");
   background-repeat: no-repeat scroll;
   background-size: 100%;
 
-  .cal-main-display {
-    background-color: rgba(0, 0, 0, .3);
+  .cal-main-display, .cal-header {
     height: 100%;
-    padding: 50px;
-    min-height: 400px;
+    padding: 0 50px;
 
     .cal-description {
       max-width: 50%;
@@ -94,7 +92,18 @@ input[type=text] {
     h1 {
       color: white;
     }
+    .col-md-4 h3 {
+      text-align: center;
+    }
+    .col-info {
+      padding: 20px;
+      text-align: center;
 
+    }
+  }
+  .cal-header {
+    padding: 50px;
+    background-color: rgba(0, 0, 0, .3);
   }
 
   .cal-call-to-action-text {

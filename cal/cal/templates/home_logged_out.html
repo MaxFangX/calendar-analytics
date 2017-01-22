@@ -14,28 +14,36 @@
 
 {% block content %}
 <div class="cal-home-logged-out">
-  <div class="cal-main-display">
+  <div class="cal-header">
     <h1>CalendarAnalytics</h1>
     <h3 class="cal-description">The most comprehensive way to analyze your time. What have you done over the years?</h3>
     <button id="google-plus-button" class="cal-signin-button">Sign In With Google</button>
   </div>
+    
+  <div class="cal-main-display">
+    <div class="col-md-4">
+      <h3>View Real Data</h3>
+      <div class="col-info">
+        <img src="{% static "img/category-sleep.png" %}"/>
+        <p>Check out how much time you're spending on certain parts of your routine.</p>
+      </div>
+    </div>
 
-  <div class="col-md-4">
-    <h2>View Real Data</h2>
-    <img src="{% static "img/category-sleep.png" %}"/>
-    <p>Check out how much time you're spending on certain parts of your routine.</p>
-  </div>
+    <div class="col-md-4">
+      <h3>Run Your Own Statistics</h3>
+      <div class="col-info">
+        <img src="{% static "img/adding-tag.png" %}" />
+        <p>Add tags and generate data based on keywords extracted from event names</p>
+      </div>
+    </div>
 
-  <div class="col-md-4">
-    <h2>Run Your Own Statistics</h2>
-    <img src="{% static "img/adding-tag.png" %}" />
-    <p>Add tags and generate data based on keywords extracted from event names</p>
-  </div>
-
-  <div class="col-md-4">
-    <h2>Orient to your Goals</h2>
-    <img src="{% static "img/tag-detail.png" %}"/>
-    <p>With transparency comes focus and goal setting. If you feel you spent too much time watching TV, you can actively work to decrease the numbers and see the results immediately. View the full history of time spent on a tag or category, with trend lines and moving averages. </p>
+    <div class="col-md-4">
+      <h3>Orient to your Goals</h3>
+      <div class="col-info">
+        <img src="{% static "img/tag-detail.png" %}"/>
+        <p>Develop the ability to recognize action items to either increase or decrease certain categories. View the full history of time spent on a tag or category, with trend lines and moving averages. </p>
+      </div>
+    </div>
   </div>
 
 </div>
