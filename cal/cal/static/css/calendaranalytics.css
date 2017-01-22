@@ -13,7 +13,12 @@ h1, h2, h3, h4, h5, h6, a, p {
   padding: 3% 3% 5% 3%; }
 
 .cal-home-logged-in .select-calendar-id {
-  display:block; }
+  cursor: pointer;
+  margin: 4px auto 4px 4px;
+  display: block; }
+
+.cal-home-logged-in .select-calendar-id #checkbox {
+  cursor: pointer; }
 
 .preloader {
   padding: 70px;

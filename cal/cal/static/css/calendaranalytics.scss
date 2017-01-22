@@ -16,6 +16,16 @@ h1, h2, h3, h4, h5, h6, a, p {
   padding: 3% 3% 5% 3%;
 }
 
+.cal-home-logged-in .select-calendar-id {
+  cursor: pointer;
+  margin: 5px auto 5px 5px;
+  display:block;
+}
+
+.cal-home-logged-in .select-calendar-id #checkbox {
+  cursor: pointer;
+}
+
 .preloader {
   padding: 70px;
   background: url('/static/img/preloader.gif') no-repeat 50% 50% transparent;
