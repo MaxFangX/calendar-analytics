@@ -11,7 +11,7 @@
       <span class="caret"></span>
     </button>
     <ul class="dropdown-menu" ng-click="$event.stopPropagation()">
-      <li ng-repeat="cal in $ctrl.calendars" id=cal-name>
+      <li ng-repeat="cal in $ctrl.calendars">
         <label class="select-calendar-id">
           <input type="checkbox" id="checkbox" ng-model="cal.enabled"
             ng-click="$ctrl.toggleEnabled(cal.id); $ctrl.refresh('panalytics');">

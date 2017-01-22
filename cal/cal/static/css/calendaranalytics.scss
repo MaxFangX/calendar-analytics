@@ -24,14 +24,14 @@ h4 {
   cursor: pointer;
   margin: 5px auto 5px 5px;
   display:block;
+  width: 170;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .cal-home-logged-in .select-calendar-id #checkbox {
   cursor: pointer;
-}
-
-.cal-home-logged-in #cal-name {
-  text-overflow: ellipsis;
 }
 
 .preloader {
