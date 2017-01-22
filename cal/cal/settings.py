@@ -73,11 +73,10 @@ INSTALLED_APPS = (
 )
 
 BOWER_INSTALLED_APPS = (
-    'angular-ui-calendar',
+    'angular',
     'moment-timezone',
-    'd3',
-    'nvd3',
-    'angular-nvd3'
+    'angular-nvd3',
+    'fullcalendar',
 )
 
 # TODO make an actual login page for redirection
@@ -193,7 +192,7 @@ USE_TZ = True
 if ENVIRONMENT == 'prod':
     STATIC_ROOT = os.path.join(BASE_DIR, "..", "www", "static")
     STATIC_URL = '/static/'
-    BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, "..", "www", "static")
+    BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, "..", "www", "cal", "static/")
 else:
     STATIC_ROOT = os.path.join(BASE_DIR, "static/")
     STATIC_URL = '/static/'

@@ -1,9 +1,15 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 
-{% block top_html %}
-  <html ng-app="analyticsApp" itemscope itemtype="http://schema.org/Article">
-  <!-- ^ Google Server-Side App Sign In-->
+{% block meta %}
+  {{ block.super }}
+  <meta name="google-signin-scope" content="{{ social_auth_google_oauth2_scope | safe }}">
+  <meta name="google-signin-client_id" content="{{ social_auth_google_plus_key }}">
+{% endblock %}
+
+{% block head %}
+  {{ block.super }}
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
 {% endblock %}
 
 {% block content %}
@@ -11,7 +17,7 @@
   <div class="jumbotron cal-main-display">
     <h1>CalendarAnalytics</h1>
     <h3 class="cal-description">Analyze how much time you spend in meetings or with a friend using your Calendar.</h3>
-    <button id="google-plus-button" class="cal-signin-button">Sign In With Google</button>
+    <div class="g-signin2 cal-signin-button" data-onsuccess="onSignIn" data-theme="dark"></div>
   </div>
 
   <div class="jumbotron cal-main-display">
@@ -25,39 +31,37 @@
 
 {% block bottom_js %}
   {{ block.super }}
-  <!-- BEGIN PSA G+ signin-->
-  <script type="text/javascript">
-    gapi.load('auth2', function () {
-      var auth2;
-      auth2 = gapi.auth2.init({
-        client_id: "{{ social_auth_google_plus_key }}",
-        scope: "{{ social_auth_google_oauth2_scope | safe }}",
-      });
-      auth2.then(function () {
-        var button = document.getElementById("google-plus-button");
-        console.log("User is signed-in in Google+ platform?", auth2.isSignedIn.get() ? "Yes" : "No");
 
-        auth2.attachClickHandler(button, {}, function (googleUser) {
-          // Send access-token to backend to finish the authenticate
-          // with your application
+  <script>
+    function onSignIn(googleUser) {
+      // Useful data for your client-side scripts:
+      var profile = googleUser.getBasicProfile();
+      console.log("ID: " + profile.getId()); // Don't send this directly to your server!
+      console.log('Full Name: ' + profile.getName());
+      console.log('Given Name: ' + profile.getGivenName());
+      console.log('Family Name: ' + profile.getFamilyName());
+      console.log("Image URL: " + profile.getImageUrl());
+      console.log("Email: " + profile.getEmail());
 
-          var authResponse = googleUser.getAuthResponse();
-          var $form;
-          var $input;
+      // The ID token you need to pass to your backend:
+      var id_token = googleUser.getAuthResponse().id_token;
+      console.log("ID Token: " + id_token);
 
-          $form = $("<form>");
-          $form.attr("action", "/complete-with-token/google-plus/");
-          $form.attr("method", "post");
-          $input = $("<input>");
-          $input.attr("name", "access_token");
-          $input.attr("value", authResponse.access_token);
-          $form.append($input);
-          // Add csrf-token if needed
-          $(document.body).append($form);
-          $form.submit();
-        });
-      });
-    });
+      var authResponse = googleUser.getAuthResponse();
+      var $form;
+      var $input;
+
+      $form = $("<form>");
+      $form.attr("action", "/complete-with-token/google-plus/");
+      $form.attr("method", "post");
+      $input = $("<input>");
+      $input.attr("name", "access_token");
+      $input.attr("value", authResponse.access_token);
+      $form.append($input);
+      // Add csrf-token if needed
+      $(document.body).append($form);
+      $form.submit();
+    };
   </script>
-  <!-- END PSA G+ signin-->
+
 {% endblock %}
