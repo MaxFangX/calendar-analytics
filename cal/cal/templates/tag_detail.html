@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1 class="well">Tags - Cumulative</h1>
-<h3 class="well">Tag: {{ tag.label }}</h3>
-<h3 class="well">Keyword(s): {{ tag.keywords }}<h3>
-<tag-details tag-id="{{ tag.id }}"></tag-details>
-
+<div class="container">
+  <h1>Tag: "{{ tag.label }}"</h1>
+  <p style="margin-left: 15px">Keyword(s): {{ tag.keywords }}<p>
+  <tag-details tag-id="{{ tag.id }}"></tag-details>
+</div>
 {% endblock %}
