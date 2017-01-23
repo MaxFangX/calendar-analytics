@@ -5,7 +5,6 @@ analyticsApp.component('calendar', {
 
 analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarConfig, CalendarFilterService) {
    this.calendars = {};
-   this.calendars.dataLoaded = false;
    var _this = this;
 
    this.events = function(start, end, timezone, callback) {
@@ -32,7 +31,6 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
            _this.calendars[gcal.calendar_id].enabled = gcal.enabled_by_default;
          }
        }
-      _this.calendars.dataLoaded = true;
    
        // Trigger first CalendarFilter now that this.calendars has been set
        CalendarFilterService.setFilter(start, end,
@@ -72,7 +70,6 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
          }
    
          callback(events);
-         _this.calendars.dataLoaded = true;
 
    
        }, function eventError(response) {
@@ -111,6 +108,16 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
      return element;
    };
    
+   $scope.loading = function(isLoading, view){
+      if (isLoading) {
+        $('#calendar-preloader').show();
+        $('.calendar').hide();
+      } else {
+        $('#calendar-preloader').hide();
+        $('.calendar').show();
+      }
+    };
+
    this.viewRender = function(view, element) {
    
      /* jshint unused:vars */
@@ -121,7 +128,6 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
                                        this.getEnabledCalendarIds());
 
      }
-    _this.calendars.dataLoaded = true;
    }.bind(this);
    
    $scope.uiConfig = {
@@ -136,9 +142,11 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
        firstDay: 1,
        eventRender: $scope.eventRender,
        viewRender: this.viewRender,
+       loading: $scope.loading
      }
    };
-   
+  
+
    this.refresh = function(calendarName) {
      if(uiCalendarConfig.calendars[calendarName] !== undefined){
        uiCalendarConfig.calendars[calendarName].fullCalendar('refetchEvents');

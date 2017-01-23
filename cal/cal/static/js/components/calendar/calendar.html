@@ -22,8 +22,6 @@
     </div>
   </div>
   <!-- Calendar -->
-  <!-- <div ng-hide="$ctrl.calendars.dataLoaded" class="preloader"></div> -->
-  <!-- <div ng-if="$ctrl.calendars.dataLoaded"> -->
-    <div ui-calendar="uiConfig.calendar" calendar="panalytics" class="calendar" ng-model="$ctrl.eventSources"></div>
-  <!-- </div> -->
+  <div id="calendar-preloader" class="preloader"></div>
+  <div ui-calendar="uiConfig.calendar" calendar="panalytics" class="calendar" ng-model="$ctrl.eventSources"></div>
 </div>
