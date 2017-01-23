@@ -76,7 +76,7 @@ function CategoryListCtrl($scope, $http, CalendarFilterService, CategoryService)
 
   this.delete = function(categoryId) {
     CategoryService.deleteCategory(categoryId)
-      .success(function removeFromList(data) {
+      .then(function removeFromList(data) {
         /* jshint unused:vars */
         _this.categories = _this.categories.filter(function(category) {
           return category.id !== categoryId;

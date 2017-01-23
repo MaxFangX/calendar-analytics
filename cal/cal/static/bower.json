@@ -15,7 +15,6 @@
     "tests"
   ],
   "dependencies": {
-    "angular": "1.5.11",
     "moment-timezone": "^0.5.11"
   }
 }
