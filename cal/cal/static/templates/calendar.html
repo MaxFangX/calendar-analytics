@@ -12,13 +12,11 @@
     </button>
     <ul class="dropdown-menu" ng-click="$event.stopPropagation()">
       <li ng-repeat="cal in $ctrl.calendars">
-        <a href="#">
-          <label>
-            <input type="checkbox" ng-model="cal.enabled"
-              ng-click="$ctrl.toggleEnabled(cal.id); $ctrl.refresh('panalytics');">
-              {{ cal.summary }}
-          </label>
-        </a>
+        <label class="select-calendar-id">
+          <input type="checkbox" id="checkbox" ng-model="cal.enabled"
+            ng-click="$ctrl.toggleEnabled(cal.id); $ctrl.refresh('panalytics');">
+            {{ cal.summary }}
+        </label>
       </li>
     </ul>
     </div>
