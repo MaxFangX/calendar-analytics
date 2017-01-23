@@ -10,7 +10,7 @@ analyticsApp.component('tagDetails', {
 
 function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, QueryService) {
   var _this = this;
-  this.$onInit = () => {
+  this.$onInit = function () {
     var tagId = this.tagId;
     this.tagUrl = '/v1/tags/' + tagId;
     this.tagEvent = '/v1/tags/' + tagId + '/events';
@@ -18,7 +18,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
     this.timeseriesMonth = '/v1/tags/' + tagId + '/timeseries/month';
     this.timeseriesDay = '/v1/tags/' + tagId + '/timeseries/day';
     this.categoryTags = '/v1/tags/' + tagId + '/by-category';
-  }
+  };
   var query_timezone = moment.tz.guess();
   var calendarIds = [];
   this.tagHours = 0;
@@ -107,7 +107,7 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
       }
       _this.showCategoryPie();
     }, function errorCallback() {
-      console.log("Failed to get tags by categories")
+      console.log("Failed to get tags by categories");
     });
   };
 
