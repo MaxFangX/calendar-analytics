@@ -1,5 +1,5 @@
 analyticsApp.component('tagList', {
-  templateUrl: '/static/templates/tag-list.html',
+  templateUrl: '/static/js/components/tag-list/tag-list.html',
   controller: ['$scope', '$http', 'CalendarFilterService', 'TagService', TagListCtrl],
   bindings: {
     isCumulative: '<?',
