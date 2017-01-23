@@ -24,28 +24,6 @@ def home(request):
     else:
         return render(request, template_name='home_logged_out.html')
 
-@login_required
-def category_detail(request, pk):
-    context = {}
-    try:
-        context['category'] = Category.objects.get(user=request.user, id=pk)
-    except Exception:
-        # TODO gracefully handle this
-        pass
-    return render(request, template_name='category_detail.html', context=context)
-
-@login_required
-def tag_detail(request, pk):
-    context = {}
-    try:
-        tag = Tag.objects.get(user=request.user, id=pk)
-        context['tag'] = tag
-    except Exception:
-        # TODO gracefully handle this
-        pass
-    return render(request, template_name='tag_detail.html', context=context)
-
-
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect("/")

@@ -33,7 +33,7 @@
 
 <!-- Information when logged in -->
 {% block content %}
-<div ng-controller="LoggedInCtrl" class="cal-home-logged-in">
+<div class="cal-home-logged-in">
   <ul class="nav nav-tabs">
     <li>
       <a href="/">CalendarAnalytics</a>
@@ -44,7 +44,7 @@
   </ul>
   {% if request.user.profile.authed %}
 
-  <calendar></calendar>
+  <ui-view class="col-md-8"></ui-view>
 
   <!-- Lists and other info on the side -->
   <div class="col-md-4 calendar-border">

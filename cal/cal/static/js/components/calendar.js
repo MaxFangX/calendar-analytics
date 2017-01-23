@@ -6,7 +6,7 @@ analyticsApp.component('calendar', {
 analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarConfig, CalendarFilterService) {
    this.calendars = {};
    var _this = this;
-   
+
    this.events = function(start, end, timezone, callback) {
      var query_timezone = '';
      if (!timezone) {
