@@ -108,10 +108,19 @@ def google_auth(request):
                                        redirect_uri=settings.BASE_URL + '/auth/google')
     default_flow.params['access_type'] = 'offline'
     default_flow.params['include_granted_scopes'] = 'true'
+    default_flow.params['prompt'] = 'consent'
 
     # Try to retrieve an existing flow, or create one if it doesn't exist
     gflow = GoogleFlow.objects.filter(id=request.user).last()
+
+    if gflow and gflow.flow.params.get('prompt') != 'consent':
+        # Delete any flows that don't have the prompt parameter set, since that will
+        # prevent the credentials from getting a refresh token
+        gflow.delete()
+        gflow = None
+
     if not gflow:
+        print "Could not retrieve existing flow"
         gflow = GoogleFlow(id=request.user,
                           flow=default_flow)
         gflow.save()
