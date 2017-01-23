@@ -22,7 +22,9 @@
           <tr ng-repeat="category in $ctrl.categories | orderBy:orderByField:reverseSort">
             <td ng-hide="category.editing">
               <ul style="list-style-type: square; margin-left: -15px">
-                <li style="color: {{ category.color }}"><a ui-sref="category-details({ categoryId: category.id, categoryHours: category.hours })">{{ category.label }}</a></li>
+                <li style="color: {{ category.color }}">
+                  <a ui-sref="category-details({ displayName: category.label, categoryId: category.id, categoryHours: category.hours })">{{ category.label }}</a>
+                </li>
               </ul>
             </td>
             <td ng-hide="category.editing">

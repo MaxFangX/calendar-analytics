@@ -3,6 +3,7 @@ analyticsApp.component('categoryDetails', {
   controller: ['$scope', '$http', 'QueryService', CategoriesDetailCtrl],
   controllerAs: '$ctrl',
   bindings: {
+    displayName: '@',
     categoryId: '@',
     categoryHours: '@'
   }
