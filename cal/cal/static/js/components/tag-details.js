@@ -2,6 +2,8 @@ analyticsApp.component('tagDetails', {
   templateUrl: '/static/templates/tag-details.html',
   controller: ['$scope', '$interpolate', '$http', 'CalendarFilterService', 'QueryService', TagsDetailCtrl],
   bindings: {
+    label: '@',
+    keywords: '@',
     tagId: '@'
   }
 });

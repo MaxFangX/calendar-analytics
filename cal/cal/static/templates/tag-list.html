@@ -20,7 +20,7 @@
         <tr ng-repeat="tag in $ctrl.tags
                       | filter : $ctrl.hideZeroHoursFilter
                       | orderBy:orderByField:reverseSort">
-          <td ng-hide="tag.editing"><a ui-sref="tag-details({tagId: tag.id})">{{ tag.label }}</a></td>
+          <td ng-hide="tag.editing"><a ui-sref="tag-details({label: tag.label, keywords: tag.keywords, tagId: tag.id})">{{ tag.label }}</a></td>
           <td ng-hide="tag.editing">{{ tag.hours }}</td>
           <td ng-show="tag.editing">
             Label<br>
