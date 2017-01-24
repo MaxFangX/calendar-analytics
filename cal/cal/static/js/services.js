@@ -58,18 +58,19 @@ analyticsApp.service("TagService", ['$http', '$q', 'QueryService', function($htt
 
     var calendarData = calendarIds.map(function(calId) {
       var cacheKey = calId + " " + filterKey;
-      _this.tags[cacheKey] = $q.when(QueryService.getDataForCalendarIds("tags", start, end, calId, _this.tags, cacheKey));
+      _this.tags[cacheKey] = $q.when(
+        QueryService.getDataForCalendarIds("tags", start, end, calId, _this.tags, cacheKey));
       return $q.when(_this.tags[cacheKey]);
     });
 
     var accumulatedTags = {};
     var tags = [];
 
-    return $q.all(calendarData).then(function(response) {
+    return $q.all(calendarData).then(function successCallback(response) {
       // Add up duplicate tags across calendars.
       response.forEach(function(data) {
         for (var tagId in data) {
-          if (accumulatedTags.hasOwnProperty(tagId)) {
+          if (accumulatedTags.hasOwnProperty(tagId.toString())) {
             accumulatedTags[tagId].hours = accumulatedTags[tagId].hours + data[tagId].hours;
           } else {
             accumulatedTags[tagId] = data[tagId];
@@ -85,6 +86,8 @@ analyticsApp.service("TagService", ['$http', '$q', 'QueryService', function($htt
         });
       }
       return tags;
+    }, function errorCallback(response) {
+      console.log("Failed to get tags");
     });
 
   }.bind(this);
@@ -177,19 +180,21 @@ analyticsApp.service('CategoryService', ['$http', '$q', 'QueryService', function
 
     var calendarData = calendarIds.map(function(calId) {
       var cacheKey = calId + " " + filterKey;
-      _this.categories[cacheKey] = $q.when(QueryService.getDataForCalendarIds("categories", start, end, calId, _this.categories, cacheKey));
+      _this.categories[cacheKey] =
+        $q.when(QueryService.getDataForCalendarIds("categories", start, end, calId, _this.categories, cacheKey));
       return $q.when(_this.categories[cacheKey]);
     });
 
     var accumulatedCategories = {};
     var categories = [];
 
-    return $q.all(calendarData).then(function(response) {
+    return $q.all(calendarData).then(function successCallback(response) {
       // Add up duplicate categories across calendars.
       response.forEach(function(data) {
         for (var categoryId in data) {
-          if (accumulatedCategories.hasOwnProperty(categoryId)) {
-            accumulatedCategories[categoryId].hours = accumulatedCategories[categoryId].hours + data[categoryId].hours;
+          if (accumulatedCategories.hasOwnProperty(categoryId.toString())) {
+            accumulatedCategories[categoryId].hours =
+              accumulatedCategories[categoryId].hours + data[categoryId].hours;
           } else {
             accumulatedCategories[categoryId] = data[categoryId];
           }
@@ -204,6 +209,8 @@ analyticsApp.service('CategoryService', ['$http', '$q', 'QueryService', function
         });
       }
       return categories;
+    }, function errorCallback(response) {
+      console.log("Failed to get categories");
     });
   }.bind(this);
 
@@ -371,7 +378,7 @@ analyticsApp.service('QueryService', ['$http', function($http) {
         cache[cacheKey] = {};
         for (var i = 0; i < modelData.length; i++) {
           var model = modelData[i];
-          if (cache[cacheKey].hasOwnProperty(model.id)) {
+          if (cache[cacheKey].hasOwnProperty(model.id.toString())) {
             var newHours = cache[cacheKey][model.id][hours] + model.hours;
             cache[cacheKey][model.id][hours] = newHours;
           } else {
