@@ -6,12 +6,12 @@
     <table class="table table-hover">
       <thead>
         <th>
-          <a href="" ng-click="orderByField = 'label'; reverseSort = !reverseSort">
+          <a href="#" ng-click="orderByField = 'label'; reverseSort = !reverseSort">
             Label
           </a>
         </th>
         <th>
-          <a href="" ng-click="orderByField = 'hours'; reverseSort = !reverseSort">
+          <a href="#" ng-click="orderByField = 'hours'; reverseSort = !reverseSort">
             Hours
           </a>
         </th>
@@ -20,7 +20,7 @@
         <tr ng-repeat="tag in $ctrl.tags
                       | filter : $ctrl.hideZeroHoursFilter
                       | orderBy:orderByField:reverseSort">
-          <td ng-hide="tag.editing"><a href="/tags/{{ tag.id }}/">{{ tag.label }}</a></td>
+          <td ng-hide="tag.editing"><a ui-sref="tag-details({label: tag.label, keywords: tag.keywords, tagId: tag.id})">{{ tag.label }}</a></td>
           <td ng-hide="tag.editing">{{ tag.hours }}</td>
           <td ng-show="tag.editing">
             Label<br>

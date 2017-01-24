@@ -45,12 +45,12 @@ function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
   this.create = function(tag) {
     var filterData = CalendarFilterService.getFilter();
     TagService.createTag(tag.label, tag.keywords, this.isCumulative, filterData)
-      .success(function addToList(data) {
+      .then(function addToList(response) {
         _this.tags.push({
-          id: data.id,
-          label: data.label,
-          keywords: data.keywords,
-          hours: data.hours,
+          id: response.data.id,
+          label: response.data.label,
+          keywords: response.data.keywords,
+          hours: response.data.hours,
           editing: false
         });
       _this.tags.dataLoaded = true;
@@ -92,7 +92,7 @@ function TagListCtrl($scope, $http, CalendarFilterService, TagService) {
 
   this.delete = function(tagId) {
     TagService.deleteTag(tagId)
-      .success(function removeFromList() {
+      .then(function removeFromList() {
         _this.tags = _this.tags.filter(function(tag) {
           return tag.id !== tagId;
         });

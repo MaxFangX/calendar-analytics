@@ -1,5 +1,5 @@
 /*jslint devel: true, browser: true, jquery: true */
-/*global d3, getCookie */
+/*global d3, getCookie, moment */
 
 var analyticsApp = window.angular.module('analyticsApp.services', []);
 

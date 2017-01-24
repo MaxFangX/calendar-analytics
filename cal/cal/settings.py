@@ -24,10 +24,12 @@ else:
 if PRODUCTION:
     BASE_URL = 'panalytics.elasticbeanstalk.com'
     DEBUG = False
+    VERBOSE_PRINT = False
     TEMPLATE_DEBUG = False
 else:
     BASE_URL = os.getenv('BASE_URL', 'http://localhost:8000')
     DEBUG = True
+    VERBOSE_PRINT = True
     TEMPLATE_DEBUG = True
 
 # Environment variables

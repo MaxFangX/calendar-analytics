@@ -3,6 +3,7 @@ analyticsApp.component('categoryDetails', {
   controller: ['$scope', '$http', 'QueryService', CategoriesDetailCtrl],
   controllerAs: '$ctrl',
   bindings: {
+    displayName: '@',
     categoryId: '@',
     categoryHours: '@'
   }
@@ -10,10 +11,14 @@ analyticsApp.component('categoryDetails', {
 
 function CategoriesDetailCtrl($scope, $http, QueryService){
   var _this = this;
-  var categoryUrl = '/v1/categories/' + this.categoryId + '/events';
-  var timeseriesWeek = '/v1/categories/' + this.categoryId + '/timeseries/week';
-  var timeseriesMonth = '/v1/categories/' + this.categoryId + '/timeseries/month';
-  var timeseriesDay = '/v1/categories/' + this.categoryId + '/timeseries/day';
+  this.$onInit = function () {
+    var categoryId = this.categoryId;
+    this.categoryUrl = '/v1/categories/' + categoryId + '/events';
+    this.timeseriesWeek = '/v1/categories/' + categoryId + '/timeseries/week';
+    this.timeseriesMonth = '/v1/categories/' + categoryId + '/timeseries/month';
+    this.timeseriesDay = '/v1/categories/' + categoryId + '/timeseries/day';
+    this.initialize();
+  };
   var query_timezone = moment.tz.guess();
   this.categoryEvents = [];
   this.pageEvents = [];
@@ -60,52 +65,58 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
   this.showDaily = function() {
     $http({
       method: 'GET',
-      url: timeseriesDay + '.json',
+      url: this.timeseriesDay + '.json',
       params: {
         timezone: query_timezone,
       }
     }).
-    success(function successCallback(data) {
+    then(function successCallback(response) {
       _this.timeStep = "day";
-      _this.averageHours = Math.round(((_this.categoryHours / data[0].length) * 100)) / 100;
-      var eventData = QueryService.populateData(data, 'Category');
+      _this.averageHours = Math.round(((_this.categoryHours / response.data[0].length) * 100)) / 100;
+      var eventData = QueryService.populateData(response.data, 'Category');
       _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
+    }, function errorCallback() {
+      throw "Failed to get timeseries day";
     });
   };
 
   this.showWeekly = function() {
     $http({
       method: 'GET',
-      url: timeseriesWeek + '.json',
+      url: this.timeseriesWeek + '.json',
       params: {
         timezone: query_timezone,
       }
     }).
-    success(function successCallback(data) {
+    then(function successCallback(response) {
       _this.timeStep = "week";
       // round(... * 100) / 100 neceessary to round average hours to two decimal
-      _this.averageHours = Math.round(((_this.categoryHours / data[0].length) * 100)) / 100;
-      var eventData = QueryService.populateData(data, 'Category');
+      _this.averageHours = Math.round(((_this.categoryHours / response.data[0].length) * 100)) / 100;
+      var eventData = QueryService.populateData(response.data, 'Category');
       _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
+    }, function errorCallback() {
+      throw "Failed to get timeseries week";
     });
   };
 
   this.showMonthly = function() {
     $http({
       method: 'GET',
-      url: timeseriesMonth + '.json',
+      url: this.timeseriesMonth + '.json',
       params: {
         timezone: query_timezone,
       }
     }).
-    success(function successCallback(data) {
+    then(function successCallback(response) {
       _this.timeStep = "month";
-      _this.averageHours = Math.round(((_this.categoryHours / data[0].length) * 100)) / 100;
-      var eventData = QueryService.populateData(data, 'Category');
+      _this.averageHours = Math.round(((_this.categoryHours / response.data[0].length) * 100)) / 100;
+      var eventData = QueryService.populateData(response.data, 'Category');
       _this.ctrlGraphData = eventData[0];
       _this.showGraph(eventData[1]);
+    }, function errorCallback() {
+      throw "Failed to get timeseries month";
     });
   };
 
@@ -121,20 +132,20 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
   this.getEvents = function(pageNum) {
     $http({
       method: 'GET',
-      url: categoryUrl + '.json',
+      url: this.categoryUrl + '.json',
       params: {
         page:pageNum
       }
     }).
-    success(function successCallback(data) {
-      for (var i = 0; i < data.results.length; i++) {
-        var event = data.results[i];
+    then(function successCallback(response) {
+      for (var i = 0; i < response.data.results.length; i++) {
+        var event = response.data.results[i];
         _this.categoryEvents.unshift({
           start: (new Date(event.start)).toString(),
           name: event.name,
         });
       }
-      if (data.next !== null) {
+      if (response.data.next !== null) {
         pageNum += 1;
         _this.getEvents(pageNum);
       } else {
@@ -142,6 +153,8 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
         _this.showPageEvents();
         _this.categoryEvents.dataLoaded = true;
       }
+    }, function errorCallback() {
+      throw "Failed to get events";
     });
   };
 
@@ -149,6 +162,4 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
     this.showWeekly();
     this.getEvents(1);
   }.bind(this);
-
-  this.initialize();
 }
