@@ -36,18 +36,13 @@ analyticsApp.factory('CalendarFilterService', ['$rootScope', function CalendarFi
   };
 }]);
 
-analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
+analyticsApp.service("TagService", ['$http', '$q', 'QueryService', function($http, $q, QueryService) {
 
   var _this = this;
 
   this.tags = {};
 
   this.getTags = function(filterKey, start, end, calendarIds) {
-    var calendarTags = {}; // {calendarId : list of tags}
-    var accumulatedTags = {};
-    var requests = [];
-    var calendarRequestsMap = {}; // {request index : calendarId}
-    var tags = [];
 
     if (!filterKey) {
       throw "filterKey must always be supplied";
@@ -61,64 +56,36 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
       }
     }
 
-    for (var i = 0; i < calendarIds.length; i++) {
-      var cacheKey = calendarIds[i] + " " + filterKey;
-      if (this.tags[cacheKey]) {
-        calendarTags[calendarIds[i]] = this.tags[cacheKey];
-      } else {
-        requests.push($http({
-          method: 'GET',
-          url: '/v1/tags.json',
-          cache: true,
-          params: {
-            start: (start)? start.toISOString() : null,
-            end: (end)? end.toISOString() : null,
-            calendar_ids: JSON.stringify([calendarIds[i]]),
-            timezone: moment.tz.guess()
-          }
-        }));
-        calendarRequestsMap[i] = calendarIds[i];
-      }
-    }
+    var calendarData = calendarIds.map(function(calId) {
+      var cacheKey = calId + " " + filterKey;
+      _this.tags[cacheKey] = $q.when(QueryService.getDataForCalendarIds("tags", start, end, calId, _this.tags, cacheKey));
+      return $q.when(_this.tags[cacheKey]);
+    });
 
-    return $q.all(requests).then(function(responses) {
-      for (var j = 0; j < responses.length; j++) {
-        var data = responses[j].data.results;
-        var calId = calendarRequestsMap[j];
-        var cacheKey = calId + " " + filterKey;
-        calendarTags[calId] = data;
-        _this.tags[cacheKey] = data;
-      }
+    var accumulatedTags = {};
+    var tags = [];
 
-      for (var calendar in calendarTags) {
-        for (var n = 0; n < calendarTags[calendar].length; n++) {
-          var tag = calendarTags[calendar][n];
-          if (accumulatedTags.hasOwnProperty(tag.id)) {
-            var tagInfo = accumulatedTags[tag.id];
-            tagInfo[2] += tag.hours;
-            accumulatedTags[tag.id] = tagInfo;
+    return $q.all(calendarData).then(function(response) {
+      response.forEach(function(data) {
+        for (var tagId in data) {
+          if (accumulatedTags.hasOwnProperty(tagId)) {
+            accumulatedTags[tagId].hours = accumulatedTags[tagId].hours + data[tagId].hours;
           } else {
-            accumulatedTags[tag.id] = [tag.label, tag.keywords, tag.hours];
+            accumulatedTags[tagId] = data[tagId];
           }
         }
-      }
-
-      for (var tagId in accumulatedTags) {
-        if (accumulatedTags.hasOwnProperty(tagId)) {
-          tags.push({
-            label: accumulatedTags[tagId][0],
-            id: tagId,
-            keywords: accumulatedTags[tagId][1],
-            hours: accumulatedTags[tagId][2]
-          });
-        }
+      });
+      for (var tag in accumulatedTags) {
+        tags.push({
+          id: tag,
+          label: accumulatedTags[tag].label,
+          keywords: accumulatedTags[tag].keywords,
+          hours: accumulatedTags[tag].hours
+        });
       }
       return tags;
-    }, function errorCallback(response) {
-      /* jshint unused:vars */
-      console.log("Failed to get tags:");
-      console.log(response);
     });
+
   }.bind(this);
 
   this.createTag = function(label, keywords, isCumulative, filterData) {
@@ -312,7 +279,7 @@ analyticsApp.service('CategoryService', ['$http', '$q', function($http, $q) {
 
 }]);
 
-analyticsApp.service('QueryService', function() {
+analyticsApp.service('QueryService', ['$http', function($http) {
   this.populateData = function(data, type) {
     var ctrlDetails = [];
     var maxYValue = 0;
@@ -403,4 +370,58 @@ analyticsApp.service('QueryService', function() {
 
     return [slope, intercept, rSquare];
   }
-});
+
+  this.getDataForCalendarIds = function(type, start, end, calendarId, cache, cacheKey) {
+ //    As an example, tags are saved like this:
+ //    [
+ //     cacheKey1:
+ //       {
+ //         tagId1: {totalHours: 5, label: school, keywords: “UC Berkeley”},
+ //         tagId2: {totalHours: 5, label: exercise, tag.keywords: “Gym”}
+ //       },
+ //     cacheKey2:
+ //       {
+ //         tagId1: {totalHours: 5, label: school, keywords: “UC Berkeley”},
+ // 	      tagId2: {totalHours: 5, label: exercise, keywords: “Gym”}
+ // 	    }
+ //     ]
+
+    if (cache[cacheKey]) {
+      return cache[cacheKey];
+    } else {
+      return $http({
+        method: 'GET',
+        url: '/v1/' + type + '.json',
+        cache: true,
+        params: {
+          start: (start)? start.toISOString() : null,
+          end: (end)? end.toISOString() : null,
+          calendar_ids: JSON.stringify([calendarId]),
+          timezone: moment.tz.guess()
+        }
+      }).then(function successCallback(response) {
+        var modelData = response.data.results;
+        cache[cacheKey] = {};
+        for (var i = 0; i < modelData.length; i++) {
+          var model = modelData[i];
+          if (cache[cacheKey].hasOwnProperty(model.id)) {
+            var newHours = cache[cacheKey][model.id][hours] + model.hours;
+            cache[cacheKey][model.id][hours] = newHours;
+          } else {
+            if (type === 'tags') {
+              cache[cacheKey][model.id] = {
+                hours: model.hours, label: model.label, keywords: model.keywords
+              };
+            }
+            if (type === 'categories') {
+              cache[cacheKey][model.id] = {
+                hours: model.hours, label: model.label, color: model.category_color
+              };
+            }
+          }
+        }
+        return cache[cacheKey];
+      });
+    }
+  };
+}]);
