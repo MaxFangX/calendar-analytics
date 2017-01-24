@@ -66,6 +66,7 @@ analyticsApp.service("TagService", ['$http', '$q', 'QueryService', function($htt
     var tags = [];
 
     return $q.all(calendarData).then(function(response) {
+      // Add up duplicate tags across calendars.
       response.forEach(function(data) {
         for (var tagId in data) {
           if (accumulatedTags.hasOwnProperty(tagId)) {
@@ -154,18 +155,13 @@ analyticsApp.service("TagService", ['$http', '$q', 'QueryService', function($htt
 
 }]);
 
-analyticsApp.service('CategoryService', ['$http', '$q', function($http, $q) {
+analyticsApp.service('CategoryService', ['$http', '$q', 'QueryService', function($http, $q, QueryService) {
 
   var _this = this;
 
   this.categories = {};
 
   this.getCategories = function(filterKey, start, end, calendarIds) {
-    var calendarCategories = {}; // {calendarId : list of categories}
-    var accumulatedCategories = {};
-    var requests = [];
-    var calendarRequestsMap = {}; // {request index : calendarId}
-    var categories = [];
 
     if (!filterKey) {
       throw "filterKey must always be supplied";
@@ -179,66 +175,37 @@ analyticsApp.service('CategoryService', ['$http', '$q', function($http, $q) {
       }
     }
 
-    for (var i = 0; i < calendarIds.length; i++) {
-      var cacheKey = calendarIds[i] + " " + filterKey;
-      if (this.categories[cacheKey]) {
-        calendarCategories[calendarIds[i]] = this.categories[cacheKey];
-      } else {
-        requests.push($http({
-          method: 'GET',
-          url: '/v1/categories.json',
-          cache: true,
-          params: {
-            start: (start)? start.toISOString() : null,
-            end: (end)? end.toISOString() : null,
-            calendar_ids: JSON.stringify([calendarIds[i]]),
-            timezone: moment.tz.guess()
-          }
-        }));
-        calendarRequestsMap[i] = calendarIds[i];
-      }
-    }
+    var calendarData = calendarIds.map(function(calId) {
+      var cacheKey = calId + " " + filterKey;
+      _this.categories[cacheKey] = $q.when(QueryService.getDataForCalendarIds("categories", start, end, calId, _this.categories, cacheKey));
+      return $q.when(_this.categories[cacheKey]);
+    });
 
-    return $q.all(requests).then(function(responses) {
-      for (var j = 0; j < responses.length; j++) {
-        var data = responses[j].data.results;
-        var calId = calendarRequestsMap[j];
-        var cacheKey = calId + " " + filterKey;
-        calendarCategories[calId] = data;
-        _this.categories[cacheKey] = data;
-      }
+    var accumulatedCategories = {};
+    var categories = [];
 
-      for (var calendar in calendarCategories) {
-        for (var n = 0; n < calendarCategories[calendar].length; n++) {
-          var category = calendarCategories[calendar][n];
-          if (accumulatedCategories.hasOwnProperty(category.id)) {
-            var categoryInfo = accumulatedCategories[category.id];
-            categoryInfo[2] += category.hours;
-            accumulatedCategories[category.id] = categoryInfo;
+    return $q.all(calendarData).then(function(response) {
+      // Add up duplicate categories across calendars.
+      response.forEach(function(data) {
+        for (var categoryId in data) {
+          if (accumulatedCategories.hasOwnProperty(categoryId)) {
+            accumulatedCategories[categoryId].hours = accumulatedCategories[categoryId].hours + data[categoryId].hours;
           } else {
-            accumulatedCategories[category.id] =
-              [category.label, category.category_color, category.hours];
+            accumulatedCategories[categoryId] = data[categoryId];
           }
         }
-      }
-
-      for (var categoryId in accumulatedCategories) {
-        if (accumulatedCategories.hasOwnProperty(categoryId)) {
-          categories.push({
-            label: accumulatedCategories[categoryId][0],
-            id: categoryId,
-            include: true,
-            color: accumulatedCategories[categoryId][1],
-            hours: accumulatedCategories[categoryId][2]
-          });
-        }
+      });
+      for (var category in accumulatedCategories) {
+        categories.push({
+          id: category,
+          label: accumulatedCategories[category].label,
+          color: accumulatedCategories[category].color,
+          hours: accumulatedCategories[category].hours
+        });
       }
       return categories;
-    }, function errorCallback(response) {
-      console.log("Failed to get categories:");
-      console.log(response);
     });
-  };
+  }.bind(this);
 
   this.editCategory = function(categoryId, newLabel) {
     return $http({
@@ -377,12 +344,12 @@ analyticsApp.service('QueryService', ['$http', function($http) {
  //     cacheKey1:
  //       {
  //         tagId1: {totalHours: 5, label: school, keywords: “UC Berkeley”},
- //         tagId2: {totalHours: 5, label: exercise, tag.keywords: “Gym”}
+ //         tagId2: {totalHours: 5, label: music, tag.keywords: “Brandon Flowers”}
  //       },
  //     cacheKey2:
  //       {
  //         tagId1: {totalHours: 5, label: school, keywords: “UC Berkeley”},
- // 	      tagId2: {totalHours: 5, label: exercise, keywords: “Gym”}
+ // 	      tagId2: {totalHours: 5, label: music, keywords: “Brandon Flowers”}
  // 	    }
  //     ]
 
