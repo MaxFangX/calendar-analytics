@@ -352,13 +352,13 @@ analyticsApp.service('QueryService', ['$http', function($http) {
  //    [
  //     cacheKey1:
  //       {
- //         tagId1: {totalHours: 5, label: school, keywords: “UC Berkeley”},
- //         tagId2: {totalHours: 5, label: music, tag.keywords: “Brandon Flowers”}
+ //         tagId1: {totalHours: 5, label: "school", keywords: "UC Berkeley"},
+ //         tagId2: {totalHours: 5, label: "music", keywords: "Brandon Flowers"}
  //       },
  //     cacheKey2:
  //       {
- //         tagId1: {totalHours: 5, label: school, keywords: “UC Berkeley”},
- // 	      tagId2: {totalHours: 5, label: music, keywords: “Brandon Flowers”}
+ //         tagId1: {totalHours: 5, label: "school", keywords: “UC Berkeley”},
+ // 	      tagId2: {totalHours: 5, label: "music", keywords: “Brandon Flowers”}
  // 	    }
  //     ]
     var calendarData = {};
