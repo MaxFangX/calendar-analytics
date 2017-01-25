@@ -58,9 +58,8 @@ analyticsApp.service("TagService", ['$http', '$q', 'QueryService', function($htt
 
     var calendarData = calendarIds.map(function(calId) {
       var cacheKey = calId + " " + filterKey;
-      _this.tags[cacheKey] = $q.when(
+      return $q.when(
         QueryService.getDataForCalendarIds("tags", start, end, calId, _this.tags, cacheKey));
-      return $q.when(_this.tags[cacheKey]);
     });
 
     var accumulatedTags = {};
@@ -69,11 +68,13 @@ analyticsApp.service("TagService", ['$http', '$q', 'QueryService', function($htt
     return $q.all(calendarData).then(function successCallback(response) {
       // Add up duplicate tags across calendars.
       response.forEach(function(data) {
-        for (var tagId in data) {
+        var calendarKey = Object.keys(data)[0];
+        _this.tags[calendarKey] = data[calendarKey];
+        for (var tagId in data[calendarKey]) {
           if (accumulatedTags.hasOwnProperty(tagId.toString())) {
-            accumulatedTags[tagId].hours = accumulatedTags[tagId].hours + data[tagId].hours;
+            accumulatedTags[tagId].hours = accumulatedTags[tagId].hours + data[calendarKey][tagId].hours;
           } else {
-            accumulatedTags[tagId] = data[tagId];
+            accumulatedTags[tagId] = data[calendarKey][tagId];
           }
         }
       });
@@ -180,9 +181,8 @@ analyticsApp.service('CategoryService', ['$http', '$q', 'QueryService', function
 
     var calendarData = calendarIds.map(function(calId) {
       var cacheKey = calId + " " + filterKey;
-      _this.categories[cacheKey] =
-        $q.when(QueryService.getDataForCalendarIds("categories", start, end, calId, _this.categories, cacheKey));
-      return $q.when(_this.categories[cacheKey]);
+      return $q.when(
+        QueryService.getDataForCalendarIds("categories", start, end, calId, _this.categories, cacheKey));
     });
 
     var accumulatedCategories = {};
@@ -191,12 +191,14 @@ analyticsApp.service('CategoryService', ['$http', '$q', 'QueryService', function
     return $q.all(calendarData).then(function successCallback(response) {
       // Add up duplicate categories across calendars.
       response.forEach(function(data) {
-        for (var categoryId in data) {
+        var calendarKey = Object.keys(data)[0];
+        _this.categories[calendarKey] = data[calendarKey];
+        for (var categoryId in data[calendarKey]) {
           if (accumulatedCategories.hasOwnProperty(categoryId.toString())) {
             accumulatedCategories[categoryId].hours =
-              accumulatedCategories[categoryId].hours + data[categoryId].hours;
+              accumulatedCategories[categoryId].hours + data[calendarKey][categoryId].hours;
           } else {
-            accumulatedCategories[categoryId] = data[categoryId];
+            accumulatedCategories[categoryId] = data[calendarKey][categoryId];
           }
         }
       });
@@ -359,9 +361,10 @@ analyticsApp.service('QueryService', ['$http', function($http) {
  // 	      tagId2: {totalHours: 5, label: music, keywords: “Brandon Flowers”}
  // 	    }
  //     ]
-
+    var calendarData = {};
     if (cache[cacheKey]) {
-      return cache[cacheKey];
+      calendarData[cacheKey] = cache[cacheKey];
+      return calendarData;
     } else {
       return $http({
         method: 'GET',
@@ -375,26 +378,26 @@ analyticsApp.service('QueryService', ['$http', function($http) {
         }
       }).then(function successCallback(response) {
         var modelData = response.data.results;
-        cache[cacheKey] = {};
+        calendarData[cacheKey] = {};
         for (var i = 0; i < modelData.length; i++) {
           var model = modelData[i];
-          if (cache[cacheKey].hasOwnProperty(model.id.toString())) {
-            var newHours = cache[cacheKey][model.id][hours] + model.hours;
-            cache[cacheKey][model.id][hours] = newHours;
+          if (calendarData[cacheKey].hasOwnProperty(model.id.toString())) {
+            var newHours = calendarData[cacheKey][model.id][hours] + model.hours;
+            calendarData[cacheKey][model.id][hours] = newHours;
           } else {
             if (type === 'tags') {
-              cache[cacheKey][model.id] = {
+              calendarData[cacheKey][model.id] = {
                 hours: model.hours, label: model.label, keywords: model.keywords
               };
             }
             if (type === 'categories') {
-              cache[cacheKey][model.id] = {
+              calendarData[cacheKey][model.id] = {
                 hours: model.hours, label: model.label, color: model.category_color
               };
             }
           }
         }
-        return cache[cacheKey];
+        return calendarData;
       });
     }
   };
