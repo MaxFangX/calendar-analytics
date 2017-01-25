@@ -68,16 +68,15 @@ analyticsApp.service("TagService", ['$http', '$q', 'QueryService', function($htt
     return $q.all(calendarData).then(function successCallback(response) {
       // Add up duplicate tags across calendars.
       response.forEach(function(data) {
-        var calendarKey = Object.keys(data)[0];
-        _this.tags[calendarKey] = data[calendarKey];
-        for (var tagId in data[calendarKey]) {
+        for (var tagId in data) {
           if (accumulatedTags.hasOwnProperty(tagId.toString())) {
-            accumulatedTags[tagId].hours = accumulatedTags[tagId].hours + data[calendarKey][tagId].hours;
+            accumulatedTags[tagId].hours += data[tagId].hours;
           } else {
-            accumulatedTags[tagId] = data[calendarKey][tagId];
+            accumulatedTags[tagId] = data[tagId];
           }
         }
       });
+      // Construct the data for tag details.
       for (var tag in accumulatedTags) {
         tags.push({
           id: tag,
@@ -191,17 +190,15 @@ analyticsApp.service('CategoryService', ['$http', '$q', 'QueryService', function
     return $q.all(calendarData).then(function successCallback(response) {
       // Add up duplicate categories across calendars.
       response.forEach(function(data) {
-        var calendarKey = Object.keys(data)[0];
-        _this.categories[calendarKey] = data[calendarKey];
-        for (var categoryId in data[calendarKey]) {
+        for (var categoryId in data) {
           if (accumulatedCategories.hasOwnProperty(categoryId.toString())) {
-            accumulatedCategories[categoryId].hours =
-              accumulatedCategories[categoryId].hours + data[calendarKey][categoryId].hours;
+            accumulatedCategories[categoryId].hours += data[categoryId].hours;
           } else {
-            accumulatedCategories[categoryId] = data[calendarKey][categoryId];
+            accumulatedCategories[categoryId] = data[categoryId];
           }
         }
       });
+      // Construct the data for category details.
       for (var category in accumulatedCategories) {
         categories.push({
           id: category,
@@ -352,18 +349,18 @@ analyticsApp.service('QueryService', ['$http', function($http) {
  //    [
  //     cacheKey1:
  //       {
- //         tagId1: {totalHours: 5, label: "school", keywords: "UC Berkeley"},
- //         tagId2: {totalHours: 5, label: "music", keywords: "Brandon Flowers"}
+ //         tagId1: {hours: 5, label: "school", keywords: "UC Berkeley"},
+ //         tagId2: {hours: 5, label: "music", keywords: "Brandon Flowers"}
  //       },
  //     cacheKey2:
  //       {
- //         tagId1: {totalHours: 5, label: "school", keywords: “UC Berkeley”},
- // 	      tagId2: {totalHours: 5, label: "music", keywords: “Brandon Flowers”}
+ //         tagId1: {hours: 5, label: "school", keywords: “UC Berkeley”},
+ // 	      tagId2: {hours: 5, label: "music", keywords: “Brandon Flowers”}
  // 	    }
  //     ]
     var calendarData = {};
     if (cache[cacheKey]) {
-      calendarData[cacheKey] = cache[cacheKey];
+      calendarData = angular.copy(cache[cacheKey]);
       return calendarData;
     } else {
       return $http({
@@ -378,25 +375,24 @@ analyticsApp.service('QueryService', ['$http', function($http) {
         }
       }).then(function successCallback(response) {
         var modelData = response.data.results;
-        calendarData[cacheKey] = {};
-        for (var i = 0; i < modelData.length; i++) {
-          var model = modelData[i];
-          if (calendarData[cacheKey].hasOwnProperty(model.id.toString())) {
-            var newHours = calendarData[cacheKey][model.id][hours] + model.hours;
-            calendarData[cacheKey][model.id][hours] = newHours;
+        modelData.forEach(function(model) {
+          if (calendarData.hasOwnProperty(model.id.toString())) {
+            calendarData[model.id].hours += model.hours;
           } else {
             if (type === 'tags') {
-              calendarData[cacheKey][model.id] = {
+              calendarData[model.id] = {
                 hours: model.hours, label: model.label, keywords: model.keywords
               };
             }
             if (type === 'categories') {
-              calendarData[cacheKey][model.id] = {
+              calendarData[model.id] = {
                 hours: model.hours, label: model.label, color: model.category_color
               };
             }
           }
-        }
+        });
+        // Save the data in the cache.
+        cache[cacheKey] = angular.copy(calendarData);
         return calendarData;
       });
     }
