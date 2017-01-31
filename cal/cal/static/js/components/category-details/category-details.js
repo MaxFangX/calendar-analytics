@@ -1,5 +1,5 @@
 analyticsApp.component('categoryDetails', {
-  templateUrl: '/static/templates/category-details.html',
+  templateUrl: '/static/js/components/category-details/category-details.html',
   controller: ['$scope', '$http', 'QueryService', CategoriesDetailCtrl],
   controllerAs: '$ctrl',
   bindings: {

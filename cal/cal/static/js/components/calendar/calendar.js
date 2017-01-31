@@ -1,5 +1,5 @@
 analyticsApp.component('calendar', {
-  templateUrl: '/static/templates/calendar.html',
+  templateUrl: '/static/js/components/calendar/calendar.html',
   controller: 'CalendarCtrl'
 });
 

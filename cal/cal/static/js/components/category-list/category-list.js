@@ -1,5 +1,5 @@
 analyticsApp.component('categoryList', {
-  templateUrl: '/static/templates/category-list.html',
+  templateUrl: '/static/js/components/category-list/category-list.html',
   controller: ['$scope', '$http', 'CalendarFilterService', 'CategoryService', CategoryListCtrl],
   controllerAs: '$ctrl',
   bindings: {
