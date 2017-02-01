@@ -14,14 +14,12 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
   this.$onInit = function () {
     var categoryId = this.categoryId;
     this.categoryUrl = '/v1/categories/' + categoryId + '/events';
-    this.timeseriesWeek = '/v1/categories/' + categoryId + '/timeseries/week';
-    this.timeseriesMonth = '/v1/categories/' + categoryId + '/timeseries/month';
-    this.timeseriesDay = '/v1/categories/' + categoryId + '/timeseries/day';
     this.initialize();
   };
   var query_timezone = moment.tz.guess();
   this.categoryEvents = [];
   this.pageEvents = [];
+  this.dailyData = [];
   this.categoryEvents.dataLoaded = false;
   this.timeStep = "";
   this.currentPage = 0;
@@ -63,61 +61,35 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
   }.bind(this);
 
   this.showDaily = function() {
-    $http({
-      method: 'GET',
-      url: this.timeseriesDay + '.json',
-      params: {
-        timezone: query_timezone,
-      }
-    }).
-    then(function successCallback(response) {
+    QueryService.populateDay('Category day' + _this.categoryId, 'Category', _this.categoryId, []).
+    then(function populate(data) {
       _this.timeStep = "day";
-      _this.averageHours = Math.round(((_this.categoryHours / response.data[0].length) * 100)) / 100;
-      var eventData = QueryService.populateData(response.data, 'Category');
-      _this.ctrlGraphData = eventData[0];
-      _this.showGraph(eventData[1]);
+      var numDays = data.lineGraph[0].values.length;
+      _this.averageHours = Math.round(((_this.categoryHours / numDays) * 100)) / 100;
+      _this.ctrlGraphData = data.lineGraph;
+      _this.showGraph(data.maxYValue);
+      _this.dailyData = data;
     }, function errorCallback() {
       throw "Failed to get timeseries day";
     });
   };
 
   this.showWeekly = function() {
-    $http({
-      method: 'GET',
-      url: this.timeseriesWeek + '.json',
-      params: {
-        timezone: query_timezone,
-      }
-    }).
-    then(function successCallback(response) {
-      _this.timeStep = "week";
-      // round(... * 100) / 100 neceessary to round average hours to two decimal
-      _this.averageHours = Math.round(((_this.categoryHours / response.data[0].length) * 100)) / 100;
-      var eventData = QueryService.populateData(response.data, 'Category');
-      _this.ctrlGraphData = eventData[0];
-      _this.showGraph(eventData[1]);
-    }, function errorCallback() {
-      throw "Failed to get timeseries week";
-    });
+    var data = QueryService.populateData('Category week' + _this.categoryId, 'Category', _this.categoryId, "week", _this.dailyData);
+    _this.timeStep = "week";
+    var numWeeks = data.lineGraph[0].values.length;
+    _this.averageHours = Math.round(((_this.categoryHours / numWeeks) * 100)) / 100;
+    _this.ctrlGraphData = data.lineGraph;
+    _this.showGraph(data.maxYValue);
   };
 
   this.showMonthly = function() {
-    $http({
-      method: 'GET',
-      url: this.timeseriesMonth + '.json',
-      params: {
-        timezone: query_timezone,
-      }
-    }).
-    then(function successCallback(response) {
-      _this.timeStep = "month";
-      _this.averageHours = Math.round(((_this.categoryHours / response.data[0].length) * 100)) / 100;
-      var eventData = QueryService.populateData(response.data, 'Category');
-      _this.ctrlGraphData = eventData[0];
-      _this.showGraph(eventData[1]);
-    }, function errorCallback() {
-      throw "Failed to get timeseries month";
-    });
+    var data = QueryService.populateData('Category month' + _this.categoryId, 'Category', _this.categoryId, "month", _this.dailyData);
+   _this.timeStep = "month";
+   var numMonths = data.lineGraph[0].values.length;
+   _this.averageHours = Math.round(((_this.categoryHours / numMonths) * 100)) / 100;
+   _this.ctrlGraphData = data.lineGraph;
+   _this.showGraph(data.maxYValue);
   };
 
   this.showPageEvents = function() {
@@ -159,7 +131,7 @@ function CategoriesDetailCtrl($scope, $http, QueryService){
   };
 
   this.initialize = function() {
-    this.showWeekly();
+    this.showDaily();
     this.getEvents(1);
   }.bind(this);
 }
