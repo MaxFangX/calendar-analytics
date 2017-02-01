@@ -88,9 +88,13 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
   };
 
   this.showTagsByCategories = function() {
+    var filterData = CalendarFilterService.getFilter();
     $http({
       method: 'GET',
       url: this.categoryTags + '.json',
+      params: {
+        calendar_ids: JSON.stringify(filterData.calendarIds),
+      }
     }).then(function successCallback(response) {
       _this.tagsByCategoriesData = [];
       for (var i = 0; i < response.data.length; i++) {
