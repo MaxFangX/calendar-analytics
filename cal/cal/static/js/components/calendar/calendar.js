@@ -108,7 +108,7 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
      return element;
    };
    
-   $scope.loading = function(isLoading, view){
+   this.loading = function(isLoading, view){
       if (isLoading) {
         $('#calendar-preloader').show();
         $('.calendar').hide();
@@ -116,7 +116,7 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
         $('#calendar-preloader').hide();
         $('.calendar').show();
       }
-    };
+    }.bind(this);
 
    this.viewRender = function(view, element) {
    
@@ -126,7 +126,6 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
      if(_this.calendars.length !== 0) {
        CalendarFilterService.setFilter(view.start, view.end,
                                        this.getEnabledCalendarIds());
-
      }
    }.bind(this);
    
@@ -142,11 +141,10 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
        firstDay: 1,
        eventRender: $scope.eventRender,
        viewRender: this.viewRender,
-       loading: $scope.loading
+       loading: this.loading
      }
    };
   
-
    this.refresh = function(calendarName) {
      if(uiCalendarConfig.calendars[calendarName] !== undefined){
        uiCalendarConfig.calendars[calendarName].fullCalendar('refetchEvents');
