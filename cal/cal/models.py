@@ -605,7 +605,7 @@ class Category(models.Model, EventCollection):
     def hours(self, calendar_ids=None, start=None, end=None):
         events = self.get_events(calendar_ids=calendar_ids, start=start, end=end)
         # round(...) necessary to display hours to two decimal points
-        return round(EventCollection(lambda: events).total_time() / 3600.0, 2)
+        return round(EventCollection(lambda: events).total_time(start=start, end=end) / 3600.0, 2)
 
     def category_color(self):
         return get_color(self.calendar, self.color_index)['background']
@@ -675,7 +675,7 @@ class Tag(models.Model, EventCollection):
     def hours(self, calendar_ids=None, start=None, end=None):
         events = self.get_events(calendar_ids=calendar_ids, start=start, end=end)
         # round(...) necessary to display hours to two decimal points
-        return round(EventCollection(lambda: events).total_time() / 3600.0, 2)
+        return round(EventCollection(lambda: events).total_time(start=start, end=end) / 3600.0, 2)
 
     def get_events(self, calendar_ids=None, start=None, end=None):
         """
@@ -754,7 +754,7 @@ class Tag(models.Model, EventCollection):
                 else:
                     events_qs = events_qs.filter(start__lt=datetime.now(pytz.utc))
 
-                hours = round(EventCollection(lambda:set(events_qs)).total_time() / 3600.0, 2)
+                hours = round(EventCollection(lambda:set(events_qs)).total_time(start=start, end=end) / 3600.0, 2)
                 for i in range(1, len(events_qs)):
                     if (events_qs[i - 1].end - events_qs[i].start).total_seconds() > 0:
                         # events overlap
