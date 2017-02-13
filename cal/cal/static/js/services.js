@@ -252,51 +252,134 @@ analyticsApp.service('CategoryService', ['$http', '$q', 'QueryService', function
 
 }]);
 
-analyticsApp.service('QueryService', ['$http', function($http) {
-  this.populateData = function(data, type) {
+analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
+
+  var _this = this;
+
+  this.details = {};
+
+  this.populateData = function(filterKey, type, id, timeStep, data) {
+    // Attempt to return cached categories
+    if (_this.details[filterKey]) {
+      return _this.details[filterKey];
+    }
+
+    var dailyData = data.lineGraph[0].values;
     var ctrlDetails = [];
+
+    // Type line
+    var timeStepData = [];
+    // Gets hours of first datapoint
+    var start = new Date(dailyData[0].x);
+    var offset = 0;
+
+    if (timeStep == "week") {
+      // Find closest Monday
+      start.setDate(start.getDate() - start.getDay() + (start.getDay() === 0 ? -6:1));
+      offset = start.getDay();
+    }
+    if (timeStep == "month") {
+      offset = start.getDate();
+      start.setDate(1);
+    }
+
+    var timeStepHours = 0;
     var maxYValue = 0;
-    var events = [];
-    var movingAverage = [];
+
+    // Trendline
     var xLabels = [];
     var yLabels = [];
-    for (var i = 0; i < data[0].length; i++) {
-      var event = data[0][i];
-      var date = new Date(event[0]);
-      var hours = event[1];
-      if (hours > maxYValue) {
-        maxYValue = hours;
+
+    // Moving average
+    var movingAverageList = [];
+    var data_point = 0;
+    var moving_average = 0;
+    var period = 7;
+    var endOfTimeStep = true;
+
+    for (var i = 0; i < dailyData.length; i++) {
+      timeStepHours += dailyData[i].y;
+
+      if (timeStep == "week") {
+        endOfTimeStep = (i + offset) % 7 === 0;
       }
-      xLabels.push(date);
-      yLabels.push(hours);
-      events.push({
-        x: date,
-        y: hours
+      if (timeStep == "month") {
+        endOfTimeStep = offset == new Date(start.getYear(), start.getMonth() + 1, 0).getDate();
+        offset += 1;
+      }
+
+      if (endOfTimeStep) {
+        xLabels.push(new Date(start));
+        yLabels.push(timeStepHours);
+
+        timeStepData.push({
+          x: new Date(start),
+          y: timeStepHours
+        });
+
+        // Max Y Value logic
+        if (timeStepHours > maxYValue) {
+          maxYValue = timeStepHours;
+        }
+
+        // Moving average logic.
+        if (data_point < period - 1) {
+          moving_average += timeStepHours;
+        } else {
+          if (data_point - period == -1) {
+            first_event = 0;
+          } else {
+            first_event = timeStepData[data_point - period].y;
+          }
+          moving_average = moving_average - first_event + timeStepHours;
+          movingAverageList.push({
+            x: new Date(start),
+            y: moving_average / period
+          });
+        }
+        data_point += 1;
+
+        timeStepHours = 0;
+        if (timeStep == "week") {
+          start.setDate(start.getDate() + 7);
+        }
+        if (timeStep == "month") {
+          offset = 1;
+          start.setMonth(start.getMonth() + 1);
+        }
+      }
+    }
+
+    if (timeStep == "week") {
+      endOfTimeStep = (i + offset) % 7 !== 0;
+    }
+    if (timeStep == "month") {
+      endOfTimeStep = offset != new Date(start.getYear(), start.getMonth() + 1, 0).getDate();
+    }
+    // Take care of this week/month
+    if (endOfTimeStep) {
+      xLabels.push(new Date(start));
+      yLabels.push(timeStepHours);
+      timeStepData.push({
+        x: new Date(start),
+        y: timeStepHours
       });
 
-      if (i < data[1].length) {
-        // MA = Moving Average
-        var MAEvent = data[1][i];
-        var MADate = new Date(MAEvent[0]);
-        var MAHours = MAEvent[1];
-        movingAverage.push({
-          x: MADate,
-          y: MAHours
+      if (data_point > period - 1) {
+        // Moving average for this week/month
+        first_event = timeStepData[data_point - period].y;
+        moving_average = moving_average - first_event + timeStepHours;
+        movingAverageList.push({
+          x: new Date(start),
+          y: moving_average / period
         });
       }
     }
-    var xSeries = d3.range(1, xLabels.length + 1);
-    var leastSquaresCoeff = leastSquares(xSeries, yLabels);
 
-    // apply the results of the least squares regression
-    var x1 = xLabels[0];
-    var y1 = leastSquaresCoeff[0] + leastSquaresCoeff[1];
-    var x2 = xLabels[xLabels.length - 1];
-    var y2 = leastSquaresCoeff[0] * xSeries.length + leastSquaresCoeff[1];
-    var trendData = [{x:x1,y:y1},{x:x2,y:y2}];
+    var trendData = trendLine(xLabels, yLabels);
 
     ctrlDetails.push({
-      values: events,
+      values: timeStepData,
       key: type + ' Line',
       color: '#DDD5C7',
       strokeWidth: 2,
@@ -309,17 +392,117 @@ analyticsApp.service('QueryService', ['$http', function($http) {
       strokeWidth: 3,
     });
 
-    if (movingAverage.length != 1) {
-      ctrlDetails.push({
-        values: movingAverage,
-        key: '7D Moving Average Line',
-        color: '#003057',
-        strokeWidth: 3,
-      });
+    ctrlDetails.push({
+      values: movingAverageList,
+      key: '7D Moving Average Line',
+      color: '#003057',
+      strokeWidth: 3,
+    });
+
+    _this.details[filterKey] = {lineGraph: ctrlDetails, maxYValue: maxYValue + 10};
+    return _this.details[filterKey];
+  };
+
+  this.populateDay = function(filterKey, type, id, calendarIds) {
+    if (!filterKey) {
+      throw "filterKey must always be supplied";
     }
 
-    return [ctrlDetails, maxYValue];
+    // Attempt to return cached categories
+    if (_this.details[filterKey]) {
+      return $q.when(_this.details[filterKey]);
+    }
+
+    var timeseriesUrl = "";
+    if (type == "Category") {
+      timeseriesUrl = '/v1/categories/' + id + '/timeseries/day';
+    } else {
+      timeseriesUrl = '/v1/tags/' + id + '/timeseries/day';
+    }
+    return $http({
+      method: 'GET',
+      url: timeseriesUrl + '.json',
+      params: {
+        timezone: moment.tz.guess(),
+        calendar_ids: JSON.stringify(calendarIds)
+      }
+    }).then(function successCallback(response) {
+      var data = response.data;
+      var ctrlDetails = [];
+      var maxYValue = 0;
+      var events = [];
+      var movingAverage = [];
+      var xLabels = [];
+      var yLabels = [];
+      for (var i = 0; i < data[0].length; i++) {
+        var event = data[0][i];
+        var date = new Date(event[0]);
+        var hours = event[1];
+        if (hours > maxYValue) {
+          maxYValue = hours;
+        }
+        xLabels.push(date);
+        yLabels.push(hours);
+        events.push({
+          x: date,
+          y: hours
+        });
+
+        if (i < data[1].length) {
+          // MA = Moving Average
+          var MAEvent = data[1][i];
+          var MADate = new Date(MAEvent[0]);
+          var MAHours = MAEvent[1];
+          movingAverage.push({
+            x: MADate,
+            y: MAHours
+          });
+        }
+      }
+
+      var trendData = trendLine(xLabels, yLabels);
+
+      // This line should always be pushed on first
+      ctrlDetails.push({
+        values: events,
+        key: type + ' Line',
+        color: '#DDD5C7',
+        strokeWidth: 2,
+      });
+
+      ctrlDetails.push({
+        values: trendData,
+        key: 'Trend Line',
+        color: '#FDB515',
+        strokeWidth: 3,
+      });
+
+      if (movingAverage.length != 1) {
+        ctrlDetails.push({
+          values: movingAverage,
+          key: '7D Moving Average Line',
+          color: '#003057',
+          strokeWidth: 3,
+        });
+      }
+      _this.details[filterKey] = {lineGraph: ctrlDetails, maxYValue: maxYValue};
+      return _this.details[filterKey];
+    });
   };
+
+
+  function trendLine(xLabels, yLabels) {
+    var xSeries = d3.range(1, xLabels.length + 1);
+    var leastSquaresCoeff = leastSquares(xSeries, yLabels);
+
+    // apply the results of the least squares regression
+    var x1 = xLabels[0];
+    var y1 = leastSquaresCoeff[0] + leastSquaresCoeff[1];
+    var x2 = xLabels[xLabels.length - 1];
+    var y2 = leastSquaresCoeff[0] * xSeries.length + leastSquaresCoeff[1];
+    return [{x:x1,y:y1},{x:x2,y:y2}];
+
+  }
 
   // returns slope, intercept and r-square of the line
   function leastSquares(xSeries, ySeries) {
@@ -350,12 +533,12 @@ analyticsApp.service('QueryService', ['$http', function($http) {
  //     cacheKey1:
  //       {
  //         tagId1: {hours: 5, label: "school", keywords: "UC Berkeley"},
- //         tagId2: {hours: 5, label: "music", keywords: "Brandon Flowers"}
+ //         tagId2: {hours: 5, label: "music", keywords: "The All-American Rejects"}
  //       },
  //     cacheKey2:
  //       {
  //         tagId1: {hours: 5, label: "school", keywords: “UC Berkeley”},
- // 	      tagId2: {hours: 5, label: "music", keywords: “Brandon Flowers”}
+ // 	      tagId2: {hours: 5, label: "music", keywords: “The All-American Rejects”}
  // 	    }
  //     ]
     var calendarData = {};

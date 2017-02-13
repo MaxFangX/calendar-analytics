@@ -1,5 +1,5 @@
 analyticsApp.component('tagDetails', {
-  templateUrl: '/static/templates/tag-details.html',
+  templateUrl: '/static/js/components/tag-details/tag-details.html',
   controller: ['$scope', '$interpolate', '$http', 'CalendarFilterService', 'QueryService', TagsDetailCtrl],
   bindings: {
     label: '@',
@@ -14,16 +14,13 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
     var tagId = this.tagId;
     this.tagUrl = '/v1/tags/' + tagId;
     this.tagEvent = '/v1/tags/' + tagId + '/events';
-    this.timeseriesWeek = '/v1/tags/' + tagId + '/timeseries/week';
-    this.timeseriesMonth = '/v1/tags/' + tagId + '/timeseries/month';
-    this.timeseriesDay = '/v1/tags/' + tagId + '/timeseries/day';
     this.categoryTags = '/v1/tags/' + tagId + '/by-category';
   };
   var query_timezone = moment.tz.guess();
-  var calendarIds = [];
   this.tagHours = 0;
   this.tagEvents = [];
   this.pageEvents = [];
+  this.dailyData = [];
   this.tagEvents.dataLoaded = false;
   this.timeStep = "";
   this.currentPage = 0;
@@ -33,7 +30,6 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
   $scope.$on('calendarFilter:updated', function(event, data) {
     _this.tagEvents.dataLoaded = false;
     var filterData = CalendarFilterService.getFilter();
-    calendarIds = filterData.calendarIds;
     if (filterData.calendarIds.length > 0) {
       _this.refresh();
     }
@@ -92,9 +88,13 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
   };
 
   this.showTagsByCategories = function() {
+    var filterData = CalendarFilterService.getFilter();
     $http({
       method: 'GET',
       url: this.categoryTags + '.json',
+      params: {
+        calendar_ids: JSON.stringify(filterData.calendarIds),
+      }
     }).then(function successCallback(response) {
       _this.tagsByCategoriesData = [];
       for (var i = 0; i < response.data.length; i++) {
@@ -112,62 +112,36 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
   };
 
   this.showDaily = function() {
-    $http({
-      method: 'GET',
-      url: this.timeseriesDay + '.json',
-      params: {
-        timezone: query_timezone,
-        calendar_ids: JSON.stringify(calendarIds),
-      }
-    }).then(function successCallback(response) {
+    var filterData = CalendarFilterService.getFilter();
+    QueryService.populateDay('Tag day ' + filterData.calendarIds + _this.tagId, 'Tag', _this.tagId, filterData.calendarIds).
+    then(function populate(data) {
       _this.timeStep = "day";
-      // round(... * 100) / 100 necessary to round average hours to two decimal
-      _this.averageHours = Math.round(((_this.tagHours / response.data[0].length) * 100)) / 100;
-      var eventData = QueryService.populateData(response.data,'Tag');
-      _this.ctrlGraphData = eventData[0];
-      _this.showGraph(eventData[1]);
-    }, function errorCallback() {
-      throw "Failed to get timeseries day";
-    });
+      var numDays = data.lineGraph[0].values.length
+      _this.averageHours = Math.round(((_this.tagHours / numDays) * 100)) / 100;
+      _this.ctrlGraphData = data.lineGraph;
+      _this.showGraph(data.maxYValue);
+      _this.dailyData = data;
+    })
   };
 
   this.showWeekly = function() {
-    $http({
-      method: 'GET',
-      url: this.timeseriesWeek + '.json',
-      params: {
-        timezone: query_timezone,
-        calendar_ids: JSON.stringify(calendarIds),
-      }
-    }).then(function successCallback(response) {
-      _this.timeStep = "week";
-      // round(... * 100) / 100 necessary to round average hours to two decimal
-      _this.averageHours = Math.round(((_this.tagHours / response.data[0].length) * 100)) / 100;
-      var eventData = QueryService.populateData(response.data,'Tag');
-      _this.ctrlGraphData = eventData[0];
-      _this.showGraph(eventData[1]);
-      }, function errorCallback(response) {
-        throw "Could not get weekly timeseries";
-      });
+    var filterData = CalendarFilterService.getFilter();
+    var data = QueryService.populateData('Tag week ' + filterData.calendarIds + _this.tagId, 'Tag', _this.tagId, "week", _this.dailyData)
+    _this.timeStep = "week";
+    var numWeeks = data.lineGraph[0].values.length
+    _this.averageHours = Math.round(((_this.tagHours / numWeeks) * 100)) / 100;
+    _this.ctrlGraphData = data.lineGraph;
+    _this.showGraph(data.maxYValue);
   };
 
   this.showMonthly = function() {
-    $http({
-      method: 'GET',
-      url: this.timeseriesMonth + '.json',
-      params: {
-        timezone: query_timezone,
-        calendar_ids: JSON.stringify(calendarIds),
-      }
-    }).then(function successCallback(response) {
-      _this.timeStep = "month";
-      _this.averageHours = Math.round(((_this.tagHours / response.data[0].length) * 100)) / 100;
-      var eventData = QueryService.populateData(response.data,'Tag');
-      _this.ctrlGraphData = eventData[0];
-      _this.showGraph(eventData[1]);
-    }, function errorCallback() {
-      throw "Could not get monthly timeseries";
-    });
+    var filterData = CalendarFilterService.getFilter();
+    var data = QueryService.populateData('Tag month ' + filterData.calendarIds + _this.tagId, 'Tag', _this.tagId, "month", _this.dailyData)
+    _this.timeStep = "month";
+    var numMonths = data.lineGraph[0].values.length
+    _this.averageHours = Math.round(((_this.tagHours / numMonths) * 100)) / 100;
+    _this.ctrlGraphData = data.lineGraph;
+    _this.showGraph(data.maxYValue);
   };
 
   this.showPageEvents = function() {
@@ -180,12 +154,13 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
   }.bind(this);
 
   this.getEvents = function(pageNum) {
+    var filterData = CalendarFilterService.getFilter();
     $http({
       method: 'GET',
       url: this.tagEvent + '.json',
       params: {
         page: pageNum,
-        calendar_ids: JSON.stringify(calendarIds)
+        calendar_ids: JSON.stringify(filterData.calendarIds)
       }
     }).then(function successCallback(response) {
       _this.tagEvents = [];
@@ -208,18 +183,19 @@ function TagsDetailCtrl($scope, $interpolate, $http, CalendarFilterService, Quer
   };
 
   this.refresh = function() {
+    var filterData = CalendarFilterService.getFilter();
     $http({
       method: 'GET',
       url: this.tagUrl + '.json',
       params: {
-        calendar_ids: JSON.stringify(calendarIds),
+        calendar_ids: JSON.stringify(filterData.calendarIds),
       }
     }).then(function successCallback(response) {
       _this.tagHours = response.data.hours;
-      if (_this.timeStep === "day") {
+      if (_this.timeStep === "day" || _this.timeStep === "") {
         _this.showDaily();
       }
-      if (_this.timeStep === "week" || _this.timeStep === "") {
+      if (_this.timeStep === "week") {
         _this.showWeekly();
       }
       if (_this.timeStep === "month") {

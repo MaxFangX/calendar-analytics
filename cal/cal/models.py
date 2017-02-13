@@ -726,7 +726,7 @@ class Tag(models.Model, EventCollection):
         return get_time_series(self, timezone, time_step, calendar_ids, start, end)
 
 
-    def get_category_stats(self, categories, start=None, end=None):
+    def get_category_stats(self, categories, calendar_ids=None, start=None, end=None):
         """
         Returns a list of category-hour tuples corresponding to the number of hours per category
         that corresponds to this Tag.
@@ -735,31 +735,32 @@ class Tag(models.Model, EventCollection):
         keywords = self.keywords.split(',')
 
         for category in categories:
-            querysets = [
-                    GEvent.objects
-                    .filter(calendar__user=category.user, calendar=category.calendar,
-                            name__regex=r'\b(?i)[^a-zA-Z\d:]?'+keyword+r'(?i)[^a-zA-Z\d:]?\b',
-                            color_index=category.color_index)
-                    for keyword in keywords
-                    ]
+            if category.calendar and category.calendar.calendar_id in calendar_ids:
+                querysets = [
+                        GEvent.objects
+                        .filter(calendar__user=category.user, calendar=category.calendar,
+                                name__regex=r'\b(?i)[^a-zA-Z\d:]?'+keyword+r'(?i)[^a-zA-Z\d:]?\b',
+                                color_index=category.color_index)
+                        for keyword in keywords
+                        ]
 
-            events_qs = reduce(lambda qs1, qs2: qs1 | qs2, querysets)
-            events_qs = events_qs.order_by('start')
+                events_qs = reduce(lambda qs1, qs2: qs1 | qs2, querysets)
+                events_qs = events_qs.order_by('start')
 
-            if start:
-                events_qs = events_qs.filter(end__gt=start)
-            if end:
-                events_qs = events_qs.filter(start__lt=end)
-            else:
-                events_qs = events_qs.filter(start__lt=datetime.now(pytz.utc))
+                if start:
+                    events_qs = events_qs.filter(end__gt=start)
+                if end:
+                    events_qs = events_qs.filter(start__lt=end)
+                else:
+                    events_qs = events_qs.filter(start__lt=datetime.now(pytz.utc))
 
-            hours = round(EventCollection(lambda:set(events_qs)).total_time() / 3600.0, 2)
-            for i in range(1, len(events_qs)):
-                if (events_qs[i - 1].end - events_qs[i].start).total_seconds() > 0:
-                    # events overlap
-                    hours -= round((events_qs[i - 1].end - events_qs[i].start).total_seconds() / 3600.0, 2)
+                hours = round(EventCollection(lambda:set(events_qs)).total_time() / 3600.0, 2)
+                for i in range(1, len(events_qs)):
+                    if (events_qs[i - 1].end - events_qs[i].start).total_seconds() > 0:
+                        # events overlap
+                        hours -= round((events_qs[i - 1].end - events_qs[i].start).total_seconds() / 3600.0, 2)
 
-            category_hours.append((category.label, category.category_color(), hours))
+                category_hours.append((category.label, category.category_color(), hours))
 
         return category_hours
 
