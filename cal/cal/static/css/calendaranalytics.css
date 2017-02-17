@@ -62,28 +62,36 @@ input[type=text] {
   margin-top: 10%; }
 
 .cal-home-logged-out {
-  height: 100%;
-  background-image: url("https://blogpfeifferlab.files.wordpress.com/2012/01/cf_desk_0937.jpg");
+  height: 60%;
+  background-image: url("https://images.pexels.com/photos/27893/pexels-photo-27893.jpg?w=940&h=650&auto=compress&cs=tinysrgb");
   background-repeat: no-repeat scroll;
-  background-size: 130%; }
-  .cal-home-logged-out .cal-main-display {
-    background-color: transparent;
+  background-size: 100%; }
+  .cal-home-logged-out .cal-main-display, .cal-home-logged-out .cal-header {
     height: 100%;
+    padding: 0 50px; }
+    .cal-home-logged-out .cal-main-display .cal-description, .cal-home-logged-out .cal-header .cal-description {
+      max-width: 50%;
+      color: white; }
+    .cal-home-logged-out .cal-main-display h1, .cal-home-logged-out .cal-header h1 {
+      color: white; }
+    .cal-home-logged-out .cal-main-display .col-md-4 h3, .cal-home-logged-out .cal-header .col-md-4 h3 {
+      text-align: center; }
+    .cal-home-logged-out .cal-main-display .col-info, .cal-home-logged-out .cal-header .col-info {
+      padding: 20px;
+      text-align: center; }
+  .cal-home-logged-out .cal-header {
     padding: 50px;
-    min-height: 400px; }
-    .cal-home-logged-out .cal-main-display .cal-description {
-      max-width: 50%; }
+    background-color: rgba(0, 0, 0, 0.3); }
   .cal-home-logged-out .cal-call-to-action-text {
     text-align: center; }
   .cal-home-logged-out .cal-signin-button {
     position: relative;
-    height: 50px;
-    left: 50%;
-    bottom: 0;
-    width: 200px;
-    margin-left: -100px;
+    float: left;
+    top: 50px;
     font-size: 16px;
-    font-weight: 500; }
+    border: 0px; }
+  .cal-home-logged-out img {
+    width: 100%; }
 
 table {
   font-size: 14px;
