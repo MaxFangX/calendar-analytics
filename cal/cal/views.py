@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect, HttpResponseBadRequest
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
 
@@ -128,8 +128,8 @@ def google_auth(request):
         auth_uri = flow.step1_get_authorize_url()
         return HttpResponseRedirect(auth_uri)
 
+
 def handler404(request):
-    response = render_to_response('404.html', {},
-                                  context_instance=RequestContext(request))
+    response = render('404.html', {}, context_instance=RequestContext(request))
     response.status_code = 404
     return response
