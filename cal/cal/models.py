@@ -60,7 +60,7 @@ class Profile(models.Model):
         if calendar_ids:
             for calendar_str in calendar_ids:
                 try:
-                    c = GCalendar.objects.get(calendar_id=calendar_str)
+                    c = GCalendar.objects.get(calendar_id=calendar_str, user=self.user)
                 except GCalendar.DoesNotExist:
                     raise InvalidParameterException("Provided calendar {} does not exist".format(calendar_str))
                 if c.user != self.user:
@@ -880,7 +880,8 @@ class GoogleCredentials(models.Model):
                 gcal.update_meta()
 
         calendar_ids = [cal['id'] for cal in result['items'] if cal['accessRole'] == 'owner']
-        inaccessible_calendars = GCalendar.objects.exclude(calendar_id__in=calendar_ids)
+        inaccessible_calendars = GCalendar.objects.filter(user=self.user)\
+                                                  .exclude(calendar_id__in=calendar_ids)
         for i in inaccessible_calendars:
             print "Deleting calendar '{}' because it is now inaccessible".format(i.summary)
             i.delete()
