@@ -38,6 +38,13 @@ h4 {
   padding: 70px;
   background: url('/static/img/preloader.gif') no-repeat 50% 50% transparent;
 }
+.large-preloader {
+  position: fixed;
+  margin: 5%;
+  z-index: 100;
+  padding: 300px;
+  background: url('/static/img/big-preloader.gif') no-repeat 50% 50% transparent;
+}
 
 button {
   margin: 2px;
@@ -165,5 +172,6 @@ body {
 .calendar-border {
   border-left: 1px solid #D3D3D3;
 }
+
 
 /*# sourceMappingURL=calendaranalytics.css.map */
