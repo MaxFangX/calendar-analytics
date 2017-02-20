@@ -17,9 +17,14 @@
               Hours
             </a>
           </th>
+          <th>
+            <button class="btn btn-primary pull-right" ng-click="$ctrl.hideZeroHours = !$ctrl.hideZeroHours">Toggle Zero Hours</button>
+          </th>
         </thead>
         <tbody>
-          <tr ng-repeat="category in $ctrl.categories | orderBy:orderByField:reverseSort">
+          <tr ng-repeat="category in $ctrl.categories
+                        | filter : $ctrl.hideZeroHoursFilter
+                        | orderBy:orderByField:reverseSort">
             <td ng-hide="category.editing">
               <ul style="list-style-type: square; margin-left: -15px">
                 <li style="color: {{ category.color }}">

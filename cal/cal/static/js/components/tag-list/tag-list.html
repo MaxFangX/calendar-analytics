@@ -15,6 +15,9 @@
             Hours
           </a>
         </th>
+        <th>
+          <button class="btn btn-primary pull-right" ng-click="$ctrl.hideZeroHours = !$ctrl.hideZeroHours">Toggle Zero Hours</button>
+        </th>
       </thead>
       <tbody>
         <tr ng-repeat="tag in $ctrl.tags
