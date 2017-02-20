@@ -76,20 +76,34 @@ input[type=text] {
 }
 
 .cal-home-logged-out {
-  height: 100%;
-  background-image: url("https://blogpfeifferlab.files.wordpress.com/2012/01/cf_desk_0937.jpg");
+  height: 60%;
+  background-image: url("https://images.pexels.com/photos/27893/pexels-photo-27893.jpg?w=940&h=650&auto=compress&cs=tinysrgb");
   background-repeat: no-repeat scroll;
-  background-size: 130%;
+  background-size: 100%;
 
-  .cal-main-display {
-    background-color: transparent;
+  .cal-main-display, .cal-header {
     height: 100%;
-    padding: 50px;
-    min-height: 400px;
+    padding: 0 50px;
 
     .cal-description {
       max-width: 50%;
+      color: white;
     }
+    h1 {
+      color: white;
+    }
+    .col-md-4 h3 {
+      text-align: center;
+    }
+    .col-info {
+      padding: 20px;
+      text-align: center;
+
+    }
+  }
+  .cal-header {
+    padding: 50px;
+    background-color: rgba(0, 0, 0, .3);
   }
 
   .cal-call-to-action-text {
@@ -98,13 +112,14 @@ input[type=text] {
 
   .cal-signin-button {
     position: relative;
-    height: 50px;
-    left: 50%;
-    bottom: 0;
-    width: 200px;
-    margin-left: -100px;
+    float: left;
+    top: 50px;
     font-size: 16px;
-    font-weight: 500;
+    border: 0px;
+  }
+
+  img {
+    width: 100%;
   }
 }
 

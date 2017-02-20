@@ -14,17 +14,37 @@
 
 {% block content %}
 <div class="cal-home-logged-out">
-  <div class="jumbotron cal-main-display">
+  <div class="cal-header">
     <h1>CalendarAnalytics</h1>
-    <h3 class="cal-description">Analyze how much time you spend in meetings or with a friend using your Calendar.</h3>
+    <h3 class="cal-description">The most comprehensive way to analyze your time. What have you done over the years?</h3>
     <div class="g-signin2 cal-signin-button" data-onsuccess="onSignIn" data-theme="dark"></div>
   </div>
+    
+  <div class="cal-main-display">
+    <div class="col-md-4">
+      <h3>View Real Data</h3>
+      <div class="col-info">
+        <img src="{% static "img/category-sleep.png" %}"/>
+        <p>Check out how much time you're spending on certain parts of your routine.</p>
+      </div>
+    </div>
 
-  <div class="jumbotron cal-main-display">
-    <h2>Still aren't convinced?</h2>
-    <p class="cal-description">CalendarAnalytics is a way for you to analyze how much time you spend.</p>
+    <div class="col-md-4">
+      <h3>Run Your Own Statistics</h3>
+      <div class="col-info">
+        <img src="{% static "img/adding-tag.png" %}" />
+        <p>Add tags and generate data based on keywords extracted from event names</p>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <h3>Orient to your Goals</h3>
+      <div class="col-info">
+        <img src="{% static "img/tag-detail.png" %}"/>
+        <p>Develop the ability to recognize action items to either increase or decrease certain categories. View the full history of time spent on a tag or category, with trend lines and moving averages. </p>
+      </div>
+    </div>
   </div>
-
 
 </div>
 {% endblock %}
