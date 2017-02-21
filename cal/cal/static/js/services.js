@@ -527,3 +527,32 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
     return [slope, intercept, rSquare];
   }
 }]);
+
+analyticsApp.service('CalendarSelect', ['$http', '$q', function($http, $q) {
+  this.calendars = {};
+  var _this = this;
+
+  this.initialize = function(response) {
+    // Initialize cached calendars
+    for (var i = 0; i < response.data.results.length; i++) {
+      var gcal = response.data.results[i];
+      if (_this.calendars[gcal.calendar_id] === undefined) {
+        _this.calendars[gcal.calendar_id] = gcal;
+        _this.calendars[gcal.calendar_id].enabled = gcal.enabled_by_default;
+      }
+    }
+  }
+
+  // Converts the dict of calendarIds to an array of ids of enabled calendars
+  this.getEnabledCalendarIds = function() {
+    var calendarIds = Object.values(_this.calendars)
+      .filter(function(cal) {
+        return cal.enabled ? true : false;
+      })
+      .map(function(cal) {
+        return cal.calendar_id;
+      })
+      .sort();
+    return calendarIds;
+  };
+}]);

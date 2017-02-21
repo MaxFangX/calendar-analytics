@@ -1,10 +1,10 @@
 analyticsApp.component('calendar', {
   templateUrl: '/static/js/components/calendar/calendar.html',
-  controller: 'CalendarCtrl'
+  controller:  ['$scope', '$http', '$q', 'uiCalendarConfig', 'CalendarFilterService', 'CalendarSelect',  CalendarCtrl],
 });
 
-analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarConfig, CalendarFilterService) {
-   this.calendars = {};
+function CalendarCtrl($scope, $http, $q, uiCalendarConfig, CalendarFilterService, CalendarSelect) {
+   this.calendars = CalendarSelect.calendars;
    var _this = this;
 
    this.events = function(start, end, timezone, callback) {
@@ -16,30 +16,23 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
      } else {
        query_timezone = timezone;
      }
-   
+
      $http({
        method: 'GET',
        url: "/v1/gcalendars.json",
        cache: true,
      }).then(function gcalSuccess(response) {
-   
-       // Initialize cached calendars
-       for (var i = 0; i < response.data.results.length; i++) {
-         var gcal = response.data.results[i];
-         if (_this.calendars[gcal.calendar_id] === undefined) {
-           _this.calendars[gcal.calendar_id] = gcal;
-           _this.calendars[gcal.calendar_id].enabled = gcal.enabled_by_default;
-         }
-       }
-   
-       // Trigger first CalendarFilter now that this.calendars has been set
+
+       CalendarSelect.initialize(response);
+
+       // Trigger first CalendarFilter now that CalendarSelect.calendars has been set
        CalendarFilterService.setFilter(start, end,
-         _this.getEnabledCalendarIds());
-   
+         CalendarSelect.getEnabledCalendarIds());
+
        var calendarIds = response.data.results.map(function(cal) {
          return cal.calendar_id;
        }).sort();
-   
+
        $http({
          method: 'GET',
          url: "/v1/gevents.json",
@@ -55,7 +48,7 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
          var events = [];
          for (i = 0; i < response.data.results.length; i++) {
            var gevent = response.data.results[i];
-           if (_this.calendars[gevent.calendar.calendar_id].enabled) {
+           if (CalendarSelect.calendars[gevent.calendar.calendar_id].enabled) {
              events.push({
                title: gevent.name,
                start: gevent.start,
@@ -69,20 +62,20 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
              });
            }
          }
-   
+
          callback(events);
-   
+
        }, function eventError(response) {
          console.log("Ajax call to gevents failed:");
          console.log(response);
        });
-   
-   
+
+
      }, function gcalError(response) {
        console.log("Ajax call to gcalendars failed: " + response);
      });
    };
-   
+
    $scope.eventRender = function(event, element, view) {
      /* jshint unused:vars */
      var location = '';
@@ -107,18 +100,18 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
      });
      return element;
    };
-   
+
    this.viewRender = function(view, element) {
-   
+
      /* jshint unused:vars */
      // The first time viewRender is called, the GCalendars haven't been
      // populated yet.
-     if(_this.calendars.length !== 0) {
+     if(CalendarSelect.calendars.length !== 0) {
        CalendarFilterService.setFilter(view.start, view.end,
-                                       this.getEnabledCalendarIds());
+                                       CalendarSelect.getEnabledCalendarIds());
      }
    }.bind(this);
-   
+
    $scope.uiConfig = {
      calendar:{
        defaultView: 'agendaWeek',
@@ -133,26 +126,13 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
        viewRender: this.viewRender,
      }
    };
-   
+
    this.refresh = function(calendarName) {
      if(uiCalendarConfig.calendars[calendarName] !== undefined){
        uiCalendarConfig.calendars[calendarName].fullCalendar('refetchEvents');
      }
    };
-   
-   // Converts the dict of calendarIds to an array of ids of enabled calendars
-   this.getEnabledCalendarIds = function() {
-     var calendarIds = Object.values(_this.calendars)
-       .filter(function(cal) {
-         return cal.enabled ? true : false;
-       })
-       .map(function(cal) {
-         return cal.calendar_id;
-       })
-       .sort();
-     return calendarIds;
-   };
-   
+
    this.toggleEnabled = function(calendarPrimaryKey) {
      $http({
        method: 'GET',
@@ -168,9 +148,9 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
      ).then(function() {
        CalendarFilterService.setFilter(null,
                                        null,
-                                       _this.getEnabledCalendarIds());
+                                       CalendarSelect.getEnabledCalendarIds());
      });
    };
-   
+
    this.eventSources = [this.events];
-});
+}
