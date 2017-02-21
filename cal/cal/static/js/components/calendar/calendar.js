@@ -28,7 +28,6 @@ function CalendarCtrl($scope, $http, $q, uiCalendarConfig, CalendarFilterService
        // Trigger first CalendarFilter now that CalendarSelect.calendars has been set
        CalendarFilterService.setFilter(start, end,
          CalendarSelect.getEnabledCalendarIds());
-
        var calendarIds = response.data.results.map(function(cal) {
          return cal.calendar_id;
        }).sort();
@@ -101,6 +100,16 @@ function CalendarCtrl($scope, $http, $q, uiCalendarConfig, CalendarFilterService
      return element;
    };
 
+   this.loading = function(isLoading, view){
+      if (isLoading) {
+        $('#calendar-preloader').show();
+        $('.calendar').hide();
+      } else {
+        $('#calendar-preloader').hide();
+        $('.calendar').show();
+      }
+    }.bind(this);
+
    this.viewRender = function(view, element) {
 
      /* jshint unused:vars */
@@ -124,6 +133,7 @@ function CalendarCtrl($scope, $http, $q, uiCalendarConfig, CalendarFilterService
        firstDay: 1,
        eventRender: $scope.eventRender,
        viewRender: this.viewRender,
+       loading: this.loading
      }
    };
 
