@@ -134,14 +134,22 @@ def get_time_series(model, timezone='UTC', time_step='week', calendar_ids=None, 
         if data_point < period - 1:
             moving_average += total
         else:
-            # We need to find hours of first event to subtract off
-            first_event = week_hours[int(data_point - period)][1]
+            if data_point - period == -1:
+                # Account for period-th day
+                first_event = 0
+            else:
+                # We need to find hours of first event to subtract off
+                first_event = week_hours[int(data_point - period)][1]
             moving_average = moving_average - first_event + total
             moving_average_lst.append((start, moving_average / period))
         data_point += 1
 
         week_hours.append((start, total))
         start = end
+
+    # Account for rollover event to today
+    if rollover:
+        week_hours.append((start, rollover))
 
     # Take care if not enough data to offset one period
     if moving_average_lst == []:
@@ -170,6 +178,7 @@ def truncated_queryset(queryset, edge, start, end):
         start_edge = list(queryset.filter(start__lt=start, end__gt=start).order_by('start'))
         exclusive = list(queryset.filter(start__gte=start, end__lte=end).order_by('start'))
         end_edge = list(queryset.filter(start__lt=end, end__gt=end).order_by('start'))
+
         for s in start_edge:
             s.start = start
         for e in end_edge:
@@ -181,7 +190,6 @@ def truncated_queryset(queryset, edge, start, end):
         queryset = queryset.filter(end__gt=start, start__lt=end).order_by('start')
 
     return queryset
-
 
 def get_color(calendar, color_index):
     """
@@ -231,13 +239,21 @@ class EventCollection:
 
         return ec
 
-    def total_time(self, calendar=None):
+    def total_time(self, calendar=None, start=None, end=None):
 
         events = self.get_events()
 
         total = timedelta()
         for e in events:
-            total += e.end - e.start
+            truncate_start = e.start
+            truncate_end = e.end
+
+            if start and e.start < start:
+                truncate_start = start
+            if end and e.end > end:
+                truncate_end = end
+                
+            total += truncate_end - truncate_start
 
         return int(total.total_seconds())
 

@@ -35,7 +35,6 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
        // Trigger first CalendarFilter now that this.calendars has been set
        CalendarFilterService.setFilter(start, end,
          _this.getEnabledCalendarIds());
-   
        var calendarIds = response.data.results.map(function(cal) {
          return cal.calendar_id;
        }).sort();
@@ -71,6 +70,7 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
          }
    
          callback(events);
+
    
        }, function eventError(response) {
          console.log("Ajax call to gevents failed:");
@@ -108,6 +108,16 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
      return element;
    };
    
+   this.loading = function(isLoading, view){
+      if (isLoading) {
+        $('#calendar-preloader').show();
+        $('.calendar').hide();
+      } else {
+        $('#calendar-preloader').hide();
+        $('.calendar').show();
+      }
+    }.bind(this);
+
    this.viewRender = function(view, element) {
    
      /* jshint unused:vars */
@@ -131,9 +141,10 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
        firstDay: 1,
        eventRender: $scope.eventRender,
        viewRender: this.viewRender,
+       loading: this.loading
      }
    };
-   
+  
    this.refresh = function(calendarName) {
      if(uiCalendarConfig.calendars[calendarName] !== undefined){
        uiCalendarConfig.calendars[calendarName].fullCalendar('refetchEvents');

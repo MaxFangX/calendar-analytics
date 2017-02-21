@@ -1,17 +1,23 @@
 # Calendar Analytics
 
-
 ## About
-If you use your calendar often, then you must have a decent timeline of how you spend your time. Why not analyze it?
 
-Tip: If you fill in the gaps, your stats will be even more meaningful!
-
-Connect your Google Calendar and immediately see stats on how you've been spending your time.
-
-Mostly built for fun!
+Calendar Analytics takes your calendar and shows you what you've done over the years. The most sophisticated way to analyze your time. Built for fun by a couple of UC Berkeley students and grads!
 
 
-## Features and Usage
+## Features
+
+**We show you accurate statistics based on your Google Calendar**. With that information, we can answer questions like:
+- How many hours did you spend on your "Work" calendar each month?
+- How big of a slice was your "Sleep" category?
+- How many hours did you spend watching TV, by querying event names like "Game of Thrones" and "Westworld" as keywords?
+- What was the history of time spent with your Significant Other in the past year?
+
+**We give you the ability to make cross connections with other data.**
+Showing detailed statistics of your data allows you to create comparisons with other data that you have. For example, a college student (and one of the founders) used Calendar Analytics' tagging system to determine [how much time she spent on her different classes and compared it to the grades she received in those classes](https://medium.com/@tiffanyqi/a-college-students-individual-analysis-of-productivity-of-four-years-e51e5ec3af6). With that information, she used real data to power real insights.
+
+**We help you orient you on your goals.**
+With transparency comes focus and goal setting. If you feel you spent too much time watching TV, you can actively work to decrease the numbers and see the results immediately.
 
 
 ## Development
