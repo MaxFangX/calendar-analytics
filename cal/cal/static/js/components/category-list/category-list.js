@@ -28,14 +28,23 @@ function CategoryListCtrl($scope, $http, CalendarFilterService, CategoryService)
           _this.filterKey = filterData.filterKey;
           _this.categories.dataLoaded = true;
         });
-    } else {
-      CategoryService.getCategories('cumulative ' + filterData.filterKey, null,
-        null, filterData.calendarIds)
-        .then(function(categories) {
-          _this.categories = categories;
-          _this.categories.dataLoaded = true;
-        });
     }
+    CategoryService.getCategories('cumulative ' + filterData.filterKey, null,
+      null, filterData.calendarIds)
+    .then(function(categories) {
+      if (_this.isCumulative) {
+         _this.categories = categories;
+         _this.categories.dataLoaded = true;
+      }
+      for (var i = 0; i < categories.length; i++) {
+        var category = categories[i];
+        var match = _this.categories.find(function (e) {
+          return e.id == category.id;
+        });
+        match.cumulativeHours = category.hours;
+      }
+
+    });
   });
 
   this.hideZeroHoursFilter = function(value, index, array) {
