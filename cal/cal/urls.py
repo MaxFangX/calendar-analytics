@@ -1,4 +1,5 @@
 from django.conf.urls import patterns, include, url
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.contrib import admin
 
 urlpatterns = patterns(
@@ -23,3 +24,5 @@ urlpatterns = patterns(
     url('', include('social.apps.django_app.urls', namespace='social')),
 
 )
+
+urlpatterns += staticfiles_urlpatterns()
