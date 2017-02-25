@@ -15,8 +15,10 @@ import httplib2
 import pytz
 import sys
 
+
 class InvalidParameterException(Exception):
     pass
+
 
 class MalformedDataException(Exception):
     pass
@@ -60,7 +62,7 @@ class Profile(models.Model):
         if calendar_ids:
             for calendar_str in calendar_ids:
                 try:
-                    c = GCalendar.objects.get(calendar_id=calendar_str)
+                    c = GCalendar.objects.get(calendar_id=calendar_str, user=self.user)
                 except GCalendar.DoesNotExist:
                     raise InvalidParameterException("Provided calendar {} does not exist".format(calendar_str))
                 if c.user != self.user:
@@ -145,6 +147,7 @@ class GCalendar(models.Model):
     color_index = models.CharField(max_length=10, blank=False, choices=CALENDAR_COLORS_TUPLES)
     calendar_id = models.CharField(max_length=250)
     summary = models.CharField(max_length=250, help_text="Title of the calendar")
+    next_sync_token = models.CharField(max_length=100, null=True, blank=True, help_text="The syncToken provided for this specific calendar")
     meta = JSONField(default="{}", blank=True)
 
     enabled_by_default = models.BooleanField(default=True)
@@ -280,7 +283,7 @@ class GCalendar(models.Model):
             # Incremental sync, initial request needs syncToken
             try:
                 # Google API doesn't accept constraints for the first request in incremental sync
-                result = service.events().list(syncToken=creds.next_sync_token, **default_list_args).execute()
+                result = service.events().list(syncToken=self.next_sync_token, **default_list_args).execute()
             except Exception as e:
                 t, v, tb = sys.exc_info()
                 if hasattr(e, 'resp') and e.resp.status == 410:
@@ -300,8 +303,8 @@ class GCalendar(models.Model):
 
             if not next_page_token:
                 # We've reached the last page. Store the sync token.
-                creds.next_sync_token = result['nextSyncToken']
-                creds.save()
+                self.next_sync_token = result['nextSyncToken']
+                self.save()
                 break
 
             result = service.events().list(pageToken=next_page_token, **list_args_with_constraints).execute()
@@ -799,7 +802,6 @@ class GoogleCredentials(models.Model):
 
     user = models.OneToOneField(User, primary_key=True, related_name='googlecredentials')
     credential = CredentialsField()
-    next_sync_token = models.CharField(max_length=100, null=True, blank=True)
 
     def get_service(self):
         http_auth = self.credential.authorize(httplib2.Http())
@@ -833,7 +835,7 @@ class GoogleCredentials(models.Model):
         #   "kind": "calendar#calendarList",
         #   "etag": etag,
         #   "nextPageToken": string,
-        #   "nextSyncToken": string,
+        #   "nextSyncToken": string,  # Not sure what this is for
         #   "items": [
         #     {u'accessRole': u'owner',
         #      u'backgroundColor': u'#9fc6e7',
@@ -855,9 +857,7 @@ class GoogleCredentials(models.Model):
         #   ]
         # }
 
-        assert 'items' in result and 'nextSyncToken' in result, "import calendars failed"
-
-        self.next_sync_token = result['nextSyncToken']
+        assert 'items' in result, "import calendars failed"
 
         for item in result['items']:
             if item['accessRole'] != 'owner':
@@ -880,7 +880,8 @@ class GoogleCredentials(models.Model):
                 gcal.update_meta()
 
         calendar_ids = [cal['id'] for cal in result['items'] if cal['accessRole'] == 'owner']
-        inaccessible_calendars = GCalendar.objects.exclude(calendar_id__in=calendar_ids)
+        inaccessible_calendars = GCalendar.objects.filter(user=self.user)\
+                                                  .exclude(calendar_id__in=calendar_ids)
         for i in inaccessible_calendars:
             print "Deleting calendar '{}' because it is now inaccessible".format(i.summary)
             i.delete()
