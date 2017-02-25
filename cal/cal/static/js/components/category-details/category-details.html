@@ -1,6 +1,6 @@
 <div>
   <h1>{{$ctrl.displayName}}</h1>
-  <h2>{{$ctrl.categoryHours}}</h2>
+  <h2>Total hours: {{$ctrl.categoryHours}}</h2>
   <div ng-hide="$ctrl.categoryEvents.dataLoaded" class="preloader"></div>
   <div ng-if="$ctrl.categoryEvents.dataLoaded">
     <p>Average hours per {{$ctrl.timeStep}}: {{ $ctrl.averageHours }}</p>
