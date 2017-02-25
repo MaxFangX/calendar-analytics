@@ -42,7 +42,7 @@ GOOGLE_CALENDAR_API_CLIENT_SECRET = os.getenv('CJ_GOOGLE_CALENDAR_API_CLIENT_SEC
 assert GOOGLE_CALENDAR_API_CLIENT_ID, "GOOGLE_CALENDAR_API_CLIENT_ID environment variable must be set"
 assert GOOGLE_CALENDAR_API_CLIENT_SECRET, "GOOGLE_CALENDAR_API_CLIENT_SECRET environment variable must be set"
 
-ALLOWED_HOSTS = ['panalytics.elasticbeanstalk.com', 'localhost', '127.0.0.1', 'ngrok.io']
+ALLOWED_HOSTS = ['.herokuapp.com', 'localhost', '127.0.0.1', 'ngrok.io']
 
 AUTHENTICATION_BACKENDS = (
     # Python social auth
@@ -192,8 +192,19 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
 if ENVIRONMENT == 'prod':
-    STATIC_ROOT = os.path.join(BASE_DIR, "..", "www", "static")
+    # Static files (CSS, JavaScript, Images)
+    # https://docs.djangoproject.com/en/1.9/howto/static-files/
+    
+    PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+    
+    STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
     STATIC_URL = '/static/'
+    
+    # Extra places for collectstatic to find static files.
+    STATICFILES_DIRS = (
+        os.path.join(PROJECT_ROOT, 'static'),
+    )
+
     BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, "..", "www", "cal", "static/")
 else:
     STATIC_ROOT = os.path.join(BASE_DIR, "static/")
