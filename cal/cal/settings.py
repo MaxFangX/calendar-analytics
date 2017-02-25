@@ -147,7 +147,7 @@ TEMPLATE_CONTEXT_PROCESSORS = [
     # Vendor processors
     'social.apps.django_app.context_processors.backends',
     'social.apps.django_app.context_processors.login_redirect',  # TODO ensure this is used
-    
+
 ]
 
 WSGI_APPLICATION = 'cal.wsgi.application'
