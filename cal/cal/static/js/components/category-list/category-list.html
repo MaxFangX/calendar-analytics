@@ -1,5 +1,6 @@
 <div>
   <a href="/admin/generate-categories"><button class="btn btn-primary pull-right">Generate Categories</button></a>
+  <!-- <button class="btn btn-primary pull-right" ng-click="$ctrl.isCumulative = !$ctrl.isCumulative">Toggle Cumulative</button> -->
   <h4>Categories{{ $ctrl.displayName ? ' - ' + $ctrl.displayName : '' }}</h4>
   <div ng-hide="$ctrl.categories.dataLoaded" class="preloader"></div>
   <div ng-if="$ctrl.categories.dataLoaded">

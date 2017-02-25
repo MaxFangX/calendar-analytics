@@ -185,10 +185,4 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
    
    this.eventSources = [this.events];
 
-  // after sync, preloader
-  $('#sync-preloader').hide();
-    $('.sync-button').click(function(e) {
-      $('#sync-preloader').show();
-  });
-
 });
