@@ -32,16 +32,18 @@ def sync(request, format=None):
         return Response("Not logged in")
 
     profile = Profile.get_or_create(request.user)[0]
+    full_sync = request.query_params.get('full_sync')
 
     if request.query_params.get('sync_all'):
-        profile.create_calendars(only_primary=False)
+        if full_sync:
+            profile.create_calendars(only_primary=False)
         calendars = GCalendar.objects.filter(user=request.user)
     else:
         profile.create_calendars(only_primary=True)
         calendars = [profile.main_calendar]
 
     for calendar in calendars:
-        if request.query_params.get('full_sync'):
+        if full_sync:
             calendar.sync(full_sync=True)
         else:
             calendar.sync()
