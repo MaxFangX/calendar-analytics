@@ -1,9 +1,9 @@
-from cal.models import GoogleCredentials, GoogleFlow, Profile, Category, Tag
+from cal.models import GoogleCredentials, GoogleFlow, Profile
 
 from django.conf import settings
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect, HttpResponseBadRequest
+from django.http import HttpResponseRedirect, HttpResponseBadRequest, StreamingHttpResponse
 from django.shortcuts import render
 from django.template import RequestContext
 from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
@@ -48,10 +48,30 @@ def generate_categories(request):
 def accounts_profile(request):
     """
     Shows the account information for a user
-    For now, redirects to homepage.
+    For now, demonstrates how to create a streaming HTTP response..
     """
-    # TODO either remove this view or change Python Social Auth after login
-    return HttpResponseRedirect("/")
+
+    class TestIter:
+        def __init__(self):
+            self.index = 0
+            self.values = [5, 1, 0, 6, 2, 9, 3, 2, 6, 4]
+
+        def __iter__(self):
+            return self
+
+        def next(self):
+            if self.index < len(self.values):
+                import time
+                time.sleep(1)
+                value = self.values[self.index]
+                self.index += 1
+                return value
+            else:
+                raise StopIteration()
+
+    t = TestIter()
+
+    return StreamingHttpResponse(t)
 
 @csrf_exempt
 @psa('social:complete')
