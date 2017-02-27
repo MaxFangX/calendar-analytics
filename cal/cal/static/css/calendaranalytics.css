@@ -135,6 +135,9 @@ body {
 .calendar-border {
   border-left: 1px solid #D3D3D3; }
 
+.sync-button:hover {
+  cursor: pointer; }
+
 /*# sourceMappingURL=calendaranalytics.css.map */
 
 /*# sourceMappingURL=calendaranalytics.css.map */

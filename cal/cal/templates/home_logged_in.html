@@ -41,8 +41,8 @@
     <li class="pull-right">
       <a id="logout" href="/logout">Log out</a>
     </li>
-    <li class="pull-right">
-      <a href="/v1/sync?sync_all=true"><strong>Sync Calendars</strong></a>
+    <li class="pull-right sync-button">
+      <a><strong>Sync Calendars</strong></a>
     </li>
   </ul>
   {% if request.user.profile.authed %}
@@ -67,12 +67,12 @@
     <h4>Options</h4>
     <div>
       {% if request.user.is_staff %}
-        <a href="/v1/sync"><button class="sync-button btn btn-primary pull-left">Inc. Sync Main Calendar</button></a>
-        <a href="/v1/sync?full_sync=true"><button class="sync-button btn btn-primary pull-left">Full Sync Main Calendar</button></a>
-        <a href="/v1/sync?sync_all=true"><button class="sync-button btn btn-primary pull-left">Inc. Sync All Calendars</button></a>
-        <a href="/v1/sync?full_sync=true&sync_all=true"><button class="sync-button btn btn-primary pull-left">Full Sync All Calendars</button></a>
-        <a href="/v1/toggle-privacy"><button class="sync-button btn btn-primary pull-left">Toggle Privacy</button></a>
-        <a href="/auth/clear"><button class="sync-button btn btn-primary pull-left">Reset Credentials</button></a>
+        <a href="/v1/sync"><button class="btn btn-primary pull-left">Inc. Sync Main Calendar</button></a>
+        <a href="/v1/sync?full_sync=true"><button class="btn btn-primary pull-left">Full Sync Main Calendar</button></a>
+        <a href="/v1/sync?sync_all=true"><button class="btn btn-primary pull-left">Inc. Sync All Calendars</button></a>
+        <a href="/v1/sync?full_sync=true&sync_all=true"><button class="btn btn-primary pull-left">Full Sync All Calendars</button></a>
+        <a href="/v1/toggle-privacy"><button class="btn btn-primary pull-left">Toggle Privacy</button></a>
+        <a href="/auth/clear"><button class="btn btn-primary pull-left">Reset Credentials</button></a>
       {% endif %}
     </div>
   </div>

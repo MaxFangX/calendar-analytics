@@ -171,6 +171,18 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
                                        _this.getEnabledCalendarIds());
      });
    };
+
+   $('.sync-button').click(function() {
+    Pace.restart();
+    Pace.track(function() {
+      $http({
+        method: 'GET',
+        url: "/v1/sync?sync_all=true"
+      }).then(function() {
+        window.location.reload();
+      });
+    });
+   });
    
    this.eventSources = [this.events];
 
