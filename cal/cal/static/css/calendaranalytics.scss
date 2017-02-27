@@ -22,7 +22,6 @@ h4 {
 
 .cal-home-logged-in .cal-calendar {
   padding: 3% 3% 5% 3%;
-  overflow-y: scroll;
 }
 
 .cal-home-logged-in .select-calendar-id {
@@ -42,13 +41,6 @@ h4 {
 .preloader {
   padding: 70px;
   background: url('/static/img/preloader.gif') no-repeat 50% 50% transparent;
-}
-.large-preloader {
-  position: fixed;
-  margin: 5%;
-  z-index: 100;
-  padding: 300px;
-  background: url('/static/img/big-preloader.gif') no-repeat 50% 50% transparent;
 }
 
 button {
