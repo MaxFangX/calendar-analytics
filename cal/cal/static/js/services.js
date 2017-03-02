@@ -59,7 +59,7 @@ analyticsApp.service("TagService", ['$http', '$q', 'QueryService', function($htt
     var calendarData = calendarIds.map(function(calId) {
       var cacheKey = calId + " " + filterKey;
       return $q.when(
-        QueryService.getDataForCalendarIds("tags", start, end, calId, _this.tags, cacheKey));
+        QueryService.getDataForCalendarId("tags", start, end, calId, _this.tags, cacheKey));
     });
 
     var accumulatedTags = {};
@@ -181,7 +181,7 @@ analyticsApp.service('CategoryService', ['$http', '$q', 'QueryService', function
     var calendarData = calendarIds.map(function(calId) {
       var cacheKey = calId + " " + filterKey;
       return $q.when(
-        QueryService.getDataForCalendarIds("categories", start, end, calId, _this.categories, cacheKey));
+        QueryService.getDataForCalendarId("categories", start, end, calId, _this.categories, cacheKey));
     });
 
     var accumulatedCategories = {};
@@ -527,7 +527,7 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
     return [slope, intercept, rSquare];
   }
 
-  this.getDataForCalendarIds = function(type, start, end, calendarId, cache, cacheKey) {
+  this.getDataForCalendarId = function(type, start, end, calendarId, cache, cacheKey) {
  //    As an example, tags are saved like this:
  //    [
  //     cacheKey1:
