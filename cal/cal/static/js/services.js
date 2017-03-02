@@ -28,8 +28,7 @@ analyticsApp.factory('CalendarFilterService', ['$rootScope', function CalendarFi
 
       // Key must be unique per selection of start/end/calendarIds
       filterData.filterKey = filterData.start.toISOString() + " " +
-        filterData.end.toISOString() + " " +
-        filterData.calendarIds.join(' ');
+        filterData.end.toISOString();
 
 
       $rootScope.$broadcast('calendarFilter:updated');
@@ -37,7 +36,7 @@ analyticsApp.factory('CalendarFilterService', ['$rootScope', function CalendarFi
   };
 }]);
 
-analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
+analyticsApp.service("TagService", ['$http', '$q', 'QueryService', function($http, $q, QueryService) {
 
   var _this = this;
 
@@ -51,46 +50,47 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
 
     if (start || end) {
       // If the start and end time match the given filterKey
-      var keyFromParameters = start.toISOString() + " " + end.toISOString() +
-        " " + calendarIds.join(' ');
+      var keyFromParameters = start.toISOString() + " " + end.toISOString();
       if (filterKey !== keyFromParameters) {
         throw "filterKey doesn't match given start and end times";
       }
     }
-    // Attempt to return cached tags
-    if (_this.tags[filterKey]) {
-      return $q.when(_this.tags[filterKey]);
-    }
 
-    // Request the tags and return a promise
-    return $http({
-      method: 'GET',
-      url: '/v1/tags.json',
-      cache: true,
-      params: {
-        start: (start)? start.toISOString() : null,
-        end: (end)? end.toISOString() : null,
-        calendar_ids: JSON.stringify(calendarIds),
-        timezone: moment.tz.guess()
-      }
-    }).then(function successCallback(response) {
-      _this.tags[filterKey] = [];
-      for (var i = 0; i < response.data.results.length; i++) {
-        var tag = response.data.results[i];
-        _this.tags[filterKey].push({
-          id: tag.id,
-          label: tag.label,
-          keywords: tag.keywords,
-          hours: tag.hours
+    var calendarData = calendarIds.map(function(calId) {
+      var cacheKey = calId + " " + filterKey;
+      return $q.when(
+        QueryService.getDataForCalendarId("tags", start, end, calId, _this.tags, cacheKey));
+    });
+
+    var accumulatedTags = {};
+    var tags = [];
+
+    return $q.all(calendarData).then(function successCallback(response) {
+      // Add up duplicate tags across calendars.
+      response.forEach(function(data) {
+        for (var tagId in data) {
+          if (accumulatedTags.hasOwnProperty(tagId.toString())) {
+            accumulatedTags[tagId].hours += data[tagId].hours;
+          } else {
+            accumulatedTags[tagId] = data[tagId];
+          }
+        }
+      });
+      // Construct the data for tag details.
+      for (var tag in accumulatedTags) {
+        tags.push({
+          id: tag,
+          label: accumulatedTags[tag].label,
+          keywords: accumulatedTags[tag].keywords,
+          hours: accumulatedTags[tag].hours
         });
       }
-      return _this.tags[filterKey];
+      return tags;
     }, function errorCallback(response) {
-      /* jshint unused:vars */
-      console.log("Failed to get tags:");
-      console.log(response);
+      console.log("Failed to get tags");
     });
-  };
+
+  }.bind(this);
 
   this.createTag = function(label, keywords, isCumulative, filterData) {
     return $http({
@@ -158,60 +158,60 @@ analyticsApp.service("TagService", ['$http', '$q', function($http, $q) {
 
 }]);
 
-analyticsApp.service('CategoryService', ['$http', '$q', function($http, $q) {
+analyticsApp.service('CategoryService', ['$http', '$q', 'QueryService', function($http, $q, QueryService) {
 
   var _this = this;
 
   this.categories = {};
 
   this.getCategories = function(filterKey, start, end, calendarIds) {
+
     if (!filterKey) {
       throw "filterKey must always be supplied";
     }
 
     if (start || end) {
       // If the start and end time match the given filterKey
-      var keyFromParameters = start.toISOString() + " " + end.toISOString() +
-        " " + calendarIds.join(' ');
+      var keyFromParameters = start.toISOString() + " " + end.toISOString();
       if (filterKey !== keyFromParameters) {
         throw "filterKey doesn't match given start, end, and calendarIds";
       }
     }
 
-    // Attempt to return cached categories
-    if (_this.categories[filterKey]) {
-      return $q.when(_this.categories[filterKey]);
-    }
+    var calendarData = calendarIds.map(function(calId) {
+      var cacheKey = calId + " " + filterKey;
+      return $q.when(
+        QueryService.getDataForCalendarId("categories", start, end, calId, _this.categories, cacheKey));
+    });
 
-    // Request the categories and return a promise
-    return $http({
-      method: 'GET',
-      url: '/v1/categories.json',
-      cache: true,
-      params: {
-        start: (start)? start.toISOString() : null,
-        end: (end)? end.toISOString() : null,
-        calendar_ids: JSON.stringify(calendarIds),
-        timezone: moment.tz.guess()
-      }
-    }).then(function successCallback(response) {
-      _this.categories[filterKey] = [];
-      for (var i = 0; i < response.data.results.length; i++) {
-        var category = response.data.results[i];
-        _this.categories[filterKey].push({
-          id: category.id,
-          label: category.label,
-          hours: category.hours,
-          include: true,
-          color: category.category_color,
+    var accumulatedCategories = {};
+    var categories = [];
+
+    return $q.all(calendarData).then(function successCallback(response) {
+      // Add up duplicate categories across calendars.
+      response.forEach(function(data) {
+        for (var categoryId in data) {
+          if (accumulatedCategories.hasOwnProperty(categoryId.toString())) {
+            accumulatedCategories[categoryId].hours += data[categoryId].hours;
+          } else {
+            accumulatedCategories[categoryId] = data[categoryId];
+          }
+        }
+      });
+      // Construct the data for category details.
+      for (var category in accumulatedCategories) {
+        categories.push({
+          id: category,
+          label: accumulatedCategories[category].label,
+          color: accumulatedCategories[category].color,
+          hours: accumulatedCategories[category].hours
         });
       }
-      return _this.categories[filterKey];
+      return categories;
     }, function errorCallback(response) {
-      /* jshint unused:vars */
       console.log("Failed to get categories");
     });
-  };
+  }.bind(this);
 
   this.editCategory = function(categoryId, newLabel) {
     return $http({
@@ -264,18 +264,18 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
       return _this.details[filterKey];
     }
 
-    var dailyData = data.lineGraph[0].values
+    var dailyData = data.lineGraph[0].values;
     var ctrlDetails = [];
 
     // Type line
     var timeStepData = [];
     // Gets hours of first datapoint
-    var start = new Date(dailyData[0].x)
+    var start = new Date(dailyData[0].x);
     var offset = 0;
 
     if (timeStep == "week") {
       // Find closest Monday
-      start.setDate(start.getDate() - start.getDay() + (start.getDay() == 0 ? -6:1));
+      start.setDate(start.getDate() - start.getDay() + (start.getDay() === 0 ? -6:1));
       offset = start.getDay();
     }
     if (timeStep == "month") {
@@ -301,7 +301,7 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
       timeStepHours += dailyData[i].y;
 
       if (timeStep == "week") {
-        endOfTimeStep = (i + offset) % 7 == 0;
+        endOfTimeStep = (i + offset) % 7 === 0;
       }
       if (timeStep == "month") {
         endOfTimeStep = offset == new Date(start.getYear(), start.getMonth() + 1, 0).getDate();
@@ -327,7 +327,7 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
           moving_average += timeStepHours;
         } else {
           if (data_point - period == -1) {
-            first_event = 0
+            first_event = 0;
           } else {
             first_event = timeStepData[data_point - period].y;
           }
@@ -335,9 +335,9 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
           movingAverageList.push({
             x: new Date(start),
             y: moving_average / period
-          })
+          });
         }
-        data_point += 1
+        data_point += 1;
 
         timeStepHours = 0;
         if (timeStep == "week") {
@@ -351,7 +351,7 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
     }
 
     if (timeStep == "week") {
-      endOfTimeStep = (i + offset) % 7 != 0;
+      endOfTimeStep = (i + offset) % 7 !== 0;
     }
     if (timeStep == "month") {
       endOfTimeStep = offset != new Date(start.getYear(), start.getMonth() + 1, 0).getDate();
@@ -372,7 +372,7 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
         movingAverageList.push({
           x: new Date(start),
           y: moving_average / period
-        })
+        });
       }
     }
 
@@ -401,7 +401,7 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
 
     _this.details[filterKey] = {lineGraph: ctrlDetails, maxYValue: maxYValue + 10};
     return _this.details[filterKey];
-  }
+  };
 
   this.populateDay = function(filterKey, type, id, calendarIds) {
     if (!filterKey) {
@@ -427,7 +427,7 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
         calendar_ids: JSON.stringify(calendarIds)
       }
     }).then(function successCallback(response) {
-      var data = response.data
+      var data = response.data;
       var ctrlDetails = [];
       var maxYValue = 0;
       var events = [];
@@ -526,4 +526,58 @@ analyticsApp.service('QueryService', ['$http', '$q', function($http, $q) {
 
     return [slope, intercept, rSquare];
   }
+
+  this.getDataForCalendarId = function(type, start, end, calendarId, cache, cacheKey) {
+ //    As an example, tags are saved like this:
+ //    [
+ //     cacheKey1:
+ //       {
+ //         tagId1: {hours: 5, label: "school", keywords: "UC Berkeley"},
+ //         tagId2: {hours: 5, label: "music", keywords: "The All-American Rejects"}
+ //       },
+ //     cacheKey2:
+ //       {
+ //         tagId1: {hours: 5, label: "school", keywords: “UC Berkeley”},
+ // 	      tagId2: {hours: 5, label: "music", keywords: “The All-American Rejects”}
+ // 	    }
+ //     ]
+    var calendarData = {};
+    if (cache[cacheKey]) {
+      calendarData = angular.copy(cache[cacheKey]);
+      return calendarData;
+    } else {
+      return $http({
+        method: 'GET',
+        url: '/v1/' + type + '.json',
+        cache: true,
+        params: {
+          start: (start)? start.toISOString() : null,
+          end: (end)? end.toISOString() : null,
+          calendar_ids: JSON.stringify([calendarId]),
+          timezone: moment.tz.guess()
+        }
+      }).then(function successCallback(response) {
+        var modelData = response.data.results;
+        modelData.forEach(function(model) {
+          if (calendarData.hasOwnProperty(model.id.toString())) {
+            calendarData[model.id].hours += model.hours;
+          } else {
+            if (type === 'tags') {
+              calendarData[model.id] = {
+                hours: model.hours, label: model.label, keywords: model.keywords
+              };
+            }
+            if (type === 'categories') {
+              calendarData[model.id] = {
+                hours: model.hours, label: model.label, color: model.category_color
+              };
+            }
+          }
+        });
+        // Save the data in the cache.
+        cache[cacheKey] = angular.copy(calendarData);
+        return calendarData;
+      });
+    }
+  };
 }]);
