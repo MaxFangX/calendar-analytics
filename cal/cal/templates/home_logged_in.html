@@ -41,6 +41,9 @@
     <li class="pull-right">
       <a id="logout" href="/logout">Log out</a>
     </li>
+    <li class="pull-right sync-button">
+      <a><strong>Sync Calendars</strong></a>
+    </li>
   </ul>
   {% if request.user.profile.authed %}
 
@@ -63,7 +66,6 @@
   <div class="col-md-4">
     <h4>Options</h4>
     <div>
-      <a href="/v1/sync?sync_all=true"><button class="btn btn-primary pull-left">Sync Calendars</button></a>
       {% if request.user.is_staff %}
         <a href="/v1/sync"><button class="btn btn-primary pull-left">Inc. Sync Main Calendar</button></a>
         <a href="/v1/sync?full_sync=true"><button class="btn btn-primary pull-left">Full Sync Main Calendar</button></a>

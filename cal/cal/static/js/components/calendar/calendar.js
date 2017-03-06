@@ -108,16 +108,6 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
      return element;
    };
    
-   this.loading = function(isLoading, view){
-      if (isLoading) {
-        $('#calendar-preloader').show();
-        $('.calendar').hide();
-      } else {
-        $('#calendar-preloader').hide();
-        $('.calendar').show();
-      }
-    }.bind(this);
-
    this.viewRender = function(view, element) {
    
      /* jshint unused:vars */
@@ -140,8 +130,7 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
        },
        firstDay: 1,
        eventRender: $scope.eventRender,
-       viewRender: this.viewRender,
-       loading: this.loading
+       viewRender: this.viewRender
      }
    };
   
@@ -182,6 +171,19 @@ analyticsApp.controller('CalendarCtrl', function ($scope, $http, $q, uiCalendarC
                                        _this.getEnabledCalendarIds());
      });
    };
+
+   $('.sync-button').click(function() {
+    Pace.restart();
+    Pace.track(function() {
+      $http({
+        method: 'GET',
+        url: "/v1/sync?sync_all=true"
+      }).then(function() {
+        window.location.reload();
+      });
+    });
+   });
    
    this.eventSources = [this.events];
+
 });
