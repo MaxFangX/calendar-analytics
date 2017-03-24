@@ -22,12 +22,12 @@ else:
 # Configured prod/non-prod settings
 
 if PRODUCTION:
-    BASE_URL = 'calendarapptest.herokuapp.com'
+    BASE_URL = 'https://calendarapptest.herokuapp.com'
     DEBUG = False
     VERBOSE_PRINT = False
     TEMPLATE_DEBUG = False
 else:
-    BASE_URL = 'calendarapptest.herokuapp.com'
+    BASE_URL = 'https://calendarapptest.herokuapp.com'
     DEBUG = True
     VERBOSE_PRINT = True
     TEMPLATE_DEBUG = True
