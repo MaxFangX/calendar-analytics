@@ -81,11 +81,10 @@ def google_auth(request):
     """
 
     flow = None
-    print "URI IS" + settings.BASE_URL
     default_flow = OAuth2WebServerFlow(client_id=settings.GOOGLE_CALENDAR_API_CLIENT_ID,
                                        client_secret=settings.GOOGLE_CALENDAR_API_CLIENT_SECRET,
                                        scope=['https://www.googleapis.com/auth/calendar','profile','email'],
-                                       redirect_uri=settings.BASE_URL + '/auth/google')
+                                       redirect_uri='calendarapptest.herokuapp.com/auth/google')
     default_flow.params['access_type'] = 'offline'
     default_flow.params['include_granted_scopes'] = 'true'
     default_flow.params['prompt'] = 'consent'
