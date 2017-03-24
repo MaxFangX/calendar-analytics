@@ -81,6 +81,7 @@ def google_auth(request):
     """
 
     flow = None
+    print "URI IS" + settings.BASE_URL
     default_flow = OAuth2WebServerFlow(client_id=settings.GOOGLE_CALENDAR_API_CLIENT_ID,
                                        client_secret=settings.GOOGLE_CALENDAR_API_CLIENT_SECRET,
                                        scope=['https://www.googleapis.com/auth/calendar','profile','email'],
