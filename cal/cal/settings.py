@@ -160,18 +160,22 @@ if 'RDS_DB_NAME' in os.environ:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': os.environ['RDS_DB_NAME'],
-            'USER': os.environ['RDS_USERNAME'],
-            'PASSWORD': os.environ['RDS_PASSWORD'],
-            'HOST': os.environ['RDS_HOSTNAME'],
-            'PORT': os.environ['RDS_PORT'],
+            'NAME': 'dfe0rrmd4ldfa1',
+            'USER': 'yacnjuojlushro',
+            'PASSWORD': 'c18e92383803272e63b9ec80f9ded9f690c4f314dadecdf3ae7ea03fc0863f1b',
+            'HOST': 'ec2-54-243-185-99.compute-1.amazonaws.com',
+            'PORT': 5432,
         }
     }
 else:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'dfe0rrmd4ldfa1',
+            'USER': 'yacnjuojlushro',
+            'PASSWORD': 'c18e92383803272e63b9ec80f9ded9f690c4f314dadecdf3ae7ea03fc0863f1b',
+            'HOST': 'ec2-54-243-185-99.compute-1.amazonaws.com',
+            'PORT': 5432,
         }
     }
 
