@@ -1,1 +1,1 @@
-web: gunicorn cal.wsgi --log-file -
+web: gunicorn cal.cal.wsgi --log-file -
