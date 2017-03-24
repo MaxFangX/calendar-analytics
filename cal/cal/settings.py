@@ -27,7 +27,7 @@ if PRODUCTION:
     VERBOSE_PRINT = False
     TEMPLATE_DEBUG = False
 else:
-    BASE_URL = os.getenv('BASE_URL', 'http://localhost:8000')
+    BASE_URL = 'calendarapptest.herokuapp.com'
     DEBUG = True
     VERBOSE_PRINT = True
     TEMPLATE_DEBUG = True
