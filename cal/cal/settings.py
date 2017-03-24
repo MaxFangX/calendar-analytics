@@ -22,7 +22,7 @@ else:
 # Configured prod/non-prod settings
 
 if PRODUCTION:
-    BASE_URL = 'panalytics.elasticbeanstalk.com'
+    BASE_URL = 'calendarapptest.herokuapp.com'
     DEBUG = False
     VERBOSE_PRINT = False
     TEMPLATE_DEBUG = False
