@@ -1,3 +1,4 @@
+appdirs==1.4.3
 appnope==0.1.0
 awsebcli==3.7.7
 blessed==1.9.5
@@ -14,6 +15,7 @@ docker-py==1.7.2
 dockerpty==0.4.1
 docopt==0.6.2
 docutils==0.12
+gnureadline==6.3.3
 google-api-python-client==1.4.1
 gunicorn==19.3.0
 httplib2==0.9.1
@@ -25,6 +27,7 @@ jsonfield==1.0.3
 Markdown==2.6.2
 oauth2client==1.5.0
 oauthlib==1.0.3
+packaging==16.8
 path.py==8.1.2
 pathspec==0.3.4
 pexpect==4.0.1
@@ -35,6 +38,7 @@ pyasn1==0.1.8
 pyasn1-modules==0.0.7
 pycrypto==2.6.1
 PyJWT==1.4.0
+pyparsing==2.2.0
 python-dateutil==2.5.3
 python-openid==2.2.5
 python-social-auth==0.2.14
@@ -52,3 +56,4 @@ traitlets==4.2.1
 uritemplate==0.6
 wcwidth==0.1.7
 websocket-client==0.37.0
+whitenoise==3.3.0
