@@ -196,12 +196,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
 if ENVIRONMENT == 'prod':
-    STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
-    STATIC_ROOT = os.path.join(BASE_DIR, "cal", "static/")
-    STATIC_URL = 'cal/static/'
+    # STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
+    # STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    # STATIC_URL = '/static/'
     # STATICFILES_DIRS = (
-    #     os.path.join(BASE_DIR, "cal", "static/"),
+    #     os.path.join(PROJECT_ROOT, 'static'),
     # )
+    # BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    STATIC_ROOT = os.path.join(BASE_DIR, "static/")
+    STATIC_URL = '/static/'
     BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, "cal", "static/")
 else:
     STATIC_ROOT = os.path.join(BASE_DIR, "static/")
