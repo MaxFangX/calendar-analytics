@@ -1,1 +1,1 @@
-web: gunicorn cd cal && cal.wsgi --log-file -
+web: cd cal && cal.wsgi --log-file -
