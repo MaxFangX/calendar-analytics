@@ -42,7 +42,7 @@ GOOGLE_CALENDAR_API_CLIENT_SECRET = os.getenv('CJ_GOOGLE_CALENDAR_API_CLIENT_SEC
 assert GOOGLE_CALENDAR_API_CLIENT_ID, "GOOGLE_CALENDAR_API_CLIENT_ID environment variable must be set"
 assert GOOGLE_CALENDAR_API_CLIENT_SECRET, "GOOGLE_CALENDAR_API_CLIENT_SECRET environment variable must be set"
 
-ALLOWED_HOSTS = ['panalytics.elasticbeanstalk.com', 'localhost', '127.0.0.1', 'ngrok.io', 'calendarapptest.heroku.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'ngrok.io', 'calendarapptest.heroku.com']
 
 AUTHENTICATION_BACKENDS = (
     # Python social auth
