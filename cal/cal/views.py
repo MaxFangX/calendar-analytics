@@ -85,7 +85,7 @@ def google_auth(request):
     default_flow = OAuth2WebServerFlow(client_id=settings.GOOGLE_CALENDAR_API_CLIENT_ID,
                                        client_secret=settings.GOOGLE_CALENDAR_API_CLIENT_SECRET,
                                        scope=['https://www.googleapis.com/auth/calendar','profile','email'],
-                                       redirect_uri='https://' + settings.BASE_URL + '/auth/google')
+                                       redirect_uri='https://calendarapptest.herokuapp.com/auth/google')
     default_flow.params['access_type'] = 'offline'
     default_flow.params['include_granted_scopes'] = 'true'
     default_flow.params['prompt'] = 'consent'
@@ -106,16 +106,17 @@ def google_auth(request):
         gflow.save()
 
     flow = gflow.flow
-    # no code received https://developers.google.com/api-client-library/python/guide/aaa_oauth#step2_exchange
 
     code = request.GET.get('code', None)
     error = request.GET.get('error', None)
-    print error, code
+    print flow
+    print flow.params
 
     if error:
         # TODO eventually make this prettier, like redirect to some landing page
         return HttpResponseBadRequest("Authentication failed. Reason: {}".format(error))
     elif code:
+        print 'entered code'
         credential = flow.step2_exchange(code)
         # Save the credentials
         storage = Storage(GoogleCredentials, 'user', request.user, 'credential')
@@ -130,7 +131,6 @@ def google_auth(request):
         return HttpResponseRedirect("/")
     else:
         auth_uri = flow.step1_get_authorize_url()
-        print auth_uri
         return HttpResponseRedirect(auth_uri)
 
 
