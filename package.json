@@ -1,6 +1,6 @@
 {
   "engines": {
-    "node": "0.0.0";
+    "node": "0.0.0"
   },
   "dependencies": {
     "bower":"0.0.0"
