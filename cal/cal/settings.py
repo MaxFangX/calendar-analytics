@@ -207,7 +207,7 @@ else:
     STATICFILES_DIRS = (
         os.path.join(PROJECT_ROOT, 'static'),
     )
-    BOWER_COMPONENTS_ROOT = os.path.join(PROJECT_ROOT, "staticfiles/")
+    BOWER_COMPONENTS_ROOT = os.path.join(PROJECT_ROOT, "static/")
 
 STATICFILES_FINDERS = [
         'django.contrib.staticfiles.finders.FileSystemFinder',
