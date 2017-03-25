@@ -104,20 +104,16 @@ def google_auth(request):
         gflow = GoogleFlow(id=request.user,
                           flow=default_flow)
         gflow.save()
-    gflow = GoogleFlow(id=request.user,
-                      flow=default_flow)
+
     flow = gflow.flow
 
     code = request.GET.get('code', None)
     error = request.GET.get('error', None)
-    print flow
-    print flow.params
 
     if error:
         # TODO eventually make this prettier, like redirect to some landing page
         return HttpResponseBadRequest("Authentication failed. Reason: {}".format(error))
     elif code:
-        print 'entered code'
         credential = flow.step2_exchange(code)
         # Save the credentials
         storage = Storage(GoogleCredentials, 'user', request.user, 'credential')
