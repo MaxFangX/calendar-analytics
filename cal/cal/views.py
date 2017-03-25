@@ -104,8 +104,9 @@ def google_auth(request):
         gflow = GoogleFlow(id=request.user,
                           flow=default_flow)
         gflow.save()
-    print 'hit'
+
     flow = gflow.flow
+    # no code received https://developers.google.com/api-client-library/python/guide/aaa_oauth#step2_exchange
 
     code = request.GET.get('code', None)
     error = request.GET.get('error', None)
@@ -128,6 +129,7 @@ def google_auth(request):
 
         return HttpResponseRedirect("/")
     else:
+        print auth_uri
         auth_uri = flow.step1_get_authorize_url()
         return HttpResponseRedirect(auth_uri)
 
