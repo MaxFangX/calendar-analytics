@@ -1,7 +1,6 @@
 from api import views
 from django.conf.urls import include, patterns, url
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from django.contrib import admin
 from rest_framework.urlpatterns import format_suffix_patterns
 
 
