@@ -93,6 +93,7 @@ MIDDLEWARE_CLASSES = (
 
     # Custom middleware
     'cal.middleware.UserBasedExceptionMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
 )
 # Django REST Framework
 REST_FRAMEWORK = {
@@ -201,6 +202,7 @@ if ENVIRONMENT == 'prod':
     # STATIC_URL = '/static/'
     # BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, "cal", "static/")
 else:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
     PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
     STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
     STATIC_URL = '/static/'
