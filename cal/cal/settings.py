@@ -11,8 +11,6 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-print BASE_DIR
-
 
 ENVIRONMENT = os.getenv('APP_ENVIRONMENT', 'dev')
 if ENVIRONMENT == 'prod':
@@ -207,7 +205,7 @@ if ENVIRONMENT == 'prod':
 else:
     STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
     STATIC_ROOT = os.path.join(BASE_DIR, "cal", "static/")
-    STATIC_URL = 'cal/static/'
+    STATIC_URL = '/static/'
     BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, "cal", "static/")
 
 STATICFILES_FINDERS = [
