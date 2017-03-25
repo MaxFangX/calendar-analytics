@@ -1,0 +1,67 @@
+<div>
+  <h1> {{$ctrl.label}} </h1>
+  <h2> Keywords: {{$ctrl.keywords}} </h2>
+  <div ng-hide="$ctrl.tagEvents.dataLoaded" class="preloader"></div>
+  <div ng-if="$ctrl.tagEvents.dataLoaded">
+    <div class="col-md-8">
+      <p>Cumulative Hours: {{$ctrl.tagHours}}</p>
+      <p>Average hours per {{$ctrl.timeStep}}: {{ $ctrl.averageHours }}</p>
+    </div>
+    <div class="col-md-8">
+      <h3>Chart</h3>
+      <div class="group-chart">
+        <button ng-click='$ctrl.showDaily()'>Daily</button>
+        <button ng-click='$ctrl.showWeekly()'>Weekly</button>
+        <button ng-click='$ctrl.showMonthly()'>Monthly</button>
+        <nvd3 options="$ctrl.tagLine" data="$ctrl.ctrlGraphData"></nvd3>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <h3>Calendars of Tag</h3>
+      <div class="group-chart">
+        <nvd3 options="$ctrl.categoryPie" data="$ctrl.tagsByCategoriesData"></nvd3>
+      </div>
+    </div>
+    <div class="group-events col-md-4">
+      <h3>Events</h3>
+      <div class="group-border">
+        <button ng-disabled="$ctrl.currentPage === $ctrl.lastPage - 1"
+          ng-click='$ctrl.currentPage=$ctrl.currentPage+1; $ctrl.showPageEvents();'>Previous</button>
+        <button ng-disabled="$ctrl.currentPage == 0"
+          ng-click='$ctrl.currentPage=$ctrl.currentPage-1; $ctrl.showPageEvents();'>Next</button>
+        <ul ng-repeat="event in $ctrl.pageEvents">
+          <li>{{ event.start }}: {{ event.name }}</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <!-- Remove this -->
+  <div ng-controller="CalendarCtrl as $ctrl" class="cal-calendar col-md-2">
+    <!-- Enable / disable calendars button -->
+    <div id="select-calendar-button">
+      <div class="btn-group" >
+      <button type="button"
+        class="btn btn-default dropdown-toggle"
+        data-toggle="dropdown"
+        aria-haspopup="true"
+        aria-expanded="false">
+        Select Calendars
+        <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu" ng-click="$event.stopPropagation()">
+        <li ng-repeat="cal in $ctrl.calendars">
+          <a href="#">
+            <label>
+              <input type="checkbox" ng-model="cal.enabled"
+                ng-click="$ctrl.toggleEnabled(cal.id); $ctrl.refresh('panalytics');">
+                {{ cal.summary }}
+            </label>
+          </a>
+        </li>
+      </ul>
+      </div>
+    </div>
+    <!-- Calendar -->
+    <div ui-calendar="uiConfig.calendar" calendar="panalytics" class="calendar" ng-model="$ctrl.eventSources"></div>
+  </div>
+</div>
