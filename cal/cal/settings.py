@@ -212,8 +212,8 @@ else:
     STATIC_URL = '/static/'
     BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, "cal", "static/")
 
-STATICFILES_FINDERS = [
-        'django.contrib.staticfiles.finders.FileSystemFinder',
-        'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-        'djangobower.finders.BowerFinder',
-        ]
+# STATICFILES_FINDERS = [
+#         'django.contrib.staticfiles.finders.FileSystemFinder',
+#         'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+#         'djangobower.finders.BowerFinder',
+#         ]
