@@ -201,6 +201,7 @@ if ENVIRONMENT == 'prod':
     # STATIC_URL = '/static/'
     # BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, "cal", "static/")
 else:
+    STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
     PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
     STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
     STATIC_URL = '/static/'
