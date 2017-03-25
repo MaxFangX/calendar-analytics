@@ -73,12 +73,12 @@ INSTALLED_APPS = (
     'djangobower',
 )
 
-BOWER_INSTALLED_APPS = (
-    'angular',
-    'moment-timezone',
-    'angular-nvd3',
-    'fullcalendar',
-)
+# BOWER_INSTALLED_APPS = (
+#     'angular',
+#     'moment-timezone',
+#     'angular-nvd3',
+#     'fullcalendar',
+# )
 
 # TODO make an actual login page for redirection
 LOGIN_URL = "/"
