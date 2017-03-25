@@ -81,6 +81,7 @@ def google_auth(request):
     """
 
     flow = None
+    print settings.BASE_URL + '/auth/google'
     default_flow = OAuth2WebServerFlow(client_id=settings.GOOGLE_CALENDAR_API_CLIENT_ID,
                                        client_secret=settings.GOOGLE_CALENDAR_API_CLIENT_SECRET,
                                        scope=['https://www.googleapis.com/auth/calendar','profile','email'],
@@ -93,6 +94,7 @@ def google_auth(request):
     gflow = GoogleFlow.objects.filter(id=request.user).last()
 
     if gflow and gflow.flow.params.get('prompt') != 'consent':
+        print 'entered'
         # Delete any flows that don't have the prompt parameter set, since that will
         # prevent the credentials from getting a refresh token
         gflow.delete()
@@ -103,6 +105,7 @@ def google_auth(request):
         gflow = GoogleFlow(id=request.user,
                           flow=default_flow)
         gflow.save()
+    print 'hit'
     flow = gflow.flow
 
     code = request.GET.get('code', None)
