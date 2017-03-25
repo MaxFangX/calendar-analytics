@@ -206,6 +206,7 @@ else:
     STATIC_URL = '/static/'
     STATICFILES_DIRS = (
         os.path.join(PROJECT_ROOT, 'static'),
+        os.path.join(PROJECT_ROOT, 'static/bower_components'),
     )
     BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, "..", "www", "cal", "static/")
 
