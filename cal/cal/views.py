@@ -104,7 +104,8 @@ def google_auth(request):
         gflow = GoogleFlow(id=request.user,
                           flow=default_flow)
         gflow.save()
-
+    gflow = GoogleFlow(id=request.user,
+                      flow=default_flow)
     flow = gflow.flow
 
     code = request.GET.get('code', None)
