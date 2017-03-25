@@ -3,7 +3,7 @@
     "node": "6.0.0"
   },
   "dependencies": {
-    "bower":"6.0.0"
+    "bower":">0.0.0"
   },
   "scripts": {
     "postinstall": "bower install"
