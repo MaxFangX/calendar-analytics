@@ -211,8 +211,6 @@ else:
         os.path.join(PROJECT_ROOT, 'static'),
     )
     BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, "..", "www", "cal", "static/")
-    BOWER_PATH = '/usr/local/bin/bower'
-    BOWER_PATH = '/app/node_modules/bower/bin/bower'
 
 STATICFILES_FINDERS = [
         'django.contrib.staticfiles.finders.FileSystemFinder',
