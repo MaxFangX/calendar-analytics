@@ -1,0 +1,20 @@
+{
+  "name": "calendaranalytics",
+  "homepage": "https://github.com/maxfangx/calendar-analytics",
+  "authors": [
+    "Max Fang <maxfangx@gmail.com>"
+  ],
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "moment-timezone": "^0.5.11"
+  }
+}

@@ -1,0 +1,56 @@
+<div>
+  <h4>Tags{{ $ctrl.displayName ? ' - ' + $ctrl.displayName : '' }}</h4>
+  <h3>{{ $ctrl.rangeService.type }}</h3>
+  <div ng-hide="$ctrl.tags.dataLoaded" class="preloader"></div>
+  <div class="group-border" ng-if="$ctrl.tags.dataLoaded">
+    <table class="table table-hover">
+      <thead>
+        <th>
+          <a href="#" ng-click="orderByField = 'label'; reverseSort = !reverseSort">
+            Label
+          </a>
+        </th>
+        <th>
+          <a href="#" ng-click="orderByField = 'hours'; reverseSort = !reverseSort">
+            Hours
+          </a>
+        </th>
+      </thead>
+      <tbody>
+        <tr ng-repeat="tag in $ctrl.tags
+                      | filter : $ctrl.hideZeroHoursFilter
+                      | orderBy:orderByField:reverseSort">
+          <td ng-hide="tag.editing"><a ui-sref="tag-details({label: tag.label, keywords: tag.keywords, tagId: tag.id})">{{ tag.label }}</a></td>
+          <td ng-hide="tag.editing">{{ tag.hours }}</td>
+          <td ng-show="tag.editing">
+            Label<br>
+            <input type="text" ng-model="tag.newLabel">
+          </td>
+          <td ng-show="tag.editing">
+            Keywords<br>
+            <input type="text" ng-model="tag.newKeywords">
+          </td>
+          <td class="text-right text-nowrap" ng-show="tag.editing">
+            <button ng-click="$ctrl.submitEdit(tag.id)">Confirm</button>
+            <button ng-click="$ctrl.cancelEdit(tag.id)">Cancel</button>
+          </td>
+          <td class="text-right text-nowrap" ng-hide="tag.editing">
+            <button ng-click="$ctrl.startEdit(tag.id)">Edit</button>
+            <button ng-click="$ctrl.delete(tag.id)">Delete</button>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Label</strong><br>
+            <input type="text" ng-model="tag.label">
+          </td>
+          <td><strong>Keywords</strong><br>
+           <input type="text" ng-model="tag.keywords">
+          </td>
+          <td class="text-right text-nowrap">
+            <button ng-click="$ctrl.create(tag)">Add</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

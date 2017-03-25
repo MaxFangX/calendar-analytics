@@ -1,0 +1,29 @@
+<div>
+  <h1>{{$ctrl.displayName}}</h1>
+  <h2>Total hours: {{$ctrl.categoryHours}}</h2>
+  <div ng-hide="$ctrl.categoryEvents.dataLoaded" class="preloader"></div>
+  <div ng-if="$ctrl.categoryEvents.dataLoaded">
+    <p>Average hours per {{$ctrl.timeStep}}: {{ $ctrl.averageHours }}</p>
+    <div class="col-md-8">
+      <h3>Chart</h3>
+      <div class="group-chart">
+        <button ng-click='$ctrl.showDaily()'>Daily</button>
+        <button ng-click='$ctrl.showWeekly()'>Weekly</button>
+        <button ng-click='$ctrl.showMonthly()'>Monthly</button>
+        <nvd3 options="$ctrl.categoryLine" data="$ctrl.ctrlGraphData"></nvd3>
+      </div>
+    </div>
+    <div class="group-events col-md-4">
+      <h3>Events</h3>
+      <div class="group-border-tall">
+        <button ng-disabled="$ctrl.currentPage === $ctrl.lastPage - 1"
+          ng-click='$ctrl.currentPage=$ctrl.currentPage+1; $ctrl.showPageEvents();'>Previous</button>
+        <button ng-disabled="$ctrl.currentPage == 0"
+          ng-click='$ctrl.currentPage=$ctrl.currentPage-1; $ctrl.showPageEvents();'>Next</button>
+        <ul ng-repeat="event in $ctrl.pageEvents">
+          <li>{{ event.start }}: {{ event.name }}</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
