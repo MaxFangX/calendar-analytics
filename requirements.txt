@@ -13,7 +13,6 @@ colorama==0.3.7
 configglue==1.1.2
 configobj==5.0.6
 cryptography==1.2.3
-debtags==2.0
 defer==1.0.6
 dirspec==13.10
 docker-py==1.7.2
