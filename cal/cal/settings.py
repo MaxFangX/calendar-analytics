@@ -197,15 +197,15 @@ USE_TZ = True
 
 if ENVIRONMENT == 'prod':
     STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
-    STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
-    STATIC_URL = '/static/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'cal/static/')
+    STATIC_URL = 'cal/static/'
     BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, "cal", "static/")
     # STATIC_ROOT = os.path.join(BASE_DIR, "static/")
     # STATIC_URL = '/static/'
     # BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, "cal", "static/")
 else:
-    STATIC_ROOT = os.path.join(BASE_DIR, "static/")
-    STATIC_URL = '/static/'
+    STATIC_ROOT = os.path.join(BASE_DIR, 'cal/static/')
+    STATIC_URL = 'cal/static/'
     BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, "cal", "static/")
 
 STATICFILES_FINDERS = [
