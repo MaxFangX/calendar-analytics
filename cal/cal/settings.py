@@ -51,10 +51,6 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
-MIDDLEWARE_CLASSES = [
-  'whitenoise.middleware.WhiteNoiseMiddleware',
-]
-
 # Application definition
 
 INSTALLED_APPS = (
@@ -63,7 +59,6 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
 
     # CalendarJournal App(s)
@@ -199,7 +194,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
 if ENVIRONMENT == 'prod':
-    STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
     STATIC_URL = '/static/'
     BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, "cal", "static/")
@@ -207,13 +201,16 @@ if ENVIRONMENT == 'prod':
     # STATIC_URL = '/static/'
     # BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, "cal", "static/")
 else:
-    STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+    STATIC_ROOT = os.path.join(PROJECT_ROOT, 'staticfiles')
     STATIC_URL = '/static/'
+    STATICFILES_DIRS = (
+        os.path.join(PROJECT_ROOT, '../static'),
+    )
     BOWER_COMPONENTS_ROOT = os.path.join(BASE_DIR, "cal", "static/")
 
-# STATICFILES_FINDERS = [
-#         'django.contrib.staticfiles.finders.FileSystemFinder',
-#         'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#         'djangobower.finders.BowerFinder',
-#         ]
+STATICFILES_FINDERS = [
+        'django.contrib.staticfiles.finders.FileSystemFinder',
+        'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+        'djangobower.finders.BowerFinder',
+        ]
