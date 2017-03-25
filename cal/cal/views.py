@@ -129,8 +129,8 @@ def google_auth(request):
 
         return HttpResponseRedirect("/")
     else:
-        print auth_uri
         auth_uri = flow.step1_get_authorize_url()
+        print auth_uri
         return HttpResponseRedirect(auth_uri)
 
 
