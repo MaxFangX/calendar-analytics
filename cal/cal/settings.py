@@ -51,6 +51,9 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
+MIDDLEWARE_CLASSES = [
+  'whitenoise.middleware.WhiteNoiseMiddleware',
+]
 
 # Application definition
 
@@ -60,6 +63,7 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
 
     # CalendarJournal App(s)
